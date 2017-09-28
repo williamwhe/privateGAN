@@ -89,10 +89,16 @@ def train():
                 model.labels: labels,\
                 model.target : data[2]}
 
-            summary_str, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss, _ = sess.run( [ model.g_loss_add_adv_merge_sum, model.G_loss_add_adv, model.pre_G_loss, model.adv_G_loss , model.L1_norm , model.L2_norm , model.hinge_loss, model.G_train_op ], feed)
+            summary_str, G_loss, pre_G_loss, adv_G_loss,\
+                L1_norm, L2_norm, hinge_loss, _ =
+                sess.run([
+                    model.g_loss_add_adv_merge_sum, model.G_loss_add_adv,
+                    model.pre_G_loss, model.adv_G_loss, model.L1_norm,
+                    model.L2_norm, model.hinge_loss, model.G_train_op ], feed)
             writer.add_summary(summary_str, iteration)
 
-            summary_str, D_loss, _ = sess.run( [model.pre_d_loss_sum, model.D_loss, model.D_pre_train_op], feed )
+            summary_str, D_loss, _ = sess.run(
+                [model.pre_d_loss_sum, model.D_loss, model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:    

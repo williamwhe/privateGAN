@@ -118,22 +118,28 @@ class advGAN():
         if patch_flag:
             # pass
             if cgan_flag:
-                D_fake_loss, D_fake_logit =  self.patch_discriminator(tf.concat( [fake_images, images], axis = 3) )
-                D_real_loss, D_real_logit = self.patch_discriminator(tf.concat( [real_images, images], axis = 3) , reuse = True)
+                D_fake_loss, D_fake_logit =  self.patch_discriminator(
+                    tf.concat( [fake_images, images], axis = 3))
+                D_real_loss, D_real_logit = self.patch_discriminator(
+                    tf.concat( [real_images, images], axis = 3), reuse = True)
             else:
-                D_fake_loss, D_fake_logit =  self.patch_discriminator( fake_images  )
-                D_real_loss, D_real_logit = self.patch_discriminator( real_images , reuse = True) 
+                D_fake_loss, D_fake_logit =  self.patch_discriminator(fake_images)
+                D_real_loss, D_real_logit = self.patch_discriminator(real_images, reuse = True)
 
         else:    
             if cgan_flag:
-                D_fake_loss, D_fake_logit =  self.discriminator(tf.concat( [fake_images, images], axis = 3))
-                D_real_loss, D_real_logit = self.discriminator(tf.concat( [real_images, images], axis = 3) , reuse = True)
+                D_fake_loss, D_fake_logit =  self.discriminator(
+                    tf.concat([fake_images, images], axis = 3))
+                D_real_loss, D_real_logit = self.discriminator(
+                    tf.concat([real_images, images], axis = 3), reuse = True)
             else:
                 D_fake_loss, D_fake_logit =  self.discriminator(fake_images)
                 D_real_loss, D_real_logit = self.discriminator(real_images, reuse = True)
             
-        D_fake_loss = tf.reduce_mean( tf.nn.sigmoid_cross_entropy_with_logits(logits = D_fake_logit, labels = tf.zeros_like(D_fake_logit)))    
-        D_real_loss = tf.reduce_mean( tf.nn.sigmoid_cross_entropy_with_logits(logits = D_real_logit, labels = 0.9 * tf.ones_like(D_real_logit) ))
+        D_fake_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            logits = D_fake_logit, labels = tf.zeros_like(D_fake_logit)))    
+        D_real_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            logits = D_real_logit, labels = 0.9 * tf.ones_like(D_real_logit) ))
 
         G_loss = tf.reduce_mean( \
             tf.nn.sigmoid_cross_entropy_with_logits(\
