@@ -1,0 +1,118 @@
+import argparse
+
+def parse_opt():
+
+    parser = argparse.ArgumentParser()
+    # Data input settings
+
+    ###whitebox
+    parser.add_argument('--model_restore', type=str, default="models/mnist", help = "checkpoint model name of whitebox")
+
+    parser.add_argument('--bound', type=float, default=0.6, help = "bound")
+
+    #flag:  
+    parser.add_argument('--iter_model', type=int, default=0, help= "random ensemble")
+    
+    parser.add_argument('--rw', type=int, default=0, help= "random ensemble")
+    
+    parser.add_argument('--linf_flag', type=int, default=0, help= "linf")
+    parser.add_argument('--ensemble', type=int, default=0, help= "ensemble or not")
+    parser.add_argument('--cgan_flag', type=int, default=1, help = "cgan_flag")
+    parser.add_argument('--patch_flag', type=int, default=1, help = "patch_flag")
+
+    parser.add_argument('--hinge_flag', type=int, default=0, help="hinge_flag")    
+
+
+    parser.add_argument('--prefix', type = str, default = "")
+    #### loss params
+    
+    parser.add_argument('--linf_lambda', type=float, default = 0,
+                    help='linf_lambda')      
+    parser.add_argument('--H_lambda', type=float, default = 0,
+                    help='lambda_ratio')      
+
+    parser.add_argument('--ld', type=float, default = 1.0,
+                    help='lambda_ratio')      
+    parser.add_argument('--L1_lambda', type=float, default = 0,
+                    help='L1_lambda')      
+    parser.add_argument('--L2_lambda', type=float, default = 0,
+                    help='L2_lambda')     
+    parser.add_argument('--G_lambda', type=float, default = 0,
+                    help='G_lambda') 
+    parser.add_argument('--c', type=float, default = 1,
+                    help='c') 
+
+
+    parser.add_argument('--s_l', type=int, default=0, help = "source_label")
+    parser.add_argument('--t_l', type=int, default=1, help = "target_label")
+
+    parser.add_argument('--model_name', type=str, default='MLP', 
+                    help="load_model_name")    
+    parser.add_argument('--add_neg_every', type=int, default=5, 
+                    help="add negative samples from generator")    
+    parser.add_argument('--add_neg_iteration', type=int, default=10000, 
+                    help="add negative samples from generator")
+    parser.add_argument('--input_data', type=str, default = "MNIST",
+                    help="input data MNIST or CIFAR10 " )
+    parser.add_argument('--train_adv', type=int, default = 0,
+                    help="using adverarial loss or not " )
+    parser.add_argument('--pretrain_iteration', type=int, default = 3000,
+                    help="pretrain iteration" )
+
+    parser.add_argument('--confidence', type = float, default = 0.0, 
+                    help = "confidence")
+    
+
+    parser.add_argument('--h_dim', type=int, default = 128,
+                    help='hidden_dim')       
+    parser.add_argument('--batch_size', type=int, default = 200,
+                    help='batch_size')       
+    parser.add_argument('--input_c_dim', type=int, default = 1,
+                    help='input_channel_dim')       
+    parser.add_argument('--output_c_dim', type=int, default = 1,
+                    help='output_channel_dim')       
+    parser.add_argument('--gf_dim', type=int, default = 8,
+                    help='generator_filter_dim')       
+    parser.add_argument('--df_dim', type=int, default = 8,
+                    help='discriminator_filter_dim')       
+    parser.add_argument('--fine_tune', type=int, default=0,
+                    help='fine_tune(0:no, 1:yes)')
+    parser.add_argument('--img_dim', type=int, default = 28,
+                    help='image_w_h_dim')      
+
+
+    # parser.add_argument('--log_path', type=str, default = 'log_path',
+    #                 help='log_path')       
+    parser.add_argument('--image_path', type=str, default = 'GAN/out',
+                    help='image_path')       
+    parser.add_argument('--load_checkpoint_path', type=str, default='GAN/save',
+                    help='directory to store checkpointed models')
+    parser.add_argument('--checkpoint_path', type=str, default='GAN/save',
+                    help='directory to store checkpointed models')                  
+    parser.add_argument('--learning_rate', type=float, default=0.01,
+                    help='learning rate')
+    parser.add_argument('--learning_rate_decay_start', type=int, default=-1, 
+                    help='at what iteration to start decaying learning rate? (-1 = dont) (in epoch)')
+    parser.add_argument('--decay_iteration_max', type=int, default= 50000, help='decay iteration max')
+    parser.add_argument('--learning_rate_decay_every', type=int, default=20000, 
+                    help='every how many iterations thereafter to drop LR by half?(in epoch)')
+    parser.add_argument('--save_checkpoint_every', type=int, default=200,
+                    help='how often to save a model checkpoint (in iterations)?')
+    parser.add_argument('--losses_log_every', type=int, default=100,
+                    help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')       
+
+
+
+    ###flags 
+
+    parser.add_argument('--cw', type=int, default=1,
+                    help='c&w loss or not ') 
+
+    parser.add_argument('--targeted', type=int, default=1,
+                    help='c&w loss or not ') 
+
+
+
+    args = parser.parse_args()
+
+    return args
