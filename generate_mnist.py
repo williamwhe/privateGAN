@@ -1,4 +1,3 @@
-
 import math
 import numpy as np 
 import tensorflow as tf
@@ -72,7 +71,7 @@ def train():
             return
         print("source{}, target{} .".format(source_label, target_label))
         writer = tf.summary.FileWriter("logs", sess.graph)
-        loader = Dataset2(train_data, train_label, source_label)
+        loader = Dataset2(train_data, train_label, targeted=True, source_label=source_label)
         model_num = 0
         
         best_show_samples_magintude = []
@@ -90,7 +89,7 @@ def train():
                 model.target : data[2]}
 
             summary_str, G_loss, pre_G_loss, adv_G_loss,\
-                L1_norm, L2_norm, hinge_loss, _ =
+                L1_norm, L2_norm, hinge_loss, _ = \
                 sess.run([
                     model.g_loss_add_adv_merge_sum, model.G_loss_add_adv,
                     model.pre_G_loss, model.adv_G_loss, model.L1_norm,
@@ -102,17 +101,16 @@ def train():
             writer.add_summary(summary_str, iteration)
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:    
-                print("loss(D, G, pre_G_loss,  adv_G, L1_norm, L2_norm, hinge_loss ): ", D_loss, G_loss, pre_G_loss,  adv_G_loss, L1_norm, L2_norm, hinge_loss)
+                print("loss(D, G, pre_G_loss,  adv_G, L1_norm, L2_norm, hinge_loss ): ",
+                      D_loss, G_loss, pre_G_loss,  adv_G_loss, L1_norm,
+                      L2_norm, hinge_loss)
                 print("iteration: ", iteration)
 
 
             if (iteration != 0 and iteration % opt.save_checkpoint_every == 0):
-            # if (iteration != 0 and iteration % 500 == 0):
                 checkpoint_path = os.path.join(opt.checkpoint_path, 'model.ckpt')
-                                
-                # model.saver.save(sess, checkpoint_path, global_step = iteration)   
-
-                test_loader = Dataset2(test_data, test_label, source_label)
+                test_loader = Dataset2(test_data, test_label,
+                                       targeted=True, source_label=source_label)
 
                 test_num = test_loader._num_examples
                 test_iter_num = int((test_num - batch_size )  / batch_size)

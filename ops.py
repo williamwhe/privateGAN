@@ -14,13 +14,18 @@ class batch_norm(object):
             self.name = name
 
     def __call__(self, x, train=True):
-        return tf.contrib.layers.batch_norm(x, decay=self.momentum, updates_collections=None, epsilon=self.epsilon, scale=True, scope=self.name)
+        return tf.contrib.layers.batch_norm(
+            x, decay=self.momentum,updates_collections=None,
+            epsilon=self.epsilon, scale=True, scope=self.name)
 
 def instance_norm(input, name="instance_norm"):
     with tf.variable_scope(name):
         depth = input.get_shape()[3]
-        scale = tf.get_variable("scale", [depth], initializer=tf.random_normal_initializer(1.0, 0.02, dtype=tf.float32))
-        offset = tf.get_variable("offset", [depth], initializer=tf.constant_initializer(0.0))
+        scale = tf.get_variable(
+            "scale", [depth],
+            initializer=tf.random_normal_initializer(1.0, 0.02, dtype=tf.float32))
+        offset = tf.get_variable(
+            "offset",[depth], initializer=tf.constant_initializer(0.0))
         mean, variance = tf.nn.moments(input, axes=[1,2], keep_dims=True)
         epsilon = 1e-5
         inv = tf.rsqrt(variance + epsilon)
@@ -49,7 +54,8 @@ def conv_cond_concat(x, y):
     """Concatenate conditioning vector on feature map axis."""
     x_shapes = x.get_shape()
     y_shapes = y.get_shape()
-    return tf.concat([x, y*tf.ones([x_shapes[0], x_shapes[1], x_shapes[2], y_shapes[3]])], 3)
+    return tf.concat([x, y*tf.ones([x_shapes[0], x_shapes[1],
+                     x_shapes[2], y_shapes[3]])], 3)
 
 def conv2d(input_, output_dim, 
            k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, padding = "SAME",

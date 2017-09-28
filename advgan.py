@@ -114,9 +114,7 @@ class advGAN():
         patch_flag = self.opts.patch_flag
         hinge_flag = self.opts.hinge_flag
         
-        ####
         if patch_flag:
-            # pass
             if cgan_flag:
                 D_fake_loss, D_fake_logit =  self.patch_discriminator(
                     tf.concat( [fake_images, images], axis = 3))
@@ -124,7 +122,8 @@ class advGAN():
                     tf.concat( [real_images, images], axis = 3), reuse = True)
             else:
                 D_fake_loss, D_fake_logit =  self.patch_discriminator(fake_images)
-                D_real_loss, D_real_logit = self.patch_discriminator(real_images, reuse = True)
+                D_real_loss, D_real_logit = self.patch_discriminator(real_images,
+                                                                     reuse = True)
 
         else:    
             if cgan_flag:

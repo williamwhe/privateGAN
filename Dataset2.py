@@ -4,32 +4,39 @@ import scipy.io as sio
 import random
 class Dataset2:
 
-    def __init__(self,data, label, source_label):
+    def __init__(self,data, label, targeted=False, source_label=None):
+        print('Data size: %s' % str(data.shape))
+        print('Label size: %s' % str(label.shape))
+        print('Targeted = %s' % str(targeted))
+        if targeted:
+            print('Source label = %d' % source_label)
+
         self._index_in_epoch = 0
         self._epochs_completed = 0
         self._data = data
         self._label = label
         self._num_examples = data.shape[0]
         self._num_labels = label.shape[1]
-        self._negative_example_list = [np.array([]) for _ in range(self._num_labels) ]
-        self._negative_magnitude = [ np.array( [] ) for _ in range(self._num_labels) ]
-
-        #####
+        self._negative_example_list = [np.array([]) for _ in range(self._num_labels)]
+        self._negative_magnitude = [ np.array( [] ) for _ in range(self._num_labels)]
+        
         label_cls = np.argmax( self._label, axis = 1)
         examples = [[] for _ in range( self._num_labels)]
         for i in range(self._num_examples):
-            label_idx = label_cls[i] 
+            label_idx = label_cls[i]
             examples[label_idx].append(self._data[i])
 
-        self._sort_data = [ np.array( examples[i] ) for i in range(self._num_labels) ]
+        self._sort_data = [np.array( examples[i] ) for i in range(self._num_labels)]
+        self._sort_len = [self._sort_data[i].shape[0] for i in range(self._num_labels)]
 
-        self._sort_len = [ self._sort_data[i].shape[0] for i in range( self._num_labels ) ]
-        ##### only contain 4 
-        self._data = self._sort_data[source_label]
-        #### add one hot label here 
-        self._num_examples = self._data.shape[0]
-        self._label = np.zeros( ( self._num_examples, self._num_labels))
-        self._label[:, source_label] = 1
+        # We trim the data and labels to only the SOURCE label
+        if targeted == True:
+            if source_label == None:
+                raise Exception("Source label is not specified in a targeted attack.")
+            self._data = self._sort_data[source_label]
+            self._num_examples = self._data.shape[0]
+            self._label = np.zeros((self._num_examples, self._num_labels))
+            self._label[:, source_label] = 1
 
 
     @property
