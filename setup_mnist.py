@@ -60,7 +60,7 @@ class MNIST:
 
 
 class MNISTModel:
-    def __init__(self, restore, session=None):
+    def __init__(self, restore, session=None, y_dim=10):
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 10
@@ -85,16 +85,13 @@ class MNISTModel:
         model.add(Activation('relu'))
         model.add(Dense(200))
         model.add(Activation('relu'))
-        model.add(Dense(10))
+        model.add(Dense(y_dim))
         model.load_weights(restore)
 
         self.model = model
 
     def predict(self, data):
         return self.model(data)
-
-
-
 
 
 class MNISTModel2:
