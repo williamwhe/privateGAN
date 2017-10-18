@@ -34,8 +34,6 @@ class advGAN():
         self.output_c_dim = self.opts.output_c_dim
         self.batch_size = self.opts.batch_size
 
-
-
         self._build_model()
         net_vars = tf.get_collection(tf.GraphKeys.VARIABLES, scope="evagan")
         self.saver = tf.train.Saver(max_to_keep=1000)
@@ -200,6 +198,7 @@ class advGAN():
         adv_G_loss = tf.reduce_mean(self.reranking(adv_fake_predict_labels, labels))
         return adv_G_loss
 
+    # Average number of correct predictions (Accuracy).
     def _metric(self, labels, predict_labels):
         y_true_cls = tf.argmax(labels, dimension=1)
         y_pred_cls = tf.argmax(predict_labels, dimension=1)
@@ -224,62 +223,80 @@ class advGAN():
             # Creating a Generator instance that creates fake images.
             self.fake_images, self.g_x = self.generator(self.images)
 
-            # We sample an image 
+            # We sample an image
             self.fake_images_sample = self.sampler(self.images)
-            self.fake_images_sample_flatten = tf.reshape(  self.fake_images_sample, [-1, 28 * 28 ]  )
-            self.fake_images_correct = tf.reshape( self.fake_images,  [-1, 28 * 28 ]  ) * 0.5 + 0.5
+            self.fake_images_sample_flatten = \
+                tf.reshape(self.fake_images_sample, [-1, 28 * 28])
+            self.fake_images_correct = \
+                tf.reshape(self.fake_images, [-1, 28 * 28]) * 0.5 + 0.5
 
-            self.fake_images_sample_sum =  tf.summary.image("fake_images", self.fake_images_sample)
+            self.fake_images_sample_sum = \
+                tf.summary.image("fake_images", self.fake_images_sample)
 
-
-            G_loss, D_loss, L1_norm, L2_norm, hinge_loss = self._GAN_model(self.images, self.fake_images, self.real_images, self.g_x)
-            ##G loss and D loss
+            # Creating a GAN model.
+            G_loss, D_loss, L1_norm, L2_norm, hinge_loss = self._GAN_model(
+                self.images, self.fake_images, self.real_images, self.g_x)
+            # G loss and D loss.
             self.pre_G_loss = G_loss
             self.L2_norm = L2_norm
             self.L1_norm = L1_norm
             self.hinge_loss = hinge_loss
-            self.G_loss = G_loss + L1_lambda * L1_norm + L2_lambda * L2_norm + hinge_lambda * hinge_loss
+            self.G_loss = G_loss + L1_lambda * L1_norm + L2_lambda * L2_norm \
+                + hinge_lambda * hinge_loss
 
             self.D_loss = D_loss
 
             self.pre_g_loss_sum = tf.summary.scalar("pre_G_loss", self.pre_G_loss)
             self.pre_g_totoal_loss_sum = tf.summary.scalar("pre_G_loss_total", self.G_loss)
             self.pre_d_loss_sum = tf.summary.scalar("pre_d_loss", self.D_loss)
-            self.l1_norm_sum = tf.summary.scalar("l1_loss", self.L1_norm )
+            self.l1_norm_sum = tf.summary.scalar("l1_loss", self.L1_norm)
             self.l2_norm_sum = tf.summary.scalar("l2_loss", self.L2_norm)
             self.hinge_loss_sum = tf.summary.scalar("hinge_loss", self.hinge_loss)
             self.predict_labels = self.model.predict(self.images)
-            ### output is not softmax.  
-            self.accuracy = self._metric(self.labels, tf.nn.softmax( self.predict_labels))
+            ### output is not softmax.
+            self.accuracy = self._metric(self.labels, tf.nn.softmax(self.predict_labels))
             self.accuracy_sum = tf.summary.scalar("accuracy", self.accuracy)
 
-            self.fake_predict_labels   = self.model.predict(self.fake_images)
-            self.out_predict_labels = tf.argmax( tf.nn.softmax(self.model.predict(self.fake_images_sample)) , dimension = 1)
-            self.adv_G_loss = self._adversial_g_loss( self.fake_predict_labels, self.labels)
-            
-            self.adv_accuracy = self._metric(self.labels, tf.nn.softmax( self.fake_predict_labels) )  
+            self.fake_predict_labels = self.model.predict(self.fake_images)
+            self.out_predict_labels = tf.argmax(
+                tf.nn.softmax(
+                    self.model.predict(self.fake_images_sample)), dimension=1)
+            self.adv_G_loss = self._adversial_g_loss(
+                self.fake_predict_labels, self.labels)
 
+            self.adv_accuracy = self._metric(
+                self.labels, tf.nn.softmax(self.fake_predict_labels))
 
-            self.G_loss_add_adv = G_lambda * G_loss +  ld * self.adv_G_loss + L1_lambda * L1_norm + L2_lambda * L2_norm + hinge_lambda * hinge_loss
+            self.G_loss_add_adv = G_lambda * G_loss + \
+                ld * self.adv_G_loss + \
+                L1_lambda * L1_norm + \
+                L2_lambda * L2_norm + \
+                hinge_lambda * hinge_loss
+
             self.adv_g_loss_sum = tf.summary.scalar("adv_G_loss", self.adv_G_loss)
             self.g_loss_add_adv_sum = tf.summary.scalar("G_loss_total", self.G_loss_add_adv)
             self.adv_accuracy_sum = tf.summary.scalar("adv_accuracy", self.adv_accuracy)
-            self.g_loss_add_adv_merge_sum = tf.summary.merge([self.adv_g_loss_sum, self.l1_norm_sum, self.l2_norm_sum , self.g_loss_add_adv_sum,self.pre_g_loss_sum, self.hinge_loss_sum  ])
 
-
+            self.g_loss_add_adv_merge_sum = tf.summary.merge([
+                self.adv_g_loss_sum,
+                self.l1_norm_sum,
+                self.l2_norm_sum,
+                self.g_loss_add_adv_sum,
+                self.pre_g_loss_sum,
+                self.hinge_loss_sum
+            ])
 
             t_vars = tf.trainable_variables()
-            ##
             self.d_vars = [var for var in t_vars if 'd_' in var.name and 'evagan' in var.name]
             self.g_vars = [var for var in t_vars if 'g_' in var.name and 'evagan' in var.name]
-         
-            # self.adv_d_vars = [var for var in t_vars if 'adv_' in var.name and 'evagan' in var.name]
+
             D_pre_opt = tf.train.AdamOptimizer(self.lr)
             D_grads_and_vars_pre = D_pre_opt.compute_gradients(self.D_loss, self.d_vars)
-            D_grads_and_vars_pre = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in D_grads_and_vars_pre]
+            D_grads_and_vars_pre = \
+                [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in D_grads_and_vars_pre]
             self.D_pre_train_op = D_pre_opt.apply_gradients(D_grads_and_vars_pre)
 
-            #G loss without adversary loss
+            # G loss without adversary loss
             G_pre_opt = tf.train.AdamOptimizer(self.lr)
             G_grads_and_vars_pre = G_pre_opt.compute_gradients(self.G_loss, self.g_vars)
             G_grads_and_vars_pre = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars_pre]

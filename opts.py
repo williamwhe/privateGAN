@@ -31,7 +31,7 @@ def parse_opt():
     parser.add_argument(
         '--linf_lambda', type=float, default=0, help='linf_lambda')
     parser.add_argument(
-        '--H_lambda', type=float, default=0, help='lambda_ratio')
+        '--H_lambda', type=float, default=0, help='Hinge loss lambda')
 
     parser.add_argument('--ld', type=float, default=1.0,
                         help='lambda_ratio')
