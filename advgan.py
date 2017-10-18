@@ -1,5 +1,5 @@
 import math
-import numpy as np 
+import numpy as np
 import tensorflow as tf
 from ops import *
 import os
@@ -8,15 +8,14 @@ import scipy.io  as sio
 import random
 
 
-
 class advGAN():
     """
     GAN for generating malware.
-    model: whitebox model 
+    model: whitebox model
     restore: restore file for whitebox model
 
     """
-    def __init__(self, model, restore,  opts, sess):
+    def __init__(self, model, restore, opts, sess):
         """
         :param D: the discriminator object
         :param params: the dict used to train the generative neural networks
@@ -26,8 +25,8 @@ class advGAN():
         self.sess = sess
         self.model_restore = restore
 
-        ####test flags 
-        flag = 0 # concate flag 
+        ####  test flags  ####
+        flag = 0 # concate flag
 
         self.gf_dim = self.opts.gf_dim
         self.df_dim = self.opts.df_dim
@@ -38,25 +37,34 @@ class advGAN():
 
 
         self._build_model()
-        net_vars = tf.get_collection(tf.GraphKeys.VARIABLES, scope = "evagan")
-        self.saver = tf.train.Saver( max_to_keep =1000)
+        net_vars = tf.get_collection(tf.GraphKeys.VARIABLES, scope="evagan")
+        self.saver = tf.train.Saver(max_to_keep=1000)
         self.sess.run(tf.initialize_all_variables())
         self.model.model.load_weights(self.model_restore)
 
+    # Resets the training procedure.
     def reset(self):
-        net_vars = tf.get_collection(tf.GraphKeys.VARIABLES, scope = "evagan")
-        self.saver = tf.train.Saver( max_to_keep =1)
+        net_vars = tf.get_collection(tf.GraphKeys.VARIABLES, scope="evagan")
+        self.saver = tf.train.Saver(max_to_keep=1)
         self.sess.run(tf.initialize_all_variables())
         self.model.model.load_weights(self.model_restore)
 
+    # Lodas from a given checkpoint.
     def load(self, checkpoint_path):
         self.saver.restore(self.sess, checkpoint_path)
         self.model.model.load_weights(self.model_restore)
 
+    # Initializes a Variable with a truncated normal distribution with a bias.
     def init_weight(self, dim_in, dim_out, name=None, stddev=1.0):
-        return tf.Variable(tf.truncated_normal([dim_in, dim_out],
-                                               stddev=stddev/tf.sqrt(float(dim_in) / 2.)), name=name)
+        return tf.Variable(
+            tf.truncated_normal(
+                [dim_in, dim_out],
+                stddev=stddev/tf.sqrt(float(dim_in)/2.)
+            ),
+            name=name
+        )
 
+    # Initializes the bias with ALL ZEROs.
     def init_bias(self, dim_out, name=None):
         return tf.Variable(tf.zeros([dim_out]), name=name)
 
@@ -72,13 +80,13 @@ class advGAN():
         self.g_bn_e3 = batch_norm(name='g_bn_e3')
         self.g_bn_e4 = batch_norm(name='g_bn_e4')
         self.g_bn_e5 = batch_norm(name='g_bn_e5')
-       
+
         self.g_bn_d1 = batch_norm(name='g_bn_d1')
         self.g_bn_d2 = batch_norm(name='g_bn_d2')
         self.g_bn_d3 = batch_norm(name='g_bn_d3')
         self.g_bn_d4 = batch_norm(name='g_bn_d4')
-        
-        self.lr = tf.Variable(0.001, trainable = False,  name = "learning_rate")
+
+        self.lr = tf.Variable(0.001, trainable=False, name="learning_rate")
 
 
     def _create_placeholder(self):
@@ -86,104 +94,115 @@ class advGAN():
         input_dim = self.opts.input_dim
         label_dim = self.opts.label_dim
         img_dim = self.opts.img_dim
+
         # the source image which we want to attack.
-        self.source = tf.placeholder(tf.float32, [None, input_dim], name = "source_image")
-        # resize
-        self.images = tf.reshape( self.source, [-1, img_dim, img_dim, input_c_dim])
-      
+        self.source = tf.placeholder(tf.float32, [None, input_dim], name="source_image")
+        # resize to img_dim x img_dim x img_color_dim (1 in Grayscale images)
+        self.images = tf.reshape(self.source, [-1, img_dim, img_dim, input_c_dim])
+
         # the target images, which has the different label. We can also conduct target attack later
         self.target = tf.placeholder(tf.float32, [None, input_dim], name='target_image')
-        self.real_images = tf.reshape( self.target, [-1, img_dim, img_dim, input_c_dim])
-        self.labels = tf.placeholder(tf.float32, [None, self.opts.label_dim ], name = "label")
+        self.real_images = tf.reshape(self.target, [-1, img_dim, img_dim, input_c_dim])
+        self.labels = tf.placeholder(tf.float32, [None, self.opts.label_dim], name="label")
 
-        # use for showing  accuracy 
-        self.acc = tf.placeholder(tf.float32, name = "accuracy")
-        self.adv_acc = tf.placeholder( tf.float32, name = "adv_accuracy")
-        self.mag = tf.placeholder(tf.float32, name = "magnitude")
-        self.dis = tf.placeholder(tf.float32, name = "disortion")
-        
+        # used for showing  accuracy.
+        self.acc = tf.placeholder(tf.float32, name="accuracy")
+        self.adv_acc = tf.placeholder(tf.float32, name="adv_accuracy")
+        self.mag = tf.placeholder(tf.float32, name="magnitude")
+        self.dis = tf.placeholder(tf.float32, name="disortion")
+
         self.acc_sum = tf.summary.scalar("accuracy", self.acc)
         self.adv_acc_sum = tf.summary.scalar("adv_accuracy", self.adv_acc)
         self.magnitude_sum = tf.summary.scalar("magnitude", self.mag)
         self.dis_sum = tf.summary.scalar("disortion", self.dis)
 
-        self.metric_sum  = tf.summary.merge( [self.acc_sum, self.adv_acc_sum  ,self.magnitude_sum, self.dis_sum] )
-    
+        self.metric_sum = tf.summary.merge(
+            [self.acc_sum, self.adv_acc_sum, self.magnitude_sum, self.dis_sum])
+
     def _GAN_model(self, images, fake_images, real_images, g_x):
         cgan_flag = self.opts.cgan_flag
         patch_flag = self.opts.patch_flag
         hinge_flag = self.opts.hinge_flag
-        
-        ####
+
+        # This is by default True.
         if patch_flag:
-            # pass
+            # This is by default True.
             if cgan_flag:
-                D_fake_loss, D_fake_logit =  self.patch_discriminator(tf.concat( [fake_images, images], axis = 3) )
-
-                D_real_loss, D_real_logit = self.patch_discriminator(tf.concat( [real_images, images], axis = 3) , reuse = True)
+                D_fake_loss, D_fake_logit = self.patch_discriminator(
+                    tf.concat([fake_images, images], axis=3))
+                D_real_loss, D_real_logit = self.patch_discriminator(
+                    tf.concat([real_images, images], axis=3), reuse=True)
             else:
-                D_fake_loss, D_fake_logit =  self.patch_discriminator( fake_images  )
+                D_fake_loss, D_fake_logit = self.patch_discriminator(fake_images)
+                D_real_loss, D_real_logit = self.patch_discriminator(real_images, reuse=True)
 
-                D_real_loss, D_real_logit = self.patch_discriminator( real_images , reuse = True) 
-
-        else:    
+        else:
             if cgan_flag:
-                D_fake_loss, D_fake_logit =  self.discriminator(tf.concat( [fake_images, images], axis = 3) )
-
-                D_real_loss, D_real_logit = self.discriminator(tf.concat( [real_images, images], axis = 3) , reuse = True)
+                D_fake_loss, D_fake_logit = self.discriminator(
+                    tf.concat([fake_images, images], axis=3))
+                D_real_loss, D_real_logit = self.discriminator(
+                    tf.concat([real_images, images], axis=3), reuse=True)
             else:
-                D_fake_loss, D_fake_logit =  self.discriminator( fake_images  )
+                D_fake_loss, D_fake_logit = self.discriminator(fake_images)
+                D_real_loss, D_real_logit = self.discriminator(real_images, reuse=True)
 
-                D_real_loss, D_real_logit = self.discriminator( real_images , reuse = True)  
-            
-        D_fake_loss = tf.reduce_mean( tf.nn.sigmoid_cross_entropy_with_logits(logits = D_fake_logit, labels = tf.zeros_like(D_fake_logit)))    
-        D_real_loss = tf.reduce_mean( tf.nn.sigmoid_cross_entropy_with_logits(logits = D_real_logit, labels = 0.9 * tf.ones_like(D_real_logit) ))
-
-        G_loss = tf.reduce_mean( \
-            tf.nn.sigmoid_cross_entropy_with_logits(\
-                logits=D_fake_logit, \
-                labels=0.9 * tf.ones_like(D_fake_logit)\
-                )\
-        )
-
-        L2_norm = tf.reduce_mean( tf.reduce_sum( tf.square(  fake_images - images ), [1,2,3]) )
-        L1_norm = tf.reduce_mean( tf.reduce_sum( tf.abs(fake_images - images ), [1,2,3]) )
-        ####
-        # soft bound for linfinity 
-        hinge_loss = tf.maximum( (self.L2_dist(fake_images - images) - self.opts.bound), 0)
-            
+        # Discriminator tries to assign 0 to fake data.
+        D_fake_loss = tf.reduce_mean(
+            tf.nn.sigmoid_cross_entropy_with_logits(
+                logits=D_fake_logit,
+                labels=tf.zeros_like(D_fake_logit)))
+        # Discriminator tries to assign 1 to real data.
+        D_real_loss = tf.reduce_mean(
+            tf.nn.sigmoid_cross_entropy_with_logits(
+                logits=D_real_logit,
+                labels=0.9*tf.ones_like(D_real_logit)))
+        # D tries to minimize the overall loss.
         D_loss = D_real_loss + D_fake_loss
-            
+
+        # Generator tries to fool Discriminator to assign 1 to fake data.
+        G_loss = tf.reduce_mean(
+            tf.nn.sigmoid_cross_entropy_with_logits(
+                logits=D_fake_logit,
+                labels=0.9*tf.ones_like(D_fake_logit)))
+
+        L2_norm = tf.reduce_mean(
+            tf.reduce_sum(tf.square(fake_images - images), [1, 2, 3]))
+        L1_norm = tf.reduce_mean(
+            tf.reduce_sum(tf.abs(fake_images - images), [1, 2, 3]))
+
+        # soft bound for l-infinity.
+        hinge_loss = tf.maximum(
+            (self.L2_dist(fake_images - images) - self.opts.bound), 0)
+
         return G_loss, D_loss, L1_norm, L2_norm, hinge_loss
 
     def L2_dist(self, images):
-        # pdb.set_trace()
-        return tf.reduce_mean(tf.reduce_sum( tf.square(images),[1,2,3]) ) 
+        return tf.reduce_mean(tf.reduce_sum(tf.square(images), [1, 2, 3]))
 
     def L_infinity(self, image):
-        return tf.reduce_max( tf.abs( image) )
+        return tf.reduce_max(tf.abs(image))
 
-    #loss in C&W
     def reranking(self, predict_labels, target_labels):
 
-        real = tf.reduce_sum(  predict_labels * target_labels,1 )
-        other = tf.reduce_max( ( 1 - target_labels) * predict_labels - target_labels * 1000, 1)
+        real = tf.reduce_sum(predict_labels * target_labels, 1)
+        other = tf.reduce_max(
+            (1 - target_labels) * predict_labels - target_labels * 1000, 1)
 
         if self.opts.targeted == 1:
-            # target losss
+            # targeted losss:
             loss = tf.maximum(0.0, other - real + self.opts.confidence)
         else:
-            #untarget loss
+            # untargeted loss:
             loss = tf.maximum(0.0, real - other + self.opts.confidence)
-        return loss 
+        return loss
 
     def _adversial_g_loss(self, adv_fake_predict_labels, labels):
-        adv_G_loss = tf.reduce_mean( self.reranking( adv_fake_predict_labels,  labels) )
+        adv_G_loss = tf.reduce_mean(self.reranking(adv_fake_predict_labels, labels))
         return adv_G_loss
 
     def _metric(self, labels, predict_labels):
-        y_true_cls = tf.argmax( labels, dimension = 1)
-        y_pred_cls = tf.argmax( predict_labels, dimension=1)
+        y_true_cls = tf.argmax(labels, dimension=1)
+        y_pred_cls = tf.argmax(predict_labels, dimension=1)
         correct_prediction = tf.equal(y_pred_cls, y_true_cls)
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         return accuracy
@@ -202,7 +221,10 @@ class advGAN():
             self._create_variable()
             self._create_placeholder()
 
+            # Creating a Generator instance that creates fake images.
             self.fake_images, self.g_x = self.generator(self.images)
+
+            # We sample an image 
             self.fake_images_sample = self.sampler(self.images)
             self.fake_images_sample_flatten = tf.reshape(  self.fake_images_sample, [-1, 28 * 28 ]  )
             self.fake_images_correct = tf.reshape( self.fake_images,  [-1, 28 * 28 ]  ) * 0.5 + 0.5

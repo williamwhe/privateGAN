@@ -1,46 +1,48 @@
 import argparse
 
+
 def parse_opt():
 
     parser = argparse.ArgumentParser()
     # Data input settings
 
-    ###whitebox
-    parser.add_argument('--model_restore', type=str, default="models/mnist", help = "checkpoint model name of whitebox")
+    # whitebox
+    parser.add_argument('--model_restore', type=str, default="models/mnist",
+                        help="checkpoint model name of whitebox")
 
-    parser.add_argument('--bound', type=float, default=0.6, help = "bound")
+    parser.add_argument('--bound', type=float, default=0.6, help="bound")
 
-    #flag:  
-    parser.add_argument('--iter_model', type=int, default=0, help= "random ensemble")
-    
-    parser.add_argument('--rw', type=int, default=0, help= "random ensemble")
-    
-    parser.add_argument('--linf_flag', type=int, default=0, help= "linf")
-    parser.add_argument('--ensemble', type=int, default=0, help= "ensemble or not")
-    parser.add_argument('--cgan_flag', type=int, default=1, help = "cgan_flag")
-    parser.add_argument('--patch_flag', type=int, default=1, help = "patch_flag")
+    # flag:
+    parser.add_argument('--iter_model', type=int, default=0,
+                        help="random ensemble")
 
-    parser.add_argument('--hinge_flag', type=int, default=0, help="hinge_flag")    
+    parser.add_argument('--rw', type=int, default=0, help="random ensemble")
 
+    parser.add_argument('--linf_flag', type=int, default=0, help="linf")
+    parser.add_argument('--ensemble', type=int, default=0, help="ensemble or not")
+    parser.add_argument('--cgan_flag', type=int, default=1, help="cgan_flag")
+    parser.add_argument('--patch_flag', type=int, default=1, help="patch_flag")
 
-    parser.add_argument('--prefix', type = str, default = "")
-    #### loss params
-    
-    parser.add_argument('--linf_lambda', type=float, default = 0,
-                    help='linf_lambda')      
-    parser.add_argument('--H_lambda', type=float, default = 0,
-                    help='lambda_ratio')      
+    parser.add_argument('--hinge_flag', type=int, default=0, help="hinge_flag")
 
-    parser.add_argument('--ld', type=float, default = 1.0,
-                    help='lambda_ratio')      
-    parser.add_argument('--L1_lambda', type=float, default = 0,
-                    help='L1_lambda')      
-    parser.add_argument('--L2_lambda', type=float, default = 0,
-                    help='L2_lambda')     
-    parser.add_argument('--G_lambda', type=float, default = 0,
-                    help='G_lambda') 
-    parser.add_argument('--c', type=float, default = 1,
-                    help='c') 
+    parser.add_argument('--prefix', type=str, default="")
+    # loss params
+
+    parser.add_argument(
+        '--linf_lambda', type=float, default=0, help='linf_lambda')
+    parser.add_argument(
+        '--H_lambda', type=float, default=0, help='lambda_ratio')
+
+    parser.add_argument('--ld', type=float, default=1.0,
+                        help='lambda_ratio')
+    parser.add_argument('--L1_lambda', type=float, default=0,
+                        help='L1_lambda')
+    parser.add_argument('--L2_lambda', type=float, default=0,
+                        help='L2_lambda')
+    parser.add_argument('--G_lambda', type=float, default=0,
+                        help='G_lambda')
+    parser.add_argument('--c', type=float, default=1,
+                        help='c')
 
 
     parser.add_argument('--s_l', type=int, default=0, help = "source_label")

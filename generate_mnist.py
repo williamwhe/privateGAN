@@ -1,11 +1,9 @@
-
-import math
 import numpy as np 
 import tensorflow as tf
 from ops import *
 import os
 import time
-import scipy.io  as sio
+import scipy.io as sio
 import random
 from tensorflow.examples.tutorials.mnist import input_data
 import pdb
@@ -20,14 +18,16 @@ from setup_mnist import MNIST, MNISTModel, MNISTModel2, MNISTModel3
 from setup_cifar import CIFARModel, CIFARModel2, CIFARModel3
 
 tag_num = 0
+
+
 def train():
-    flatten_flag = True ### the output of G need to flatten or not?
+    flatten_flag = True  # the output of G need to flatten or not?
     opt = opts.parse_opt()
     opt.input_data = "MNIST"
     # mapping [0,1] -> [-1,1]
     # load data
     mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-    train_data =  mnist.train.images * 2.0 - 1.0
+    train_data = mnist.train.images * 2.0 - 1.0
     train_label = mnist.train.labels
 
     test_data = mnist.test.images * 2.0 - 1.0
