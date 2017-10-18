@@ -10,7 +10,7 @@ import numpy as np
 import os
 import pickle
 import gzip
-import urllib.request, urllib.parse, urllib.error
+import urllib
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -44,7 +44,7 @@ class MNIST:
                      "t10k-labels-idx1-ubyte.gz"]
             for name in files:
 
-                urllib.request.urlretrieve('http://yann.lecun.com/exdb/mnist/' + name, "data/"+name)
+                urllib.urlretrieve('http://yann.lecun.com/exdb/mnist/' + name, "data/"+name)
 
         train_data = extract_data("data/train-images-idx3-ubyte.gz", 60000)
         train_labels = extract_labels("data/train-labels-idx1-ubyte.gz", 60000)
@@ -60,7 +60,7 @@ class MNIST:
 
 
 class MNISTModel:
-    def __init__(self, restore, session=None, y_dim=10):
+    def __init__(self, restore, session=None):
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 10
@@ -85,13 +85,16 @@ class MNISTModel:
         model.add(Activation('relu'))
         model.add(Dense(200))
         model.add(Activation('relu'))
-        model.add(Dense(y_dim))
+        model.add(Dense(10))
         model.load_weights(restore)
 
         self.model = model
 
     def predict(self, data):
         return self.model(data)
+
+
+
 
 
 class MNISTModel2:

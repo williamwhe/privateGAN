@@ -44,18 +44,18 @@ def one_hot_encoded(class_numbers, num_classes=None):
 
 def process_mnist(fname = "MNIST_data/mnist.mat"):
 
-    d = sio.loadmat(fname)
-    train_data = d['train_data']
-    test_data = d['test_data']
-    train_label = d['train_label']
-    test_label = d['test_label']
-    train_data = train_data * 2.0- 1.0
-    test_data = test_data * 2.0 - 1.0
-    sio.savemat( fname, {\
-        "train_data" : train_data, \
-        "test_data" : test_data, \
-        "train_label" : train_label,\
-        "test_label" : test_label})
+	d = sio.loadmat(fname)
+	train_data = d['train_data']
+	test_data = d['test_data']
+	train_label = d['train_label']
+	test_label = d['test_label']
+	train_data = train_data * 2.0- 1.0
+	test_data = test_data * 2.0 - 1.0
+	sio.savemat( fname, {\
+		"train_data" : train_data, \
+		"test_data" : test_data, \
+		"train_label" : train_label,\
+		"test_label" : test_label})
 
 def plot(samples, img_dim = 32):
     fig = plt.figure(figsize=(4, 4))
@@ -73,16 +73,16 @@ def plot(samples, img_dim = 32):
     return fig
 
 def download_preprocess(fname = "MNIST_data/mnist.mat"):
-    mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-    train_data = mnist.train.images *2.0 -1.0
-    test_data = mnist.test.images *2.0 -1.0
-    train_label = mnist.train.labels
-    test_label = mnist.test.labels
-    sio.savemat( fname, {\
-        "train_data" : train_data, \
-        "test_data" : test_data, \
-        "train_label" : train_label,\
-        "test_label" : test_label})
+	mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+	train_data = mnist.train.images *2.0 -1.0
+	test_data = mnist.test.images *2.0 -1.0
+	train_label = mnist.train.labels
+	test_label = mnist.test.labels
+	sio.savemat( fname, {\
+		"train_data" : train_data, \
+		"test_data" : test_data, \
+		"train_label" : train_label,\
+		"test_label" : test_label})
 
 
 def load_data(image_path, flip=True, is_test=False):
@@ -149,7 +149,7 @@ def merge(images, size):
     
     h, w = images.shape[1], images.shape[2]
     if len(images.shape) == 4 and images.shape[-1 ] == 3:
-        channel = 3
+    	channel = 3
         img = np.zeros((h * size[0], w * size[1], channel))
         for idx, image in enumerate(images):
             i = idx % size[1]
@@ -159,7 +159,7 @@ def merge(images, size):
         return img
 
     else:
-        channel = 1
+    	channel = 1
         img = np.zeros((h * size[0], w * size[1]))
         for idx, image in enumerate(images):
             i = idx % size[1]

@@ -51,7 +51,7 @@ def train(file_name, params, num_epochs=50, batch_size=128, train_temp=1, init=N
 
     model = Sequential()
 
-    print('New traininig data has shape %s' % str(new_train_data.shape))
+    print(new_train_data.shape)
     
     model.add(Conv2D(params[0], (3, 3),
                             input_shape=[img_dim,img_dim,input_c_dim]))
@@ -74,6 +74,9 @@ def train(file_name, params, num_epochs=50, batch_size=128, train_temp=1, init=N
     model.add(Activation('relu'))
     model.add(Dense(10))
     # model.add(Activation('softmax'))
+
+    # if init != None:
+    #     model.load_weights(init) 
 
     def fn(correct, predicted):
         return tf.nn.softmax_cross_entropy_with_logits(labels=correct,

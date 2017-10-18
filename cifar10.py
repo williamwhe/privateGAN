@@ -100,7 +100,7 @@ def _unpickle(filename):
     # Create full path for the file.
     file_path = _get_file_path(filename)
 
-    print(("Loading data: " + file_path))
+    print("Loading data: " + file_path)
 
     with open(file_path, mode='rb') as file:
         # In Python 3.X it is important to set the encoding,

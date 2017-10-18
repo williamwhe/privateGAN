@@ -10,7 +10,7 @@ import numpy as np
 import os
 import pickle
 import gzip
-import urllib.request, urllib.parse, urllib.error
+import urllib
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten

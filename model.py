@@ -11,7 +11,7 @@ from sklearn.neighbors import KNeighborsClassifier
 # import tensorflow as tf
 import math
 from sklearn.ensemble import VotingClassifier
-import pickle
+import cPickle
 from sklearn.externals import joblib
 import tensorflow as tf
 import prettytensor as pt
@@ -68,11 +68,11 @@ class Discriminator(object):
 
     def save(self, fname):
         with open(fname, 'wb') as fid:
-            pickle.dump(self.model, fid)
+            cPickle.dump(self.model, fid)
 
     def load(self, fname):
         with open(fname, 'rb') as fid:
-            self.model = pickle.load(fid)
+            self.model = cPickle.load(fid)
 
     def getName(self):
         return self.name
@@ -279,7 +279,7 @@ class CNN():
 def setup(opt, sess):
     model_path_name = "%s/%s_model.ckpt" %(opt.load_checkpoint_path, opt.model_name.lower()) 
     # check compatibility if training is continued from previously saved model
-    print('model path: ', model_path_name)
+    print 'model path: ', model_path_name
 
     if opt.model_name.upper() == 'MLP':
         model = MLP()

@@ -6,6 +6,7 @@ from tensorflow.python.framework import ops
 import pdb
 
 class batch_norm(object):
+            # h1 = lrelu(tf.contrib.layers.batch_norm(conv2d(h0, self.df_dim*2, name='d_h1_conv'),decay=0.9,updates_collections=None,epsilon=0.00001,scale=True,scope="d_h1_conv"))
     def __init__(self, epsilon=1e-5, momentum = 0.9, name="batch_norm"):
         with tf.variable_scope(name):
             self.epsilon = epsilon
@@ -13,18 +14,13 @@ class batch_norm(object):
             self.name = name
 
     def __call__(self, x, train=True):
-        return tf.contrib.layers.batch_norm(
-            x, decay=self.momentum,updates_collections=None,
-            epsilon=self.epsilon, scale=True, scope=self.name)
+        return tf.contrib.layers.batch_norm(x, decay=self.momentum, updates_collections=None, epsilon=self.epsilon, scale=True, scope=self.name)
 
 def instance_norm(input, name="instance_norm"):
     with tf.variable_scope(name):
         depth = input.get_shape()[3]
-        scale = tf.get_variable(
-            "scale", [depth],
-            initializer=tf.random_normal_initializer(1.0, 0.02, dtype=tf.float32))
-        offset = tf.get_variable(
-            "offset",[depth], initializer=tf.constant_initializer(0.0))
+        scale = tf.get_variable("scale", [depth], initializer=tf.random_normal_initializer(1.0, 0.02, dtype=tf.float32))
+        offset = tf.get_variable("offset", [depth], initializer=tf.constant_initializer(0.0))
         mean, variance = tf.nn.moments(input, axes=[1,2], keep_dims=True)
         epsilon = 1e-5
         inv = tf.rsqrt(variance + epsilon)
@@ -53,10 +49,9 @@ def conv_cond_concat(x, y):
     """Concatenate conditioning vector on feature map axis."""
     x_shapes = x.get_shape()
     y_shapes = y.get_shape()
-    return tf.concat([
-        x, y*tf.ones([x_shapes[0], x_shapes[1], x_shapes[2], y_shapes[3]])], 3)
+    return tf.concat([x, y*tf.ones([x_shapes[0], x_shapes[1], x_shapes[2], y_shapes[3]])], 3)
 
-def conv2d(input_, output_dim,
+def conv2d(input_, output_dim, 
            k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02, padding = "SAME",
            name="conv2d"):
     with tf.variable_scope(name):
@@ -65,6 +60,8 @@ def conv2d(input_, output_dim,
         conv = tf.nn.conv2d(input_, w, strides=[1, d_h, d_w, 1], padding=padding)
 
         biases = tf.get_variable('biases', [output_dim], initializer=tf.constant_initializer(0.0))
+#        pdb.set_trace()
+#        conv = tf.reshape(tf.nn.bias_add(conv, biases), [-1] + conv.get_shape()[-3:])
         conv = tf.nn.bias_add(conv, biases)
         return conv
 
@@ -95,7 +92,7 @@ def deconv2d(input_, output_shape,
        
 
 def lrelu(x, leak=0.2, name="lrelu"):
-    return tf.maximum(x, leak*x)
+  return tf.maximum(x, leak*x)
 
 def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
     shape = input_.get_shape().as_list()
