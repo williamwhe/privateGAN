@@ -266,10 +266,10 @@ class advGAN():
             self.out_predict_labels = tf.argmax(tf.nn.softmax(
                 self.model.predict(self.fake_images_sample)), dimension=1)
 
-            if opts.is_advGAN == True:
+            if self.opts.is_advGAN == True:
                 self.adv_G_loss = self._adversarial_g_loss(
                     self.fake_predict_labels, self.labels)
-            else: # opts.is_advGAN == False. Using privateGAN.
+            else: # self.opts.is_advGAN == False. Using privateGAN.
                 self.adv_G_loss = tf.reduce_mean(
                     tf.nn.sigmoid_cross_entropy_with_logits(
                         logits=self.fake_predict_labels,
