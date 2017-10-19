@@ -260,8 +260,8 @@ class advGAN():
             self.accuracy_sum = tf.summary.scalar("accuracy", self.accuracy)
 
             self.fake_predict_labels = self.model.predict(self.fake_images)
-            # self.out_predict_labels = tf.argmax(tf.nn.softmax(
-            #     self.model.predict(self.fake_images_sample)), dimension=1)
+            self.out_predict_labels = tf.argmax(tf.nn.softmax(
+                self.model.predict(self.fake_images_sample)), dimension=1)
             # self.adv_G_loss = self._adversarial_g_loss(
             #     self.fake_predict_labels, self.labels)
 
