@@ -89,7 +89,7 @@ def train():
             feed = {
                 model.source: data[0],
                 model.labels: data[1],
-                model.target: data[1]
+                model.target: data[0]
             }
 
             summary_str, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss, _ = sess.run( [ model.g_loss_add_adv_merge_sum, model.G_loss_add_adv, model.pre_G_loss, model.adv_G_loss , model.L1_norm , model.L2_norm , model.hinge_loss, model.G_train_op ], feed)
