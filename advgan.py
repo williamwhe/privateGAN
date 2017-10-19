@@ -266,7 +266,7 @@ class advGAN():
             self.out_predict_labels = tf.argmax(tf.nn.softmax(
                 self.model.predict(self.fake_images_sample)), dimension=1)
 
-            if self.opts.is_advGAN == True:
+            if self.opts.is_advGAN is True:
                 self.adv_G_loss = self._adversarial_g_loss(
                     self.fake_predict_labels, self.labels)
             else: # self.opts.is_advGAN == False. Using privateGAN.

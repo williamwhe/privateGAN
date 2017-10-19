@@ -86,10 +86,9 @@ def train():
             labels = np.zeros_like(data[1])
             labels[:, target_label] = 1
 
-            is_advGAN = False
             feed = {}
-            if opt.is_advGAN == True:
-                # This is the settings used for advGAN.
+            if opt.is_advGAN is True:
+                # This is the setting used for advGAN.
                 feed = {
                     model.source: data[0],
                     model.labels: labels,
@@ -102,20 +101,29 @@ def train():
                     model.target: data[0]
                 }
 
-            summary_str, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss, _ = sess.run( [ model.g_loss_add_adv_merge_sum, model.G_loss_add_adv, model.pre_G_loss, model.adv_G_loss , model.L1_norm , model.L2_norm , model.hinge_loss, model.G_train_op ], feed)
+            summary_str, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss, _ = \
+                sess.run([
+                    model.g_loss_add_adv_merge_sum,
+                    model.G_loss_add_adv,
+                    model.pre_G_loss,model.adv_G_loss,
+                    model.L1_norm,
+                    model.L2_norm,
+                    model.hinge_loss,
+                    model.G_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
-            summary_str, D_loss, _ = sess.run( [model.pre_d_loss_sum, model.D_loss, model.D_pre_train_op], feed )
+            summary_str, D_loss, _ = sess.run([model.pre_d_loss_sum, model.D_loss, model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:    
-                print "loss(D, G, pre_G_loss,  adv_G, L1_norm, L2_norm, hinge_loss ): ", D_loss, G_loss, pre_G_loss,  adv_G_loss, L1_norm, L2_norm, hinge_loss
+                print "loss(D, G, pre_G_loss,  adv_G, L1_norm, L2_norm, hinge_loss ): ", \
+                    D_loss, G_loss, pre_G_loss,  adv_G_loss, L1_norm, L2_norm, hinge_loss
                 print "iteration: ", iteration
 
 
             if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
-                print 'Saving the model in model.ckpt'
                 checkpoint_path = os.path.join(opt.checkpoint_path, 'checkpoint.ckpt')
+                print 'Saving the model in "%s"' % checkpoint_path
 
                 model.saver.save(sess, checkpoint_path, global_step=iteration)
 
