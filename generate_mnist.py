@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 import tensorflow as tf
 from ops import *
 import os
@@ -7,12 +7,12 @@ import scipy.io as sio
 import random
 from tensorflow.examples.tutorials.mnist import input_data
 import pdb
-import opts 
+import opts
 from utils import plot
 from advgan import advGAN
 import cifar10
 from utils import save_images
-from Dataset2 import Dataset2 
+from Dataset2 import Dataset2
 
 from setup_mnist import MNIST, MNISTModel, MNISTModel2, MNISTModel3
 from setup_cifar import CIFARModel, CIFARModel2, CIFARModel3
@@ -32,10 +32,10 @@ def train():
 
     test_data = mnist.test.images * 2.0 - 1.0
     test_label = mnist.test.labels
-    
+
     x_dim = train_data.shape[1]
     y_dim = train_label.shape[1]
-    
+
     opt.input_c_dim = 1
     opt.output_c_dim = 1
     opt.input_dim = x_dim
@@ -45,7 +45,7 @@ def train():
 
     NUM_THREADS = 2
     tf_config = tf.ConfigProto()
-    tf_config.intra_op_parallelism_threads=NUM_THREADS
+    tf_config.intra_op_parallelism_threads = NUM_THREADS
     tf_config.gpu_options.allow_growth = True
 
     with tf.Session(config=tf_config) as sess:
@@ -74,20 +74,23 @@ def train():
         writer = tf.summary.FileWriter("logs", sess.graph)
         loader = Dataset2(train_data, train_label, source_label)
         model_num = 0
-        
+
         best_show_samples_magintude = []
         best_show_samples = []
         best_show_source_imgs = []
         best_show_idxs = []
+
         while iteration < 2000:
-            # pass
-            data = loader.next_batch(batch_size, negative = False ) 
-            labels = np.zeros_like( data[1] )
+            # return data, label, np.array( target)
+            data = loader.next_batch(batch_size, negative=False)
+            labels = np.zeros_like(data[1])
             labels[:, target_label] = 1
 
-            feed = {model.source :  data[0], \
-                model.labels: labels,\
-                model.target : data[2]}
+            feed = {
+                model.source: data[0],
+                model.labels: data[1],
+                model.target: data[1]
+            }
 
             summary_str, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss, _ = sess.run( [ model.g_loss_add_adv_merge_sum, model.G_loss_add_adv, model.pre_G_loss, model.adv_G_loss , model.L1_norm , model.L2_norm , model.hinge_loss, model.G_train_op ], feed)
             writer.add_summary(summary_str, iteration)
