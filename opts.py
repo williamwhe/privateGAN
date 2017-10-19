@@ -99,9 +99,12 @@ def parse_opt():
     parser.add_argument('--learning_rate_decay_every', type=int, default=20000, 
                     help='every how many iterations thereafter to drop LR by half?(in epoch)')
     parser.add_argument('--save_checkpoint_every', type=int, default=200,
-                    help='how often to save a model checkpoint (in iterations)?')
+                    help='how often to save a model checkpoint (in iterations)')
     parser.add_argument('--losses_log_every', type=int, default=100,
-                    help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')       
+                    help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
+    parser.add_argument('--is_advGAN', type=bool, default=False,
+                        help='Determines whether or not we are using advGAN. \
+                        If False, we are using privateGAN.')
 
 
 

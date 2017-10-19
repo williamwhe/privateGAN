@@ -80,17 +80,27 @@ def train():
         best_show_source_imgs = []
         best_show_idxs = []
 
-        while iteration < 2000:
-            # return data, label, np.array( target)
+        while iteration < 500:
+            # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
             labels = np.zeros_like(data[1])
             labels[:, target_label] = 1
 
-            feed = {
-                model.source: data[0],
-                model.labels: data[1],
-                model.target: data[0]
-            }
+            is_advGAN = False
+            feed = {}
+            if opt.is_advGAN == True:
+                # This is the settings used for advGAN.
+                feed = {
+                    model.source: data[0],
+                    model.labels: labels,
+                    model.target: data[2]
+                }
+            else: # opt.is_advGAN == False. Using privateGAN.
+                feed = {
+                    model.source: data[0],
+                    model.labels: data[1],
+                    model.target: data[0]
+                }
 
             summary_str, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss, _ = sess.run( [ model.g_loss_add_adv_merge_sum, model.G_loss_add_adv, model.pre_G_loss, model.adv_G_loss , model.L1_norm , model.L2_norm , model.hinge_loss, model.G_train_op ], feed)
             writer.add_summary(summary_str, iteration)
@@ -103,16 +113,16 @@ def train():
                 print "iteration: ", iteration
 
 
-            if (iteration != 0 and iteration % opt.save_checkpoint_every == 0):
-            # if (iteration != 0 and iteration % 500 == 0):
-                checkpoint_path = os.path.join(opt.checkpoint_path, 'model.ckpt')
-                                
-                # model.saver.save(sess, checkpoint_path, global_step = iteration)   
+            if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
+                print 'Saving the model in model.ckpt'
+                checkpoint_path = os.path.join(opt.checkpoint_path, 'checkpoint.ckpt')
+
+                model.saver.save(sess, checkpoint_path, global_step=iteration)
 
                 test_loader = Dataset2(test_data, test_label, source_label)
 
                 test_num = test_loader._num_examples
-                test_iter_num = (test_num - batch_size )  / batch_size
+                test_iter_num = (test_num - batch_size ) / batch_size
                 # test_iter_num = 1
                 test_acc = 0.0
                 test_adv_acc = 0.0
@@ -120,20 +130,22 @@ def train():
 
                 save_samples = []
 
-                for i in range( test_iter_num):
+                for i in range(test_iter_num):
 
-                    s_imgs, s_label, _  = test_loader.next_batch(batch_size, negative = False)
+                    s_imgs, s_label, _ = test_loader.next_batch(batch_size, negative=False)
 
                     # s_imgs, s_label, _  = loader.next_batch(batch_size, negative = False)
 
-                    feed = {model.source : s_imgs,  model.labels : s_label}
+                    feed = {model.source:s_imgs,  model.labels:s_label}
 
-                    test_accuracy, test_adv_accuracy = sess.run( [model.accuracy, model.adv_accuracy], feed)
+                    test_accuracy, test_adv_accuracy = sess.run(
+                        [model.accuracy, model.adv_accuracy], feed)
                     test_acc += test_accuracy
                     test_adv_acc += test_adv_accuracy
-                    
+
                     feed = {model.source : s_imgs}
-                    samples, out_predict_labels  = sess.run([ model.fake_images_sample, model.out_predict_labels], feed)
+                    samples, out_predict_labels  = sess.run(
+                        [model.fake_images_sample, model.out_predict_labels], feed)
                     idxs = np.where(out_predict_labels == target_label)[0]
                     # save_images(samples[:100], [10, 10], 'CIFAR10/result2/test_' + str(source_idx) + str(target_idx)+  '_.png')                
                     # pdb.set_trace()
@@ -145,9 +157,14 @@ def train():
                 test_adv_accuracy = test_adv_acc / float( test_iter_num )
                 if min_adv_accuracy > test_adv_accuracy:
                     min_adv_accuracy = test_adv_accuracy
-                    test_out_str =  "test total accuracy {}, adv accuracy {}".format( str( test_accuracy ) ,str( test_adv_accuracy ) )   
+                    test_out_str =  "test total accuracy {}, adv accuracy {}".\
+                        format(str(test_accuracy), str(test_adv_accuracy))
                     print test_out_str
                     save_images(save_samples[:100], [10, 10], 'result.png')
+                    # Saving the best yet model.
+                    best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
+                    print 'Saving the best model yet at "%s"' % best_model_path
+                    model.saver.save(sess, best_model_path, global_step=iteration)
             iteration += 1
 
 

@@ -130,8 +130,10 @@ class advGAN():
                 D_real_loss, D_real_logit = self.patch_discriminator(
                     tf.concat([real_images, images], axis=3), reuse=True)
             else:
-                D_fake_loss, D_fake_logit = self.patch_discriminator(fake_images)
-                D_real_loss, D_real_logit = self.patch_discriminator(real_images, reuse=True)
+                D_fake_loss, D_fake_logit = \
+                    self.patch_discriminator(fake_images)
+                D_real_loss, D_real_logit = \
+                    self.patch_discriminator(real_images, reuse=True)
 
         else:
             if cgan_flag:
@@ -141,7 +143,8 @@ class advGAN():
                     tf.concat([real_images, images], axis=3), reuse=True)
             else:
                 D_fake_loss, D_fake_logit = self.discriminator(fake_images)
-                D_real_loss, D_real_logit = self.discriminator(real_images, reuse=True)
+                D_real_loss, D_real_logit = \
+                    self.discriminator(real_images, reuse=True)
 
         # Discriminator tries to assign 0 to fake data.
         D_fake_loss = tf.reduce_mean(
@@ -262,13 +265,15 @@ class advGAN():
             self.fake_predict_labels = self.model.predict(self.fake_images)
             self.out_predict_labels = tf.argmax(tf.nn.softmax(
                 self.model.predict(self.fake_images_sample)), dimension=1)
-            # self.adv_G_loss = self._adversarial_g_loss(
-            #     self.fake_predict_labels, self.labels)
 
-            self.adv_G_loss = tf.reduce_mean(
-                tf.nn.sigmoid_cross_entropy_with_logits(
-                    logits=self.fake_predict_labels,
-                    labels=self.labels))
+            if opts.is_advGAN == True:
+                self.adv_G_loss = self._adversarial_g_loss(
+                    self.fake_predict_labels, self.labels)
+            else: # opts.is_advGAN == False. Using privateGAN.
+                self.adv_G_loss = tf.reduce_mean(
+                    tf.nn.sigmoid_cross_entropy_with_logits(
+                        logits=self.fake_predict_labels,
+                        labels=self.labels))
 
             self.adv_accuracy = self._metric(
                 self.labels, tf.nn.softmax(self.fake_predict_labels))
