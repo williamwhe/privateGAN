@@ -1,15 +1,15 @@
-# advGAN
-### ....
+# privateGAN
+A library to protect privacy of a target function `f` against an adversary function `g`.
 ## Prerequisites
-- Linux or OSZX
-- NVIDA GPU + CUDA CuDNN
+- Linux
+- NVIDA GPU with CUDA and CuDNN
 - tensorflow 1.3
 ## Getting start 
 - train whitbox model
 ```
 python train_models.py
 ```
-Models are saved under 'models/' floder.  
+Models are saved under 'models/' floder.
 - adversary attack
 ```
 python generate_mnist.py --c 1  --ld 500 --H_lambda 10  --cgan_flag 1 --patch_flag 1 --G_lambda 10 --s_l 0 --t_l 1
@@ -17,16 +17,10 @@ python generate_mnist.py --c 1  --ld 500 --H_lambda 10  --cgan_flag 1 --patch_fl
 Adversary images will be saved as 'result.png'
 
 ## parameters 
-- ld adversary loss 
-
-- H_lambda hinge loss 
-
-- cgan_flag concat or not
-
-- patch_flag patchGAN
-
-- G_lambda generator loss
-
-- s_l source label 
-
-- t_l target label 
+- `ld`: adversarial loss coefficient.
+- `G_lambda`: Generative classifier loss coefficient.
+- `H_lambda`: hinge loss coefficient.
+- `cgan_flag`: concat fake data to real data or not.
+- `patch_flag`: Use patchGAN or not.
+- `s_l`: source label
+- `t_l`: target label (attack target) 
