@@ -14,6 +14,8 @@ from time import gmtime, strftime
 
 import scipy.io as sio
 import numpy as np
+import matplotlib
+matplotlib.use('PDF')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
