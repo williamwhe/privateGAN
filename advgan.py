@@ -39,20 +39,26 @@ class advGAN():
         self.sess.run(tf.initialize_all_variables())
         self.model.model.load_weights(self.model_restore)
 
-    # Resets the training procedure.
     def reset(self):
+        """
+        Resets the training procedure.
+        """
         # net_vars = tf.get_collection(tf.GraphKeys.VARIABLES, scope="evagan")
         self.saver = tf.train.Saver(max_to_keep=1)
         self.sess.run(tf.initialize_all_variables())
         self.model.model.load_weights(self.model_restore)
 
-    # Lodas from a given checkpoint.
     def load(self, checkpoint_path):
+        """
+        Lodas from a given checkpoint.
+        """
         self.saver.restore(self.sess, checkpoint_path)
         self.model.model.load_weights(self.model_restore)
 
-    # Initializes a Variable with a truncated normal distribution with a bias.
     def init_weight(self, dim_in, dim_out, name=None, stddev=1.0):
+        """
+        Initializes a Variable with a truncated normal distribution with a bias.
+        """
         return tf.Variable(
             tf.truncated_normal(
                 [dim_in, dim_out],
@@ -61,8 +67,10 @@ class advGAN():
             name=name
         )
 
-    # Initializes the bias with ALL ZEROs.
     def init_bias(self, dim_out, name=None):
+        """
+        Initializes the bias with ALL ZEROs.
+        """
         return tf.Variable(tf.zeros([dim_out]), name=name)
 
     def _create_variable(self):
@@ -100,17 +108,19 @@ class advGAN():
         # the target images, which has the different label. We can also conduct target attack later
         self.target = tf.placeholder(tf.float32, [None, input_dim], name='target_image')
         self.real_images = tf.reshape(self.target, [-1, img_dim, img_dim, input_c_dim])
-        self.labels = tf.placeholder(tf.float32, [None, self.opts.label_dim], name="label")
+        self.labels = tf.placeholder(tf.float32, [None, label_dim], name="label")
 
         # used for showing  accuracy.
         self.acc = tf.placeholder(tf.float32, name="accuracy")
-        self.adv_acc = tf.placeholder(tf.float32, name="adv_accuracy")
-        self.mag = tf.placeholder(tf.float32, name="magnitude")
-        self.dis = tf.placeholder(tf.float32, name="disortion")
-
         self.acc_sum = tf.summary.scalar("accuracy", self.acc)
+
+        self.adv_acc = tf.placeholder(tf.float32, name="adv_accuracy")
         self.adv_acc_sum = tf.summary.scalar("adv_accuracy", self.adv_acc)
+
+        self.mag = tf.placeholder(tf.float32, name="magnitude")
         self.magnitude_sum = tf.summary.scalar("magnitude", self.mag)
+
+        self.dis = tf.placeholder(tf.float32, name="disortion")
         self.dis_sum = tf.summary.scalar("disortion", self.dis)
 
         self.metric_sum = tf.summary.merge(
@@ -121,27 +131,30 @@ class advGAN():
         patch_flag = self.opts.patch_flag
         hinge_flag = self.opts.hinge_flag
 
-        # This is by default True.
         if patch_flag:
-            # This is by default True.
+        # This is by default True.
             if cgan_flag:
+            # This is by default True.
                 D_fake_loss, D_fake_logit = self.patch_discriminator(
                     tf.concat([fake_images, images], axis=3))
                 D_real_loss, D_real_logit = self.patch_discriminator(
                     tf.concat([real_images, images], axis=3), reuse=True)
             else:
+            # This is by default False.
                 D_fake_loss, D_fake_logit = \
                     self.patch_discriminator(fake_images)
                 D_real_loss, D_real_logit = \
                     self.patch_discriminator(real_images, reuse=True)
-
         else:
+        # This is by default False.
             if cgan_flag:
+            # This is by default True.
                 D_fake_loss, D_fake_logit = self.discriminator(
                     tf.concat([fake_images, images], axis=3))
                 D_real_loss, D_real_logit = self.discriminator(
                     tf.concat([real_images, images], axis=3), reuse=True)
             else:
+            # This is by default False.
                 D_fake_loss, D_fake_logit = self.discriminator(fake_images)
                 D_real_loss, D_real_logit = \
                     self.discriminator(real_images, reuse=True)

@@ -52,11 +52,11 @@ def train():
         # Initialize the variables, and restore the variables form checkpoint if there is.
         # and initialize the writer
         iteration = 0
-        sample_matrix = []
-        source_matrix = []
-        magnitude_matrix = []
-        min_adv_accuracys = []
-        corsp_magnitudes = []
+        # sample_matrix = []
+        # source_matrix = []
+        # magnitude_matrix = []
+        # min_adv_accuracys = []
+        # corsp_magnitudes = []
         #initial whitebox model
         model_store = opt.model_restore
         whitebox_model = MNISTModel(model_store, sess)
@@ -73,12 +73,12 @@ def train():
         print "source{}, target{} .".format(source_label, target_label)
         writer = tf.summary.FileWriter("logs", sess.graph)
         loader = Dataset2(train_data, train_label, source_label)
-        model_num = 0
+        # model_num = 0
 
-        best_show_samples_magintude = []
-        best_show_samples = []
-        best_show_source_imgs = []
-        best_show_idxs = []
+        # best_show_samples_magintude = []
+        # best_show_samples = []
+        # best_show_source_imgs = []
+        # best_show_idxs = []
 
         while iteration < 500:
             # this function returns (data, label, np.array(target)).
@@ -105,7 +105,8 @@ def train():
                 sess.run([
                     model.g_loss_add_adv_merge_sum,
                     model.G_loss_add_adv,
-                    model.pre_G_loss,model.adv_G_loss,
+                    model.pre_G_loss,
+                    model.adv_G_loss,
                     model.L1_norm,
                     model.L2_norm,
                     model.hinge_loss,
@@ -115,9 +116,9 @@ def train():
             summary_str, D_loss, _ = sess.run([model.pre_d_loss_sum, model.D_loss, model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
-            if iteration != 0 and iteration % opt.losses_log_every == 0:    
+            if iteration != 0 and iteration % opt.losses_log_every == 0:
                 print "loss(D, G, pre_G_loss,  adv_G, L1_norm, L2_norm, hinge_loss ): ", \
-                    D_loss, G_loss, pre_G_loss,  adv_G_loss, L1_norm, L2_norm, hinge_loss
+                    D_loss, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss
                 print "iteration: ", iteration
 
 
@@ -140,11 +141,9 @@ def train():
 
                 for i in range(test_iter_num):
 
+                    # Loading the next batch of test images
                     s_imgs, s_label, _ = test_loader.next_batch(batch_size, negative=False)
-
-                    # s_imgs, s_label, _  = loader.next_batch(batch_size, negative = False)
-
-                    feed = {model.source:s_imgs,  model.labels:s_label}
+                    feed = {model.source:s_imgs, model.labels:s_label}
 
                     test_accuracy, test_adv_accuracy = sess.run(
                         [model.accuracy, model.adv_accuracy], feed)
@@ -152,22 +151,28 @@ def train():
                     test_adv_acc += test_adv_accuracy
 
                     feed = {model.source : s_imgs}
-                    samples, out_predict_labels  = sess.run(
+                    samples, out_predict_labels = sess.run(
                         [model.fake_images_sample, model.out_predict_labels], feed)
+
+                    # Finding those predicted labels that are equal to the target label
                     idxs = np.where(out_predict_labels == target_label)[0]
-                    # save_images(samples[:100], [10, 10], 'CIFAR10/result2/test_' + str(source_idx) + str(target_idx)+  '_.png')                
+                    # save_images(samples[:100], [10, 10], 'CIFAR10/result2/test_' + str(source_idx) + str(target_idx)+  '_.png')
                     # pdb.set_trace()
                     show_samples.append(samples)
-                    save_samples.append(samples[idxs])
-                show_samples = np.concatenate(show_samples, axis = 0)
-                save_samples = np.concatenate(save_samples, axis = 0)
-                test_accuracy = test_acc / float( test_iter_num )
-                test_adv_accuracy = test_adv_acc / float( test_iter_num )
+                    if opt.is_advGAN:
+                        save_samples.append(samples[idxs])
+                    else:
+                        # We add all samples.
+                        print 'We add all samples to saved samples since this is not advGAN.'
+                        save_samples.append(samples)
+                show_samples = np.concatenate(show_samples, axis=0)
+                save_samples = np.concatenate(save_samples, axis=0)
+                test_accuracy = test_acc / float(test_iter_num)
+                test_adv_accuracy = test_adv_acc / float(test_iter_num)
                 if min_adv_accuracy > test_adv_accuracy:
                     min_adv_accuracy = test_adv_accuracy
-                    test_out_str =  "test total accuracy {}, adv accuracy {}".\
-                        format(str(test_accuracy), str(test_adv_accuracy))
-                    print test_out_str
+                    print "test total accuracy %.6f, adv accuracy %.6f" % \
+                        (test_accuracy, test_adv_accuracy)
                     save_images(save_samples[:100], [10, 10], 'result.png')
                     # Saving the best yet model.
                     best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
@@ -177,7 +182,7 @@ def train():
 
 
 
-        #########################         
-               
+        #########################
+
 if __name__ == "__main__":
     train()

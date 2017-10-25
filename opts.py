@@ -45,78 +45,74 @@ def parse_opt():
                         help='c')
 
 
-    parser.add_argument('--s_l', type=int, default=0, help = "source_label")
-    parser.add_argument('--t_l', type=int, default=1, help = "target_label")
+    parser.add_argument('--s_l', type=int, default=0, help="source_label")
+    parser.add_argument('--t_l', type=int, default=1, help="target_label")
 
-    parser.add_argument('--model_name', type=str, default='MLP', 
-                    help="load_model_name")    
-    parser.add_argument('--add_neg_every', type=int, default=5, 
-                    help="add negative samples from generator")    
-    parser.add_argument('--add_neg_iteration', type=int, default=10000, 
-                    help="add negative samples from generator")
-    parser.add_argument('--input_data', type=str, default = "MNIST",
-                    help="input data MNIST or CIFAR10 " )
-    parser.add_argument('--train_adv', type=int, default = 0,
-                    help="using adverarial loss or not " )
-    parser.add_argument('--pretrain_iteration', type=int, default = 3000,
-                    help="pretrain iteration" )
+    parser.add_argument('--model_name', type=str, default='MLP',
+                        help="load_model_name")
+    parser.add_argument('--add_neg_every', type=int, default=5,
+                        help="add negative samples from generator")
+    parser.add_argument('--add_neg_iteration', type=int, default=10000,
+                        help="add negative samples from generator")
+    parser.add_argument('--input_data', type=str, default="MNIST",
+                        help="input data MNIST or CIFAR10 ")
+    parser.add_argument('--train_adv', type=int, default=0,
+                        help="using adverarial loss or not ")
+    parser.add_argument('--pretrain_iteration', type=int, default=3000,
+                        help="pretrain iteration")
 
-    parser.add_argument('--confidence', type = float, default = 0.0, 
-                    help = "confidence")
-    
+    parser.add_argument('--confidence', type=float, default=0.0,
+                        help="confidence")
 
-    parser.add_argument('--h_dim', type=int, default = 128,
-                    help='hidden_dim')       
-    parser.add_argument('--batch_size', type=int, default = 200,
-                    help='batch_size')       
-    parser.add_argument('--input_c_dim', type=int, default = 1,
-                    help='input_channel_dim')       
-    parser.add_argument('--output_c_dim', type=int, default = 1,
-                    help='output_channel_dim')       
-    parser.add_argument('--gf_dim', type=int, default = 8,
-                    help='generator_filter_dim')       
-    parser.add_argument('--df_dim', type=int, default = 8,
-                    help='discriminator_filter_dim')       
+    parser.add_argument('--h_dim', type=int, default=128,
+                        help='hidden_dim')
+    parser.add_argument('--batch_size', type=int, default=200,
+                        help='batch_size')
+    parser.add_argument('--input_c_dim', type=int, default=1,
+                        help='input_channel_dim')
+    parser.add_argument('--output_c_dim', type=int, default=1,
+                        help='output_channel_dim')
+    parser.add_argument('--gf_dim', type=int, default=8,
+                        help='generator_filter_dim')
+    parser.add_argument('--df_dim', type=int, default=8,
+                        help='discriminator_filter_dim')
     parser.add_argument('--fine_tune', type=int, default=0,
-                    help='fine_tune(0:no, 1:yes)')
-    parser.add_argument('--img_dim', type=int, default = 28,
-                    help='image_w_h_dim')      
+                        help='fine_tune(0:no, 1:yes)')
+    parser.add_argument('--img_dim', type=int, default=28,
+                        help='image_w_h_dim')
 
 
     # parser.add_argument('--log_path', type=str, default = 'log_path',
-    #                 help='log_path')       
-    parser.add_argument('--image_path', type=str, default = 'GAN/out',
-                    help='image_path')       
+    #                 help='log_path')
+    parser.add_argument('--image_path', type=str, default='GAN/out',
+                        help='image_path')
     parser.add_argument('--load_checkpoint_path', type=str, default='GAN/save',
-                    help='directory to store checkpointed models')
+                        help='directory to store checkpointed models')
     parser.add_argument('--checkpoint_path', type=str, default='GAN/save',
-                    help='directory to store checkpointed models')                  
+                        help='directory to store checkpointed models')
     parser.add_argument('--learning_rate', type=float, default=0.01,
-                    help='learning rate')
-    parser.add_argument('--learning_rate_decay_start', type=int, default=-1, 
-                    help='at what iteration to start decaying learning rate? (-1 = dont) (in epoch)')
-    parser.add_argument('--decay_iteration_max', type=int, default= 50000, help='decay iteration max')
-    parser.add_argument('--learning_rate_decay_every', type=int, default=20000, 
-                    help='every how many iterations thereafter to drop LR by half?(in epoch)')
+                        help='learning rate')
+    parser.add_argument('--learning_rate_decay_start', type=int, default=-1,
+                        help='at what iteration to start decaying learning rate?' + \
+                             '(-1 = dont) (in epoch)')
+    parser.add_argument('--decay_iteration_max', type=int, default=50000,
+                        help='decay iteration max')
+    parser.add_argument('--learning_rate_decay_every', type=int, default=20000,
+                        help='every how many iterations thereafter to drop LR by half?(in epoch)')
     parser.add_argument('--save_checkpoint_every', type=int, default=200,
-                    help='how often to save a model checkpoint (in iterations)')
+                        help='how often to save a model checkpoint (in iterations)')
     parser.add_argument('--losses_log_every', type=int, default=100,
-                    help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
+                        help='How often do we snapshot losses, for inclusion in the' + \
+                             'progress dump? (0 = disable)')
     parser.add_argument('--is_advGAN', type=bool, default=False,
                         help='Determines whether or not we are using advGAN. \
                         If False, we are using privateGAN.')
 
-
-
-    ###flags 
-
     parser.add_argument('--cw', type=int, default=1,
-                    help='c&w loss or not ') 
+                        help='c&w loss or not')
 
     parser.add_argument('--targeted', type=int, default=1,
-                    help='c&w loss or not ') 
-
-
+                        help='c&w loss or not')
 
     args = parser.parse_args()
 
