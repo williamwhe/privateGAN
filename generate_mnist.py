@@ -168,7 +168,7 @@ def train():
                         model.fake_images_sample,
                         model.out_predict_labels], feed)
                     print samples.shape
-                    pint '^^ shape of samples'
+                    print '^^ shape of samples'
 
                     # Finding those predicted labels that are equal to the target label
                     idxs = np.where(out_predict_labels == target_label)[0]
