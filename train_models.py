@@ -46,7 +46,7 @@ def train(file_name, params, num_epochs=50,
     """
     Standard neural network training procedure.
     """
-    opt = opts.parse_opt()
+    # opt = opts.parse_opt()
     mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
     train_data = mnist.train.images * 2.0 - 1.0
     train_label = mnist.train.labels
