@@ -154,6 +154,8 @@ def train():
 
                     # Loading the next batch of test images
                     s_imgs, s_label, _ = test_loader.next_batch(batch_size)
+                    print s_imgs.shape
+                    print '^^ is the shape of s_imgs'
                     feed = {model.source: s_imgs, model.labels: s_label}
 
                     test_accuracy, test_adv_accuracy = sess.run(
@@ -165,6 +167,8 @@ def train():
                     samples, out_predict_labels = sess.run([
                         model.fake_images_sample,
                         model.out_predict_labels], feed)
+                    print samples.shape
+                    pint '^^ shape of samples'
 
                     # Finding those predicted labels that are equal to the target label
                     idxs = np.where(out_predict_labels == target_label)[0]
@@ -185,8 +189,8 @@ def train():
                     min_adv_accuracy = test_adv_accuracy
                     print "test total accuracy %f, adv accuracy %f" % \
                         (test_accuracy, test_adv_accuracy)
-                    save_images(save_samples[:100], [10, 10], 'fake.png')
-                    save_images(input_samples[:100], [10, 10], 'real.png')
+                    save_images(samples[:100], [10, 10], 'fake.png')
+                    save_images(s_imgs[:100], [10, 10], 'real.png')
                     # Saving the best yet model.
                     best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
                     print 'Saving the best model yet at "%s"' % best_model_path
