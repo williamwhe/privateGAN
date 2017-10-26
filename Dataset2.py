@@ -5,23 +5,23 @@ import random
 
 
 class Dataset2:
+    """
+    Batch loader class for datasets.
+    """
 
-    def __init__(self, data, label, source_label):
+    def __init__(self, data, label, source_label, targeted=False):
         self._index_in_epoch = 0
         self._epochs_completed = 0
         self._data = data
         self._label = label
         self._num_examples = data.shape[0]
         self._num_labels = label.shape[1]
+        self._targeted = targeted
+            # Used to retrieve negative samples.
         self._negative_example_list = [
-            np.array(
-                []) for _ in range(
-                self._num_labels)]
+            np.array([]) for _ in range(self._num_labels)]
         self._negative_magnitude = [
-            np.array(
-                []) for _ in range(
-                self._num_labels)]
-
+            np.array([]) for _ in range(self._num_labels)]
         # Finding  the class indices, from the one-hot format.
         label_cls = np.argmax(self._label, axis=1)
         # A list of examples for each class
@@ -32,18 +32,24 @@ class Dataset2:
 
         # We turn the gathered examples to numpy arrays.
         self._sort_data = [np.array(examples[i])
-                           for i in range(self._num_labels)]
+                        for i in range(self._num_labels)]
 
         # We find the number of examples for each class.
         self._sort_len = [self._sort_data[i].shape[0]
-                          for i in range(self._num_labels)]
+                        for i in range(self._num_labels)]
 
-        # Data is only the data labeled with ``source_label''.
-        self._data = self._sort_data[source_label]
-        # add one hot label here
-        self._num_examples = self._data.shape[0]
-        self._label = np.zeros((self._num_examples, self._num_labels))
-        self._label[:, source_label] = 1
+        if self._targeted is True:
+            # We make data to be only instances of 'source_label'
+            self._data = self._sort_data[source_label]
+            # Create one-hot labels.
+            self._num_examples = self._data.shape[0]
+            self._label = np.zeros((self._num_examples, self._num_labels))
+            self._label[:, source_label] = 1
+        else: # targeted == False, we use all data.
+            idx = np.arange(0, self._num_examples)
+            np.random.shuffle(idx)  # shuffle indices.
+            self._data = self._data[idx]  # shuffled data samples.
+            self._label = self._label[idx] # shuffled labels.
 
     @property
     def data(self):
@@ -80,13 +86,15 @@ class Dataset2:
             self._label = self._label[idx0]
 
             start = 0
-            # avoid the case where the #sample != integar times of batch_size
+            # avoid #sample != integar x batch_size
             self._index_in_epoch = batch_size - rest_num_examples
             end = self._index_in_epoch
             data_new_part = self._data[start:end]
             label_new_part = self._label[start:end]
-            data = np.concatenate((data_rest_part, data_new_part), axis=0)
-            label = np.concatenate((label_rest_part, label_new_part), axis=0)
+            data = np.concatenate(
+                (data_rest_part, data_new_part), axis=0)
+            label = np.concatenate(
+                (label_rest_part, label_new_part), axis=0)
             label_cls = np.argmax(label, axis=1)
             target = []
             target_label = []
@@ -100,7 +108,7 @@ class Dataset2:
                 return data, label, neg_data, neg_label
             else:
                 return data, label, np.array(target)
-        else:
+        else: # start + batch_size <= self._num_examples.
             self._index_in_epoch += batch_size
             end = self._index_in_epoch
             data, label = self._data[start:end], self._label[start:end]
@@ -108,10 +116,8 @@ class Dataset2:
             target = []
             for i in range(batch_size):
                 label_cls_id = label_cls[i]
-                # idx = random.choice( self._sort_len[label_cls_id] )
-                # target.append( self._sort_data[ label_cls_id ][idx, :] )
                 target.append(random.choice(self._sort_data[label_cls_id]))
-            if negative:
+            if negative: # negative examples are needed.
                 neg_data, neg_label = self.get_negative(
                     batch_size, label, priority)
                 return data, label, neg_data, neg_label

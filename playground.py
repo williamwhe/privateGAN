@@ -63,7 +63,8 @@ def main():
         #         continue
         #     print(var.name, val.shape)  # Prints the name of the variable alongside its value.
 
-
+        # We have to load a batch of images, then create the fake ones.
+        # They should be identical.
         num_images = 10
         images = train_data[:num_images]
         fake_images = sess.run([model.fake_images_sample],
