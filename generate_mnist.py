@@ -83,23 +83,33 @@ def train():
         while iteration < 500:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
-            labels = np.zeros_like(data[1])
-            labels[:, target_label] = 1
 
-            feed = {}
             if opt.is_advGAN is True:
-                # This is the setting used for advGAN.
-                feed = {
-                    model.source: data[0],
-                    model.labels: labels,
-                    model.target: data[2]
-                }
-            else: # opt.is_advGAN == False. Using privateGAN.
-                feed = {
-                    model.source: data[0],
-                    model.labels: data[1],
-                    model.target: data[0]
-                }
+                labels = np.zeros_like(data[1])
+                labels[:, target_label] = 1
+            else: # opts.is_advGAN is False.
+                labels = data[1]
+
+            # feed = {}
+            # if opt.is_advGAN is True:
+            #     # This is the setting used for advGAN.
+            #     feed = {
+            #         model.source: data[0],
+            #         model.labels: labels,
+            #         model.target: data[2]
+            #     }
+            # else: # opt.is_advGAN == False. Using privateGAN.
+            #     feed = {
+            #         model.source: data[0],
+            #         model.labels: data[1],
+            #         model.target: data[0]
+            #     }
+
+            feed = {
+                model.source: data[0],
+                model.labels: labels,
+                model.target: data[2]
+            }
 
             summary_str, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss, _ = \
                 sess.run([
@@ -138,32 +148,34 @@ def train():
                 show_samples = []
 
                 save_samples = []
+                input_samples = []
 
-                for i in range(test_iter_num):
+                for _ in range(test_iter_num):
 
                     # Loading the next batch of test images
-                    s_imgs, s_label, _ = test_loader.next_batch(batch_size, negative=False)
-                    feed = {model.source:s_imgs, model.labels:s_label}
+                    s_imgs, s_label, _ = test_loader.next_batch(batch_size)
+                    feed = {model.source: s_imgs, model.labels: s_label}
 
                     test_accuracy, test_adv_accuracy = sess.run(
                         [model.accuracy, model.adv_accuracy], feed)
                     test_acc += test_accuracy
                     test_adv_acc += test_adv_accuracy
 
-                    feed = {model.source : s_imgs}
-                    samples, out_predict_labels = sess.run(
-                        [model.fake_images_sample, model.out_predict_labels], feed)
+                    feed = {model.source: s_imgs}
+                    samples, out_predict_labels = sess.run([
+                        model.fake_images_sample,
+                        model.out_predict_labels], feed)
 
                     # Finding those predicted labels that are equal to the target label
                     idxs = np.where(out_predict_labels == target_label)[0]
                     # save_images(samples[:100], [10, 10], 'CIFAR10/result2/test_' + str(source_idx) + str(target_idx)+  '_.png')
                     # pdb.set_trace()
                     show_samples.append(samples)
+                    input_samples.append(s_imgs)
                     if opt.is_advGAN:
                         save_samples.append(samples[idxs])
                     else:
                         # We add all samples.
-                        print 'We add all samples to saved samples since this is not advGAN.'
                         save_samples.append(samples)
                 show_samples = np.concatenate(show_samples, axis=0)
                 save_samples = np.concatenate(save_samples, axis=0)
@@ -171,9 +183,10 @@ def train():
                 test_adv_accuracy = test_adv_acc / float(test_iter_num)
                 if min_adv_accuracy > test_adv_accuracy:
                     min_adv_accuracy = test_adv_accuracy
-                    print "test total accuracy %.6f, adv accuracy %.6f" % \
+                    print "test total accuracy %f, adv accuracy %f" % \
                         (test_accuracy, test_adv_accuracy)
-                    save_images(save_samples[:100], [10, 10], 'result.png')
+                    save_images(save_samples[:100], [10, 10], 'fake.png')
+                    save_images(input_samples[:100], [10, 10], 'real.png')
                     # Saving the best yet model.
                     best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
                     print 'Saving the best model yet at "%s"' % best_model_path

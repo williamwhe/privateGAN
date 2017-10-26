@@ -11,8 +11,9 @@ class advGAN():
     """
     GAN for generating malware.
     model: whitebox model
-    restore: restore file for whitebox model
-
+    restore: restore file path for whitebox model
+    opts: advGAN parameters. See opts.py.
+    sess: TensorFlow Session() object.
     """
     def __init__(self, model, restore, opts, sess):
         """
@@ -262,16 +263,20 @@ class advGAN():
             self.D_loss = D_loss
 
             # Adding the values to Summary.
-            self.pre_g_loss_sum = tf.summary.scalar("pre_G_loss", self.pre_G_loss)
-            self.pre_g_totoal_loss_sum = tf.summary.scalar("pre_G_loss_total", self.G_loss)
+            self.pre_g_loss_sum = \
+                tf.summary.scalar("pre_G_loss", self.pre_G_loss)
+            self.pre_g_totoal_loss_sum = \
+                tf.summary.scalar("pre_G_loss_total", self.G_loss)
             self.pre_d_loss_sum = tf.summary.scalar("pre_d_loss", self.D_loss)
             self.l1_norm_sum = tf.summary.scalar("l1_loss", self.L1_norm)
             self.l2_norm_sum = tf.summary.scalar("l2_loss", self.L2_norm)
-            self.hinge_loss_sum = tf.summary.scalar("hinge_loss", self.hinge_loss)
+            self.hinge_loss_sum = \
+                tf.summary.scalar("hinge_loss", self.hinge_loss)
 
             # Predict labels for images using the pre-trained model.
             self.predict_labels = self.model.predict(self.images)
-            self.accuracy = self._metric(self.labels, tf.nn.softmax(self.predict_labels))
+            self.accuracy = self._metric(
+                self.labels, tf.nn.softmax(self.predict_labels))
             # Adding accuracy to Summary.
             self.accuracy_sum = tf.summary.scalar("accuracy", self.accuracy)
 
@@ -297,9 +302,12 @@ class advGAN():
                 L2_lambda * L2_norm + \
                 hinge_lambda * hinge_loss
 
-            self.adv_g_loss_sum = tf.summary.scalar("adv_G_loss", self.adv_G_loss)
-            self.g_loss_add_adv_sum = tf.summary.scalar("G_loss_total", self.G_loss_add_adv)
-            self.adv_accuracy_sum = tf.summary.scalar("adv_accuracy", self.adv_accuracy)
+            self.adv_g_loss_sum = \
+                tf.summary.scalar("adv_G_loss", self.adv_G_loss)
+            self.g_loss_add_adv_sum = \
+                tf.summary.scalar("G_loss_total", self.G_loss_add_adv)
+            self.adv_accuracy_sum = \
+                tf.summary.scalar("adv_accuracy", self.adv_accuracy)
 
             self.g_loss_add_adv_merge_sum = tf.summary.merge([
                 self.adv_g_loss_sum,
@@ -377,9 +385,11 @@ class advGAN():
                 tf.get_variable_scope().reuse_variables()
             else:
                 assert tf.get_variable_scope().reuse == False
-            ### assume image input size is 32 
+            ### assume image input size is 32
             s = 32
-            # s2, s4, s8, s16, s32, s64, s128 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), int(s/64), int(s/128)
+            # s2, s4, s8, s16, s32, s64, s128 = \
+            #   int(s/2), int(s/4), int(s/8), int(s/16), \
+            #   int(s/32), int(s/64), int(s/128)
             s2, s4, s8, s16 = int(s/2), int(s/4), int(s/8), int(s/16)
             # 16, 8 ,4, 2,1 s:32
             # image is (32 x 32 x input_c_dim)
@@ -438,13 +448,18 @@ class advGAN():
                 name='g_d5',
                 with_w=True)
             # return tf.clip_by_value( tf.clip_by_value( tf.nn.tanh(self.d5) , -0.6, 0.6) + image, -1.0, 1.0) , tf.nn.tanh(self.d5)
-            return tf.clip_by_value(self.opts.c * tf.nn.tanh(self.d5) \
-                + image, -1.0, 1.0), \
+            return \
+                tf.clip_by_value(
+                    self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0), \
                 tf.nn.tanh(self.d5)
 
             # return tf.nn.tanh(self.d5)
 
     def sampler(self, image, y=None):
+        """
+        A generator without the noise.
+        #### Returns fake images
+        """
         with tf.variable_scope("generator") as scope:
 
             tf.get_variable_scope().reuse_variables()
@@ -453,7 +468,7 @@ class advGAN():
             ###assume image input size is 32
             s = 32
             # s2, s4, s8, s16, s32, s64, s128 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), int(s/64), int(s/128)
-            s2, s4, s8, s16  = int(s/2), int(s/4), int(s/8), int(s/16)
+            s2, s4, s8, s16 = int(s/2), int(s/4), int(s/8), int(s/16)
             #16, 8 ,4, 2,1 s:32
             # image is (32 x 32 x input_c_dim)
             e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
