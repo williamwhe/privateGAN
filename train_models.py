@@ -8,6 +8,8 @@
 
 import os
 import opts
+import numpy as np
+import sys
 # import cifar10
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -21,9 +23,26 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 mnist_flag = 1
 
+def odd_even_labels(labels, one_hot=True):
+    """
+    Turns digit classes to odd[1]/even[0].
+    Returns hot-one encoded labels.
+    """
+    if one_hot is True:
+        labels = np.argmax(labels, axis=1)
+
+    num_samples = labels.shape[0]
+    new_labels = np.zeros((num_samples, 2))
+
+    for mod_2 in range(2):
+        # new_labels[even, 0] = 1
+        # new_labels[odd, 1] = 1
+        new_labels[labels % 2 == mod_2, mod_2] = 1
+
+    return new_labels
 
 def train(file_name, params, num_epochs=50,
-          batch_size=128, train_temp=1, init=None):
+          batch_size=128, train_temp=1, init=None, odd_even=False):
     """
     Standard neural network training procedure.
     """
@@ -32,8 +51,13 @@ def train(file_name, params, num_epochs=50,
     train_data = mnist.train.images * 2.0 - 1.0
     train_label = mnist.train.labels
 
+
     test_data = mnist.test.images * 2.0 - 1.0
     test_label = mnist.test.labels
+
+    if odd_even is True:
+        train_label = odd_even_labels(train_label, one_hot=True)
+        test_label = odd_even_labels(test_label, one_hot=True)
 
     x_dim = train_data.shape[1]
     y_dim = train_label.shape[1]
@@ -75,7 +99,9 @@ def train(file_name, params, num_epochs=50,
     model.add(Dropout(0.5))
     model.add(Dense(params[5]))
     model.add(Activation('relu'))
-    model.add(Dense(10))
+    # If odd/even is classified, y_dim = 2.
+    # If all digits are classified, y_dim = 10.
+    model.add(Dense(y_dim))
     # model.add(Activation('softmax'))
 
     # if init != None:
@@ -110,13 +136,14 @@ if not os.path.isdir('models'):
     os.makedirs('models')
 
 def main():
-    train("models/mnist", [32, 32, 64, 64, 200, 200], num_epochs=10)
+    if len(sys.argv) == 2:
+        model_path = sys.argv[1]
+    else:
+        model_path = 'models/mnist'
+    print 'Saving the model in %s' % model_path
+    train(model_path, [32, 32, 64, 64, 200, 200], num_epochs=10)
     # train(CIFAR(), "models/cifar", [64, 64, 128, 128, 256, 256], num_epochs=50)
-    # train2("models/mnist_model2", [32, 32, 64, 64, 200, 200], num_epochs=10)
-    # train3("models/mnist_model3", [32, 32, 64, 64, 200, 200], num_epochs=10)
     # train( "models/cifar_model1", [64, 64, 128, 128, 256, 256], num_epochs=50)
-    # train2( "models/cifar_model2", [64, 64, 128, 128, 256, 256], num_epochs=50)
-    # train3( "models/cifar_model3", [64, 64, 128, 128, 256, 256], num_epochs=50)
 
 if __name__ == '__main__':
     main()
