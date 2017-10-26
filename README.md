@@ -23,4 +23,4 @@ Adversary images will be saved as 'result.png'
 - `cgan_flag`: concat fake data to real data or not.
 - `patch_flag`: Use patchGAN or not.
 - `s_l`: source label
-- `t_l`: target label (attack target) 
+- `t_l`: target label (attack target)

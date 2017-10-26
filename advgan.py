@@ -331,7 +331,7 @@ class advGAN():
             G_grads_and_vars = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
             self.G_train_op = G_opt.apply_gradients(G_grads_and_vars)
         
-    def discriminator(self, image, y = None, reuse = False):
+    def discriminator(self, image, y = None, reuse=False):
 
         with tf.variable_scope("discriminator") as scope:
             s = 32
@@ -341,18 +341,16 @@ class advGAN():
             else:
                 assert tf.get_variable_scope().reuse == False
 
-
-            h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv')) #28 x 28 
+            h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv')) #28 x 28
             # h0 is (128 x 128 x self.df_dim) 16 x 16 x df_dim 14x 14
             h1 = lrelu(self.d_bn1(conv2d(h0, self.df_dim*2, name='d_h1_conv'))) # 14 x 14
-            # h1 is (64 x 64 x self.df_dim*2) 8 x 8 x df_dim*2 7x 7 
+            # h1 is (64 x 64 x self.df_dim*2) 8 x 8 x df_dim*2 7x 7
             h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim*4, d_h=1, d_w=1, name='d_h2_conv')))
             # h2 is (32x 32 x self.df_dim*4)  4 x 4 x df_dim*4
             h3 = lrelu(self.d_bn3(conv2d(h2, self.df_dim*8, d_h=1, d_w=1, name='d_h3_conv')))
             h4 = linear(tf.reshape(h3, [self.opts.batch_size, -1]), 1, 'd_h3_lin')
 
             return tf.nn.sigmoid(h4), h4
-
 
     def patch_discriminator(self, image, y=None, reuse=False):
         print "patch discriminator"
@@ -365,16 +363,20 @@ class advGAN():
             h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv'))  #3
             # h0 is (128 x 128 x self.df_dim) 16 x 16 x df_dim 14x14
             h1 = lrelu(self.d_bn1(conv2d(h0, self.df_dim*2, name='d_h1_conv')))
-            # h1 is (64 x 64 x self.df_dim*2) 8 x 8 x df_dim*2 7x 7 
+            # h1 is (64 x 64 x self.df_dim*2) 8 x 8 x df_dim*2 7x 7
             h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim*4, d_h = 1, d_w = 1, name='d_h2_conv')))
-            # h2 is (32x 32 x self.df_dim*4)  4 x 4 x df_dim*4  
+            # h2 is (32x 32 x self.df_dim*4)  4 x 4 x df_dim*4
             h3 = lrelu(self.d_bn3(conv2d(h2, self.df_dim*8, d_h=1, d_w=1, name='d_h3_conv')))
-            h4 = lrelu(self.d_bn5(conv2d(h3,1 , d_h=1, d_w=1, name='d_h5_conv')))
+            h4 = lrelu(self.d_bn5(conv2d(h3, 1, d_h=1, d_w=1, name='d_h5_conv')))
 
             return tf.nn.sigmoid(h4), h4 
 
-    def generator(self, image, y=None):
+    def generator(self, image, y=None, reuse=False):
         with tf.variable_scope("generator") as scope:
+            if reuse:
+                tf.get_variable_scope().reuse_variables()
+            else:
+                assert tf.get_variable_scope().reuse == False
             ### assume image input size is 32 
             s = 32
             # s2, s4, s8, s16, s32, s64, s128 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), int(s/64), int(s/128)
@@ -440,15 +442,15 @@ class advGAN():
                 + image, -1.0, 1.0), \
                 tf.nn.tanh(self.d5)
 
-            # return tf.nn.tanh(self.d5) 
+            # return tf.nn.tanh(self.d5)
 
     def sampler(self, image, y=None):
         with tf.variable_scope("generator") as scope:
-            
+
             tf.get_variable_scope().reuse_variables()
             #images = tf.image.resize_bilinear(image, [32, 32, 1])
 
-            ###assume image input size is 32 
+            ###assume image input size is 32
             s = 32
             # s2, s4, s8, s16, s32, s64, s128 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), int(s/64), int(s/128)
             s2, s4, s8, s16  = int(s/2), int(s/4), int(s/8), int(s/16)
@@ -457,43 +459,59 @@ class advGAN():
             e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
             # e1 is (16 x 16 x self.gf_dim) 14x14
             e2 = self.g_bn_e2(conv2d(lrelu(e1), self.gf_dim*2, name='g_e2_conv'))
-            # e2 is (8 x 8 x self.gf_dim*2) 7x 7 
+            # e2 is (8 x 8 x self.gf_dim*2) 7x 7
             e3 = self.g_bn_e3(conv2d(lrelu(e2), self.gf_dim*4, name='g_e3_conv'))
-            # # e3 is (4 x 4 x self.gf_dim*4) 
+            # # e3 is (4 x 4 x self.gf_dim*4)
             e4 = self.g_bn_e4(conv2d(lrelu(e3), self.gf_dim*8, name='g_e4_conv'))
             # # e4 is (2 x 2 x self.gf_dim*8)
             e5 = self.g_bn_e5(conv2d(lrelu(e4), self.gf_dim*8, name='g_e5_conv'))
             # # e5 is (1 x 1 x self.gf_dim*8)
             ##
 
-            # MNIST version 
-            ##            
-            self.d1, self.d1_w, self.d1_b = deconv2d(tf.nn.relu(e5),
-                [self.batch_size, s16, s16, self.gf_dim*8], name='g_d1', with_w=True)
+            # MNIST version
+            ##
+            self.d1, self.d1_w, self.d1_b = deconv2d(
+                tf.nn.relu(e5),
+                [self.batch_size, s16, s16, self.gf_dim*8],
+                name='g_d1',
+                with_w=True)
             d1 = tf.nn.dropout(self.g_bn_d1(self.d1), 0.5)
             d1 = tf.concat([d1, e4], 3)
             # d1 is ( 2 x 2 x self.gf_dim*8*2)            
 
-            self.d2, self.d2_w, self.d2_b = deconv2d(tf.nn.relu(d1),
-                [self.batch_size, s8, s8, self.gf_dim*4], name='g_d2', with_w=True)
+            self.d2, self.d2_w, self.d2_b = deconv2d(
+                tf.nn.relu(d1),
+                [self.batch_size, s8, s8, self.gf_dim*4],
+                name='g_d2',
+                with_w=True)
             d2 = tf.nn.dropout(self.g_bn_d2(self.d2), 0.5)
             d2 = tf.concat([d2, e3], 3)
             # d2 is (4 x 4 x self.gf_dim*4*2)
 
-            self.d3, self.d3_w, self.d3_b = deconv2d(tf.nn.relu(d2),
-                [self.batch_size, 7, 7, self.gf_dim*2], name='g_d3', with_w=True)
+            self.d3, self.d3_w, self.d3_b = deconv2d(
+                tf.nn.relu(d2),
+                [self.batch_size, 7, 7, self.gf_dim*2],
+                name='g_d3',
+                with_w=True)
             d3 = tf.nn.dropout(self.g_bn_d3(self.d3), 0.5)
             d3 = tf.concat([d3, e2], 3)
             # d3 is (8 x 8 x self.gf_dim*2*2)
-            
-            self.d4, self.d4_w, self.d4_b = deconv2d(tf.nn.relu(d3),
-                [self.batch_size, 14, 14, self.gf_dim], name='g_d4', with_w=True)
+
+            self.d4, self.d4_w, self.d4_b = deconv2d(
+                tf.nn.relu(d3),
+                [self.batch_size, 14, 14, self.gf_dim],
+                name='g_d4',
+                with_w=True)
             d4 = self.g_bn_d4(self.d4)
             d4 = tf.concat([d4, e1], 3)
             # d4 is (16 x 16 x self.gf_dim*8*2)
 
-            self.d5, self.d5_w, self.d5_b = deconv2d(tf.nn.relu(d4),
-                [self.batch_size, 28, 28, self.output_c_dim], name='g_d5', with_w=True)
+            self.d5, self.d5_w, self.d5_b = deconv2d(
+                tf.nn.relu(d4),
+                [self.batch_size, 28, 28, self.output_c_dim],
+                name='g_d5',
+                with_w=True)
 
             # return tf.clip_by_value( tf.clip_by_value( tf.nn.tanh(self.d5) , -0.6, 0.6) + image, -1.0, 1.0)
-            return tf.clip_by_value( self.opts.c * tf.nn.tanh(  self.d5)  + image  , -1.0, 1.0)
+            return tf.clip_by_value(
+                self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0)

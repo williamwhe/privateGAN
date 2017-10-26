@@ -1,8 +1,13 @@
+"""
+Module for argument parsing.
+"""
 import argparse
 
 
 def parse_opt():
-
+    """
+    Parses experiment options.
+    """
     parser = argparse.ArgumentParser()
     # Data input settings
 

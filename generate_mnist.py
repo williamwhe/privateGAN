@@ -177,7 +177,7 @@ def train():
                     # Saving the best yet model.
                     best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
                     print 'Saving the best model yet at "%s"' % best_model_path
-                    model.saver.save(sess, best_model_path, global_step=iteration)
+                    model.saver.save(sess, best_model_path)
             iteration += 1
 
 
