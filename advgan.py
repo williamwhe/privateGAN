@@ -340,9 +340,9 @@ class advGAN():
             #     self.labels, tf.nn.softmax(self.fake_predict_labels))
 
             self.G_loss_add_adv = G_lambda * G_loss + \
-                ld * self.adv_G_loss
+                ld * self.adv_G_loss + \
+                hinge_lambda * hinge_loss
                 # HINGE LOSS IS ADDED AT G_LOSS, SHOULDN'T BE ADDED HERE AGAIN!
-                # hinge_lambda * hinge_loss
 
             self.adv_g_loss_sum = \
                 tf.summary.scalar("adv_G_loss", self.adv_G_loss)

@@ -213,18 +213,19 @@ def train():
                 evil_accuracy = total_evil_accuracy / float(test_iter_num)
                 # test_accuracy = test_acc / float(test_iter_num)
                 # test_adv_accuracy = test_adv_acc / float(test_iter_num)
-                if (good_accuracy - evil_accuracy) > max_accuracy_diff:
-                    max_accuracy_diff = good_accuracy - evil_accuracy
+                print '\tAccuracy diff: %.6f' % (good_accuracy - evil_accuracy)
+                # if (good_accuracy - evil_accuracy) > max_accuracy_diff:
+                #     max_accuracy_diff = good_accuracy - evil_accuracy
                 # if min_adv_accuracy > test_adv_accuracy:
                 #     min_adv_accuracy = test_adv_accuracy
-                    print "good accuracy %f, evil accuracy %f" % (
-                        good_accuracy, evil_accuracy)
-                    save_images(fake_images[:100], [10, 10], 'fake.png')
-                    save_images(test_input_data[:100], [10, 10], 'real.png')
-                    # Saving the best yet model.
-                    best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
-                    print 'Saving the best model yet at "%s"' % best_model_path
-                    model.saver.save(sess, best_model_path)
+                print "good accuracy %f, evil accuracy %f" % (
+                    good_accuracy, evil_accuracy)
+                save_images(fake_images[:100], [10, 10], 'fake.png')
+                save_images(test_input_data[:100], [10, 10], 'real.png')
+                # Saving the best yet model.
+                best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
+                print 'Saving the best model yet at "%s"' % best_model_path
+                model.saver.save(sess, best_model_path)
             iteration += 1
 
 if __name__ == "__main__":
