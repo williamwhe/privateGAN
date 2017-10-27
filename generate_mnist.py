@@ -89,7 +89,7 @@ def train():
         while iteration < 2000:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
-            input_data, evil_labels, real_data = loader.next_batch(
+            feed_data, evil_labels, real_data = loader.next_batch(
                 batch_size, negative=False)
             good_labels = odd_even_labels(evil_labels)
 
@@ -115,7 +115,7 @@ def train():
             #     }
 
             feed = {
-                model.source: input_data,
+                model.source: feed_data,
                 model.target: real_data,
                 model.good_labels: good_labels,
                 model.evil_labels: evil_labels
