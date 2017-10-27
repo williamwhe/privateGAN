@@ -192,9 +192,9 @@ def train():
                     # test_adv_acc += test_adv_accuracy
 
                     feed = {model.source: test_input_data}
-                    fake_images = sess.run([model.fake_images_sample], feed)
-                    pdb.set_trace()
-                    print fake_images.shape
+                    fake_images = sess.run(model.fake_images_sample, feed)
+                    # pdb.set_trace()
+                    # print fake_images.shape
 
                     # Finding those predicted labels that are equal to the target label
                     # idxs = np.where(out_predict_labels == target_label)[0]
