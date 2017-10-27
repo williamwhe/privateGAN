@@ -4,12 +4,31 @@ import scipy.io as sio
 import random
 
 
+
+def odd_even_labels(labels, one_hot=True):
+    """
+    Turns digit classes to odd[1]/even[0].
+    Returns hot-one encoded labels.
+    """
+    if one_hot is True:
+        labels = np.argmax(labels, axis=1)
+
+    num_samples = labels.shape[0]
+    new_labels = np.zeros((num_samples, 2))
+
+    for mod_2 in range(2):
+        # new_labels[even, 0] = 1
+        # new_labels[odd, 1] = 1
+        new_labels[labels % 2 == mod_2, mod_2] = 1
+
+    return new_labels
+
 class Dataset2:
     """
     Batch loader class for datasets.
     """
 
-    def __init__(self, data, label, source_label, targeted=False):
+    def __init__(self, data, label, source_label=None, targeted=False):
         self._index_in_epoch = 0
         self._epochs_completed = 0
         self._data = data

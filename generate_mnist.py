@@ -1,20 +1,20 @@
 import numpy as np
 import tensorflow as tf
+from tensorflow.examples.tutorials.mnist import input_data
 from ops import *
 import os
 import time
 import scipy.io as sio
 import random
-from tensorflow.examples.tutorials.mnist import input_data
-import pdb
+# import pdb
 import opts
-from utils import plot
+# from utils import plot
+from utils import save_images
 from advgan import advGAN
 import cifar10
-from utils import save_images
-from Dataset2 import Dataset2
+from Dataset2 import Dataset2, odd_even_labels
 
-from setup_mnist import MNIST, MNISTModel, MNISTModel2, MNISTModel3
+from setup_mnist import MNIST, MNISTModel, MNISTModel2, MNISTModel3, OddEvenMNIST
 from setup_cifar import CIFARModel, CIFARModel2, CIFARModel3
 
 tag_num = 0
@@ -59,20 +59,26 @@ def train():
         # corsp_magnitudes = []
         #initial whitebox model
         model_store = opt.model_restore
-        whitebox_model = MNISTModel(model_store, sess)
-        #initial ADVGAN
-        model = advGAN(whitebox_model, model_store, opt, sess )
+        # whitebox_model = MNISTModel(model_store, sess)
+
+        evil_model = MNISTModel(opt.evil_model_path, sess)
+        good_model = OddEvenMNIST(opt.good_model_path, sess)
+        # model = advGAN(whitebox_model, model_store, opt, sess)
+        model = advGAN(good_model, evil_model, opt, sess)
 
         iteration = 0
         min_adv_accuracy = 10e10
-        source_label =  opt.s_l
-        target_label = opt.t_l
-        if source_label == target_label:
-            print "source label equals to target label"
-            return
-        print "source{}, target{} .".format(source_label, target_label)
+        max_accuracy_diff = -100.0
+        # if opt.is_advGAN:
+        #     source_label = opt.s_l
+        #     target_label = opt.t_l
+        #     if source_label == target_label:
+        #         raise ValueError("source and target labels are equal.")
+        #     print "source: {}, target: {}.".format(source_label, target_label)
+
         writer = tf.summary.FileWriter("logs", sess.graph)
-        loader = Dataset2(train_data, train_label, source_label)
+        loader = Dataset2(train_data, train_label)
+        print 'Training data loaded.'
         # model_num = 0
 
         # best_show_samples_magintude = []
@@ -80,15 +86,18 @@ def train():
         # best_show_source_imgs = []
         # best_show_idxs = []
 
-        while iteration < 500:
+        while iteration < 2000:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
+            input_data, evil_labels, real_data = loader.next_batch(
+                batch_size, negative=False)
+            good_labels = odd_even_labels(evil_labels)
 
-            if opt.is_advGAN is True:
-                labels = np.zeros_like(data[1])
-                labels[:, target_label] = 1
-            else: # opts.is_advGAN is False.
-                labels = data[1]
+            # if opt.is_advGAN is True:
+            #     labels = np.zeros_like(data[1])
+            #     labels[:, target_label] = 1
+            # else: # opts.is_advGAN is False.
+            #     labels = data[1]
 
             # feed = {}
             # if opt.is_advGAN is True:
@@ -106,9 +115,10 @@ def train():
             #     }
 
             feed = {
-                model.source: data[0],
-                model.labels: labels,
-                model.target: data[2]
+                model.source: input_data,
+                model.target: real_data,
+                model.good_labels: good_labels,
+                model.evil_labels: evil_labels
             }
 
             summary_str, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss, _ = \
@@ -117,19 +127,23 @@ def train():
                     model.G_loss_add_adv,
                     model.pre_G_loss,
                     model.adv_G_loss,
-                    model.L1_norm,
-                    model.L2_norm,
+                    # model.L1_norm,
+                    # model.L2_norm,
                     model.hinge_loss,
                     model.G_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
-            summary_str, D_loss, _ = sess.run([model.pre_d_loss_sum, model.D_loss, model.D_pre_train_op], feed)
+            summary_str, D_loss, _ = \
+                sess.run([
+                    model.pre_d_loss_sum,
+                    model.D_loss,
+                    model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:
-                print "loss(D, G, pre_G_loss,  adv_G, L1_norm, L2_norm, hinge_loss ): ", \
-                    D_loss, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss
                 print "iteration: ", iteration
+                print "D: %.4f, G: %.4f, pre_G_loss: %.4f, adv_G: %.4f, hinge_loss: %.4f" % (
+                    D_loss, G_loss, pre_G_loss, adv_G_loss, hinge_loss)
 
 
             if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
@@ -138,68 +152,76 @@ def train():
 
                 model.saver.save(sess, checkpoint_path, global_step=iteration)
 
-                test_loader = Dataset2(test_data, test_label, source_label)
+                test_loader = Dataset2(test_data, test_label)
 
                 test_num = test_loader._num_examples
-                test_iter_num = (test_num - batch_size ) / batch_size
+                test_iter_num = (test_num - batch_size) / batch_size
                 # test_iter_num = 1
-                test_acc = 0.0
-                test_adv_acc = 0.0
-                show_samples = []
+                total_evil_accuracy = 0.0
+                total_good_accuracy = 0.0
+                # show_samples = []
 
-                save_samples = []
-                input_samples = []
+                # save_samples = []
+                # input_samples = []
 
                 for _ in range(test_iter_num):
 
                     # Loading the next batch of test images
-                    s_imgs, s_label, _ = test_loader.next_batch(batch_size)
-                    print s_imgs.shape
-                    print '^^ is the shape of s_imgs'
-                    feed = {model.source: s_imgs, model.labels: s_label}
+                    test_input_data, test_evil_labels, _ = \
+                        test_loader.next_batch(batch_size)
+                    test_good_labels = odd_even_labels(test_evil_labels)
+                    feed = {
+                        model.source: test_input_data,
+                        model.evil_labels: test_evil_labels,
+                        model.good_labels: test_good_labels
+                    }
 
-                    test_accuracy, test_adv_accuracy = sess.run(
-                        [model.accuracy, model.adv_accuracy], feed)
-                    test_acc += test_accuracy
-                    test_adv_acc += test_adv_accuracy
+                    evil_accuracy, good_accuracy = sess.run(
+                        [model.evil_accuracy, model.good_accuracy], feed)
+                    # We divide the total accuracy by the number of test iterations.
+                    total_good_accuracy += good_accuracy
+                    total_evil_accuracy += evil_accuracy
+                    # print 'Evil accuracy: %.6f\tGood accuracy: %.6f' % (
+                    #     evil_accuracy, good_accuracy)
+                    # test_accuracy, test_adv_accuracy = sess.run(
+                    #     [model.accuracy, model.adv_accuracy], feed)
+                    # test_acc += test_accuracy
+                    # test_adv_acc += test_adv_accuracy
 
-                    feed = {model.source: s_imgs}
-                    samples, out_predict_labels = sess.run([
-                        model.fake_images_sample,
-                        model.out_predict_labels], feed)
-                    print samples.shape
-                    print '^^ shape of samples'
+                    feed = {model.source: test_input_data}
+                    fake_images = sess.run([model.fake_images_sample], feed)
+                    print fake_images.shape
 
                     # Finding those predicted labels that are equal to the target label
-                    idxs = np.where(out_predict_labels == target_label)[0]
+                    # idxs = np.where(out_predict_labels == target_label)[0]
                     # save_images(samples[:100], [10, 10], 'CIFAR10/result2/test_' + str(source_idx) + str(target_idx)+  '_.png')
                     # pdb.set_trace()
-                    show_samples.append(samples)
-                    input_samples.append(s_imgs)
-                    if opt.is_advGAN:
-                        save_samples.append(samples[idxs])
-                    else:
+                    # show_samples.append(samples)
+                    # input_samples.append(s_imgs)
+                    # save_samples.append(samples)
+                    # if opt.is_advGAN:
+                    #     save_samples.append(samples[idxs])
+                    # else:
                         # We add all samples.
-                        save_samples.append(samples)
-                show_samples = np.concatenate(show_samples, axis=0)
-                save_samples = np.concatenate(save_samples, axis=0)
-                test_accuracy = test_acc / float(test_iter_num)
-                test_adv_accuracy = test_adv_acc / float(test_iter_num)
-                if min_adv_accuracy > test_adv_accuracy:
-                    min_adv_accuracy = test_adv_accuracy
-                    print "test total accuracy %f, adv accuracy %f" % \
-                        (test_accuracy, test_adv_accuracy)
-                    save_images(samples[:100], [10, 10], 'fake.png')
-                    save_images(s_imgs[:100], [10, 10], 'real.png')
+                # show_samples = np.concatenate(show_samples, axis=0)
+                # save_samples = np.concatenate(save_samples, axis=0)
+                good_accuracy = total_good_accuracy / float(test_iter_num)
+                evil_accuracy = total_evil_accuracy / float(test_iter_num)
+                # test_accuracy = test_acc / float(test_iter_num)
+                # test_adv_accuracy = test_adv_acc / float(test_iter_num)
+                if (good_accuracy - evil_accuracy) > max_accuracy_diff:
+                    max_accuracy_diff = good_accuracy - evil_accuracy
+                # if min_adv_accuracy > test_adv_accuracy:
+                #     min_adv_accuracy = test_adv_accuracy
+                    print "good accuracy %f, evil accuracy %f" % (
+                        good_accuracy, evil_accuracy)
+                    save_images(fake_images[:100], [10, 10], 'fake.png')
+                    save_images(test_input_data[:100], [10, 10], 'real.png')
                     # Saving the best yet model.
                     best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
                     print 'Saving the best model yet at "%s"' % best_model_path
                     model.saver.save(sess, best_model_path)
             iteration += 1
-
-
-
-        #########################
 
 if __name__ == "__main__":
     train()

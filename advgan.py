@@ -10,23 +10,25 @@ import random
 class advGAN():
     """
     GAN for generating malware.
-    model: whitebox model
+    good_model: Safe classifier. we try to hold accuracy for this.
+    evil_model: adversarial classifier. we try to reduce accuracy for this.
     restore: restore file path for whitebox model
     opts: advGAN parameters. See opts.py.
     sess: TensorFlow Session() object.
     """
-    def __init__(self, model, restore, opts, sess):
+    def __init__(self, good_model, evil_model, opts, sess):
         """
         :param D: the discriminator object
         :param params: the dict used to train the generative neural networks
         """
-        self.model = model
+        self.good_model = good_model
+        self.evil_model = evil_model
         self.opts = opts
         self.sess = sess
-        self.model_restore = restore
+        # self.model_restore = restore
 
         ####  test flags  ####
-        flag = 0 # concate flag
+        # flag = 0 # concate flag
 
         self.gf_dim = self.opts.gf_dim
         self.df_dim = self.opts.df_dim
@@ -38,23 +40,25 @@ class advGAN():
         # net_vars = tf.get_collection(tf.GraphKeys.VARIABLES, scope="evagan")
         self.saver = tf.train.Saver(max_to_keep=1000)
         self.sess.run(tf.initialize_all_variables())
-        self.model.model.load_weights(self.model_restore)
 
-    def reset(self):
-        """
-        Resets the training procedure.
-        """
-        # net_vars = tf.get_collection(tf.GraphKeys.VARIABLES, scope="evagan")
-        self.saver = tf.train.Saver(max_to_keep=1)
-        self.sess.run(tf.initialize_all_variables())
-        self.model.model.load_weights(self.model_restore)
+        # self.model.model.load_weights(self.model_restore)
+        # self.evil_model.model.load_weights(self.model_restore)
 
-    def load(self, checkpoint_path):
-        """
-        Lodas from a given checkpoint.
-        """
-        self.saver.restore(self.sess, checkpoint_path)
-        self.model.model.load_weights(self.model_restore)
+    # def reset(self):
+    #     """
+    #     Resets the training procedure.
+    #     """
+    #     # net_vars = tf.get_collection(tf.GraphKeys.VARIABLES, scope="evagan")
+    #     self.saver = tf.train.Saver(max_to_keep=1)
+    #     self.sess.run(tf.initialize_all_variables())
+    #     self.model.model.load_weights(self.model_restore)
+
+    # def load(self, checkpoint_path):
+    #     """
+    #     Lodas from a given checkpoint.
+    #     """
+    #     self.saver.restore(self.sess, checkpoint_path)
+    #     self.model.model.load_weights(self.model_restore)
 
     def init_weight(self, dim_in, dim_out, name=None, stddev=1.0):
         """
@@ -75,6 +79,7 @@ class advGAN():
         return tf.Variable(tf.zeros([dim_out]), name=name)
 
     def _create_variable(self):
+        """Creates variable tensors"""
         ###batch normalization
 
         self.d_bn1 = batch_norm(name='d_bn1')
@@ -96,20 +101,37 @@ class advGAN():
 
 
     def _create_placeholder(self):
+        """Creates placeholders"""
         input_c_dim = self.opts.input_c_dim
         input_dim = self.opts.input_dim
         label_dim = self.opts.label_dim
+        good_label_num = self.opts.good_label_num
+        evil_label_num = self.opts.evil_label_num
         img_dim = self.opts.img_dim
 
         # the source image which we want to attack.
-        self.source = tf.placeholder(tf.float32, [None, input_dim], name="source_image")
+        self.source = tf.placeholder(
+            tf.float32, [None, input_dim], name="source_image")
         # resize to img_dim x img_dim x img_color_dim (1 in Grayscale images)
-        self.images = tf.reshape(self.source, [-1, img_dim, img_dim, input_c_dim])
+        self.images = tf.reshape(
+            self.source, [-1, img_dim, img_dim, input_c_dim])
 
-        # the target images, which has the different label. We can also conduct target attack later
-        self.target = tf.placeholder(tf.float32, [None, input_dim], name='target_image')
-        self.real_images = tf.reshape(self.target, [-1, img_dim, img_dim, input_c_dim])
-        self.labels = tf.placeholder(tf.float32, [None, label_dim], name="label")
+        # the target images, shuffled with the same labels.
+        # this is to learn the distribution, not simply images.
+        self.target = tf.placeholder(
+            tf.float32, [None, input_dim], name='target_image')
+        self.real_images = tf.reshape(
+            self.target, [-1, img_dim, img_dim, input_c_dim])
+
+        # DEPRECATED: we now have evil and good labels, for each classifier.
+        # self.labels = tf.placeholder(tf.float32, [None, label_dim], name="label")
+
+        # labels for the evil classifier.
+        self.evil_labels = tf.placeholder(
+            tf.float32, [None, evil_label_num], name="evil_label")
+        # labels for the good classifier.
+        self.good_labels = tf.placeholder(
+            tf.float32, [None, good_label_num], name="good_label")
 
         # used for showing  accuracy.
         self.acc = tf.placeholder(tf.float32, name="accuracy")
@@ -223,8 +245,8 @@ class advGAN():
         return accuracy
 
     def _build_model(self):
-        """ build a tensorflow model
-        :return
+        """
+        builds the advGAN model.
         """
         ld = self.opts.ld
         L1_lambda = self.opts.L1_lambda
@@ -254,11 +276,11 @@ class advGAN():
                 self.images, self.fake_images, self.real_images, self.g_x)
             # G loss and D loss.
             self.pre_G_loss = G_loss
-            self.L2_norm = L2_norm
-            self.L1_norm = L1_norm
             self.hinge_loss = hinge_loss
-            self.G_loss = G_loss + L1_lambda * L1_norm + L2_lambda * L2_norm \
-                + hinge_lambda * hinge_loss
+            self.G_loss = G_loss + hinge_lambda * hinge_loss
+
+            # test with D_loss
+            # self.G_loss = G_loss + D_loss + hinge_lambda * hinge_loss
 
             self.D_loss = D_loss
 
@@ -268,55 +290,78 @@ class advGAN():
             self.pre_g_totoal_loss_sum = \
                 tf.summary.scalar("pre_G_loss_total", self.G_loss)
             self.pre_d_loss_sum = tf.summary.scalar("pre_d_loss", self.D_loss)
-            self.l1_norm_sum = tf.summary.scalar("l1_loss", self.L1_norm)
-            self.l2_norm_sum = tf.summary.scalar("l2_loss", self.L2_norm)
+            # self.l1_norm_sum = tf.summary.scalar("l1_loss", self.L1_norm)
+            # self.l2_norm_sum = tf.summary.scalar("l2_loss", self.L2_norm)
             self.hinge_loss_sum = \
                 tf.summary.scalar("hinge_loss", self.hinge_loss)
 
+            # Two competing good/evil classifiers.
+            # 1. The good model.
+            self.good_predictions = self.good_model.predict(self.fake_images)
+            self.good_accuracy = self._metric(
+                self.good_labels, tf.nn.softmax(self.good_predictions))
+            self.good_fn_loss = tf.reduce_mean(
+                tf.nn.sigmoid_cross_entropy_with_logits(
+                    logits=self.good_predictions,
+                    labels=self.good_labels))
+            # 2. The evil model.
+            self.evil_predictions = self.evil_model.predict(self.fake_images)
+            self.evil_accuracy = self._metric(
+                self.evil_labels, tf.nn.softmax(self.evil_predictions))
+            self.evil_fn_loss = tf.reduce_mean(
+                tf.nn.sigmoid_cross_entropy_with_logits(
+                    logits=self.evil_predictions,
+                    labels=self.evil_labels))
+
+            # adversarial loss = good_loss - evil_loss
+            self.adv_G_loss = self.good_fn_loss - self.evil_fn_loss
+
             # Predict labels for images using the pre-trained model.
-            self.predict_labels = self.model.predict(self.images)
-            self.accuracy = self._metric(
-                self.labels, tf.nn.softmax(self.predict_labels))
-            # Adding accuracy to Summary.
-            self.accuracy_sum = tf.summary.scalar("accuracy", self.accuracy)
+            # self.predict_labels = self.model.predict(self.images)
+            # self.accuracy = self._metric(
+            #     self.labels, tf.nn.softmax(self.predict_labels))
+            # # Adding accuracy to Summary.
+            # self.accuracy_sum = tf.summary.scalar("accuracy", self.accuracy)
 
-            self.fake_predict_labels = self.model.predict(self.fake_images)
-            self.out_predict_labels = tf.argmax(tf.nn.softmax(
-                self.model.predict(self.fake_images_sample)), dimension=1)
+            # self.fake_predict_labels = self.model.predict(self.fake_images)
+            # self.out_predict_labels = tf.argmax(tf.nn.softmax(
+            #     self.model.predict(self.fake_images_sample)), dimension=1)
 
-            if self.opts.is_advGAN is True:
-                self.adv_G_loss = self._adversarial_g_loss(
-                    self.fake_predict_labels, self.labels)
-            else: # self.opts.is_advGAN == False. Using privateGAN.
-                self.adv_G_loss = tf.reduce_mean(
-                    tf.nn.sigmoid_cross_entropy_with_logits(
-                        logits=self.fake_predict_labels,
-                        labels=self.labels))
+            # if self.opts.is_advGAN is True:
+            #     self.adv_G_loss = self._adversarial_g_loss(
+            #         self.fake_predict_labels, self.labels)
+            # else: # self.opts.is_advGAN == False. Using privateGAN.
+            #     self.adv_G_loss = tf.reduce_mean(
+            #         tf.nn.sigmoid_cross_entropy_with_logits(
+            #             logits=self.fake_predict_labels,
+            #             labels=self.labels))
 
-            self.adv_accuracy = self._metric(
-                self.labels, tf.nn.softmax(self.fake_predict_labels))
+            # self.adv_accuracy = self._metric(
+            #     self.labels, tf.nn.softmax(self.fake_predict_labels))
 
             self.G_loss_add_adv = G_lambda * G_loss + \
-                ld * self.adv_G_loss + \
-                L1_lambda * L1_norm + \
-                L2_lambda * L2_norm + \
-                hinge_lambda * hinge_loss
+                ld * self.adv_G_loss
+                # HINGE LOSS IS ADDED AT G_LOSS, SHOULDN'T BE ADDED HERE AGAIN!
+                # hinge_lambda * hinge_loss
 
             self.adv_g_loss_sum = \
                 tf.summary.scalar("adv_G_loss", self.adv_G_loss)
             self.g_loss_add_adv_sum = \
                 tf.summary.scalar("G_loss_total", self.G_loss_add_adv)
-            self.adv_accuracy_sum = \
-                tf.summary.scalar("adv_accuracy", self.adv_accuracy)
+            self.good_accuracy_sum = \
+                tf.summary.scalar("good_accuracy", self.good_accuracy)
+            self.evil_accuracy_sum = \
+                tf.summary.scalar("evil_accuracy", self.evil_accuracy)
+            # self.adv_accuracy_sum = \
+            #     tf.summary.scalar("adv_accuracy", self.adv_accuracy)
 
             self.g_loss_add_adv_merge_sum = tf.summary.merge([
                 self.adv_g_loss_sum,
-                self.l1_norm_sum,
-                self.l2_norm_sum,
+                # self.l1_norm_sum,
+                # self.l2_norm_sum,
                 self.g_loss_add_adv_sum,
                 self.pre_g_loss_sum,
-                self.hinge_loss_sum
-            ])
+                self.hinge_loss_sum])
 
             t_vars = tf.trainable_variables()
             self.d_vars = [var for var in t_vars if 'd_' in var.name and 'evagan' in var.name]
@@ -333,12 +378,12 @@ class advGAN():
             G_grads_and_vars_pre = G_pre_opt.compute_gradients(self.G_loss, self.g_vars)
             G_grads_and_vars_pre = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars_pre]
             self.G_pre_train_op = G_pre_opt.apply_gradients(G_grads_and_vars_pre)
-            # G loss with adversary loss 
+            # G loss with adversary loss
             G_opt = tf.train.AdamOptimizer(self.lr)
             G_grads_and_vars = G_opt.compute_gradients(self.G_loss_add_adv, self.g_vars)
             G_grads_and_vars = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
             self.G_train_op = G_opt.apply_gradients(G_grads_and_vars)
-        
+
     def discriminator(self, image, y = None, reuse=False):
 
         with tf.variable_scope("discriminator") as scope:

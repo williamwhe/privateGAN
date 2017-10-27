@@ -91,9 +91,44 @@ class MNISTModel:
         self.model = model
 
     def predict(self, data):
+        """ wrapper function for prediction """
         return self.model(data)
 
 
+class OddEvenMNIST:
+    def __init__(self, restore, session=None):
+        self.num_channels = 1
+        self.image_size = 28
+        self.num_labels = 2
+
+        model = Sequential()
+
+        model.add(Conv2D(32, (3, 3),
+                         input_shape=(28, 28, 1)))
+        model.add(Activation('relu'))
+        model.add(Conv2D(32, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(64, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(Conv2D(64, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(200))
+        model.add(Activation('relu'))
+        model.add(Dense(200))
+        model.add(Activation('relu'))
+        model.add(Dense(2)) # only odd/even
+        model.load_weights(restore)
+
+        self.model = model
+
+    def predict(self, data):
+        """ wrapper function for prediction """
+        return self.model(data)
 
 
 

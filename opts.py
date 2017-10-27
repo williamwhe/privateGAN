@@ -14,6 +14,17 @@ def parse_opt():
     # whitebox
     parser.add_argument('--model_restore', type=str, default="models/mnist",
                         help="checkpoint model name of whitebox")
+    parser.add_argument('--good_model_path', type=str,
+                        default='models/odd_even',
+                        help='path for saved GOOD model')
+    parser.add_argument('--evil_model_path', type=str,
+                        default='models/mnist',
+                        help='path for saved EVIL model')
+
+    parser.add_argument('--evil_label_num', type=int, default=10,
+                        help='Number of labels in the adversarial classifier')
+    parser.add_argument('--good_label_num', type=int, default=2,
+                        help='Number of labels in the safe classifier')
 
     parser.add_argument('--bound', type=float, default=0.6, help="bound")
 
@@ -39,13 +50,13 @@ def parse_opt():
         '--H_lambda', type=float, default=0, help='Hinge loss lambda')
 
     parser.add_argument('--ld', type=float, default=1.0,
-                        help='lambda_ratio')
+                        help='adversarial loss coefficient')
     parser.add_argument('--L1_lambda', type=float, default=0,
-                        help='L1_lambda')
+                        help='L1 loss coefficient')
     parser.add_argument('--L2_lambda', type=float, default=0,
-                        help='L2_lambda')
+                        help='L2 loss coefficient')
     parser.add_argument('--G_lambda', type=float, default=0,
-                        help='G_lambda')
+                        help='Generator loss coefficient')
     parser.add_argument('--c', type=float, default=1,
                         help='c')
 
