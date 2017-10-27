@@ -89,7 +89,7 @@ def train():
         # best_show_source_imgs = []
         # best_show_idxs = []
 
-        while iteration < 1000:
+        while iteration < 10000:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
             feed_data, evil_labels, real_data = loader.next_batch(

@@ -277,7 +277,7 @@ class advGAN():
             # G loss and D loss.
             self.pre_G_loss = G_loss
             self.hinge_loss = hinge_loss
-            self.G_loss = G_loss + hinge_lambda * hinge_loss
+            self.G_loss = G_loss + hinge_lambda * hinge_loss + L1_lambda * L1_norm
 
             # test with D_loss
             # self.G_loss = G_loss + D_loss + hinge_lambda * hinge_loss
