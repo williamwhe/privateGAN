@@ -6,7 +6,7 @@ import os
 import time
 import scipy.io as sio
 import random
-# import pdb
+import pdb
 import opts
 # from utils import plot
 from utils import save_images
@@ -193,6 +193,7 @@ def train():
 
                     feed = {model.source: test_input_data}
                     fake_images = sess.run([model.fake_images_sample], feed)
+                    pdb.set_trace()
                     print fake_images.shape
 
                     # Finding those predicted labels that are equal to the target label
