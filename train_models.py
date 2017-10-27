@@ -7,9 +7,9 @@
 
 
 import os
-import opts
 import numpy as np
 import sys
+import argparse
 # import cifar10
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -18,6 +18,7 @@ from keras.optimizers import SGD
 
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
+from Dataset2 import odd_even_labels
 # from setup_mnist import MNIST
 # from setup_cifar import CIFAR
 
@@ -118,12 +119,21 @@ if not os.path.isdir('models'):
     os.makedirs('models')
 
 def main():
-    if len(sys.argv) == 2:
-        model_path = sys.argv[1]
-    else:
-        model_path = 'models/mnist'
-    print 'Saving the model in %s' % model_path
-    train(model_path, [32, 32, 64, 64, 200, 200], num_epochs=10)
+    # Parsing arguments
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--path', type=str, default="models/mnist",
+                        help="path to save trained model. e.g.: 'models/mnist'")
+    parser.add_argument('--type', type=str, default='all_digits',
+                        help="(all_digits/odd_even) Determines type of classifier.")
+
+    options = parser.parse_known_args()[0]
+    odd_even = (options.type == 'odd_even')
+
+    print 'Saving the model in %s' % options.path
+    print 'Classifier type is %s' % options.type
+    print 'Odd even flag is %s' % str(odd_even)
+    train(options.path, [32, 32, 64, 64, 200, 200], num_epochs=10, odd_even=odd_even)
     # train(CIFAR(), "models/cifar", [64, 64, 128, 128, 256, 256], num_epochs=50)
     # train( "models/cifar_model1", [64, 64, 128, 128, 256, 256], num_epochs=50)
 
