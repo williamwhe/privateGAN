@@ -58,11 +58,14 @@ def train():
         # min_adv_accuracys = []
         # corsp_magnitudes = []
         #initial whitebox model
-        model_store = opt.model_restore
+        # model_store = opt.model_restore
         # whitebox_model = MNISTModel(model_store, sess)
 
-        evil_model = MNISTModel(opt.evil_model_path, sess)
-        good_model = OddEvenMNIST(opt.good_model_path, sess)
+        print '\tRetrieving evil model from "%s"' % opt.evil_model_path
+        evil_model = MNISTModel(opt.evil_model_path)
+        print '\tRetrieving good model from "%s"' % opt.good_model_path
+        good_model = OddEvenMNIST(opt.good_model_path)
+        # exit()
         # model = advGAN(whitebox_model, model_store, opt, sess)
         model = advGAN(good_model, evil_model, opt, sess)
 
@@ -121,7 +124,7 @@ def train():
                 model.evil_labels: evil_labels
             }
 
-            summary_str, G_loss, pre_G_loss, adv_G_loss, L1_norm, L2_norm, hinge_loss, _ = \
+            summary_str, G_loss, pre_G_loss, adv_G_loss, hinge_loss, _ = \
                 sess.run([
                     model.g_loss_add_adv_merge_sum,
                     model.G_loss_add_adv,

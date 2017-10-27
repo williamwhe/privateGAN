@@ -43,16 +43,15 @@ class MNIST:
                      "train-labels-idx1-ubyte.gz",
                      "t10k-labels-idx1-ubyte.gz"]
             for name in files:
-
                 urllib.urlretrieve('http://yann.lecun.com/exdb/mnist/' + name, "data/"+name)
 
         train_data = extract_data("data/train-images-idx3-ubyte.gz", 60000)
         train_labels = extract_labels("data/train-labels-idx1-ubyte.gz", 60000)
         self.test_data = extract_data("data/t10k-images-idx3-ubyte.gz", 10000)
         self.test_labels = extract_labels("data/t10k-labels-idx1-ubyte.gz", 10000)
-        
+
         VALIDATION_SIZE = 5000
-        
+
         self.validation_data = train_data[:VALIDATION_SIZE, :, :, :]
         self.validation_labels = train_labels[:VALIDATION_SIZE]
         self.train_data = train_data[VALIDATION_SIZE:, :, :, :]
@@ -60,7 +59,10 @@ class MNIST:
 
 
 class MNISTModel:
-    def __init__(self, restore, session=None):
+    """
+    Standad MNIST classifier.
+    """
+    def __init__(self, restore):
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 10
@@ -73,13 +75,13 @@ class MNISTModel:
         model.add(Conv2D(32, (3, 3)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        
+
         model.add(Conv2D(64, (3, 3)))
         model.add(Activation('relu'))
         model.add(Conv2D(64, (3, 3)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        
+
         model.add(Flatten())
         model.add(Dense(200))
         model.add(Activation('relu'))
@@ -96,7 +98,10 @@ class MNISTModel:
 
 
 class OddEvenMNIST:
-    def __init__(self, restore, session=None):
+    """
+    An Odd/Even classifier for MNIST data.
+    """
+    def __init__(self, restore):
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 2
@@ -133,7 +138,7 @@ class OddEvenMNIST:
 
 
 class MNISTModel2:
-    def __init__(self, restore, session=None):
+    def __init__(self, restore):
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 10
@@ -158,7 +163,7 @@ class MNISTModel2:
 
 
 class MNISTModel3:
-    def __init__(self, restore, session=None):
+    def __init__(self, restore):
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 10
