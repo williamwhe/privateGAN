@@ -19,7 +19,6 @@ from setup_cifar import CIFARModel, CIFARModel2, CIFARModel3
 
 tag_num = 0
 
-
 def train():
     flatten_flag = True  # the output of G need to flatten or not?
     opt = opts.parse_opt()
@@ -71,7 +70,7 @@ def train():
 
         iteration = 0
         min_adv_accuracy = 10e10
-        max_accuracy_diff = -100.0
+        max_accuracy_diff = -np.inf
         # if opt.is_advGAN:
         #     source_label = opt.s_l
         #     target_label = opt.t_l
@@ -92,7 +91,9 @@ def train():
         acc_file = open('acc.txt', 'w')
         loss_file = open('loss.txt', 'w')
 
-        while iteration < 5000:
+        save_anything = False
+
+        while iteration < 200:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
             feed_data, evil_labels, real_data = loader.next_batch(
@@ -171,6 +172,9 @@ def train():
                 # save_samples = []
                 # input_samples = []
 
+                fake_samples = [[] for _ in test_loader._num_labels]
+                fake_noise = [[] for _ in test_loader._num_labels]
+
                 for _ in range(test_iter_num):
 
                     # Loading the next batch of test images
@@ -195,8 +199,17 @@ def train():
                     # test_acc += test_accuracy
                     # test_adv_acc += test_adv_accuracy
 
-                    feed = {model.source: test_input_data}
-                    fake_images = sess.run(model.fake_images_sample, feed)
+                    fake_images, fake_noise = sess.run(
+                        [model.fake_images, model.g_x],
+                        {model.source: test_input_data})
+
+                    for lbl, sample, noise in zip(
+                        test_evil_labels, fake_images, fake_noise):
+                        if len(fake_samples[lbl]) > 10:
+                            continue
+                        fake_samples[lbl].append(sample)
+                        fake_noise[lbl].append(noise)
+
                     # pdb.set_trace()
                     # print fake_images.shape
 
@@ -215,23 +228,40 @@ def train():
                 # save_samples = np.concatenate(save_samples, axis=0)
                 good_accuracy = total_good_accuracy / float(test_iter_num)
                 evil_accuracy = total_evil_accuracy / float(test_iter_num)
-                # test_accuracy = test_acc / float(test_iter_num)
-                # test_adv_accuracy = test_adv_acc / float(test_iter_num)
-                print '\tAccuracy diff: %.6f' % (good_accuracy - evil_accuracy)
-                acc_file.write('%d, %.4f, %.4f\n' % (iteration, good_accuracy, evil_accuracy))
-                # if (good_accuracy - evil_accuracy) > max_accuracy_diff:
-                #     max_accuracy_diff = good_accuracy - evil_accuracy
-                # if min_adv_accuracy > test_adv_accuracy:
-                #     min_adv_accuracy = test_adv_accuracy
-                print "good accuracy %f, evil accuracy %f" % (
+                print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
+                print '\tGood accuracy %f, Evil accuracy %f' % (
                     good_accuracy, evil_accuracy)
-                save_images(fake_images[:100], [10, 10], 'fake.png')
-                save_images(test_input_data[:100], [10, 10], 'real.png')
-                # Saving the best yet model.
-                best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
-                print 'Saving the best model yet at "%s"' % best_model_path
-                model.saver.save(sess, best_model_path)
+                acc_file.write('%d, %.4f, %.4f\n' % (
+                    iteration, good_accuracy, evil_accuracy))
+
+                fake_samples = np.array(fake_samples).flatten()
+                fake_noise = np.array(fake_noise).flatten()
+
+                if (good_accuracy - evil_accuracy) > max_accuracy_diff:
+                    max_accuracy_diff = good_accuracy - evil_accuracy
+                    # test_accuracy = test_acc / float(test_iter_num)
+                    # test_adv_accuracy = test_adv_acc / float(test_iter_num)
+                    # if (good_accuracy - evil_accuracy) > max_accuracy_diff:
+                    #     max_accuracy_diff = good_accuracy - evil_accuracy
+                    # if min_adv_accuracy > test_adv_accuracy:
+                    #     min_adv_accuracy = test_adv_accuracy
+                    # save_images(fake_images[:100], [10, 10], 'fake.png')
+                    # save_images(test_input_data[:100], [10, 10], 'real.png')
+                    save_images(fake_samples[:100], [10, 10], 'best_images.png')
+                    save_images(fake_noise[:100], [10, 10], 'best_noise.png')
+                    save_anything = True
+                    # Saving the best yet model.
+                    best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
+                    print 'Saving the best model yet at "%s"' % best_model_path
+                    model.saver.save(sess, best_model_path)
             iteration += 1
+
+
+        if save_anything is False:
+            # Nothing is saved. We save a version here.
+            save_images(fake_samples[:100], [10, 10], 'last_images.png')
+            save_images(fake_noise[:100], [10, 10], 'last_noise.png')
+            save_anything = True
 
         acc_file.close()
         loss_file.close()
