@@ -97,7 +97,8 @@ class advGAN():
         self.g_bn_d3 = batch_norm(name='g_bn_d3')
         self.g_bn_d4 = batch_norm(name='g_bn_d4')
 
-        self.lr = tf.Variable(0.001, trainable=False, name="learning_rate")
+        print 'Learning rate is %f' % self.opts.learning_rate
+        self.lr = tf.Variable(self.opts.learning_rate, trainable=False, name="learning_rate")
 
 
     def _create_placeholder(self):
@@ -313,8 +314,9 @@ class advGAN():
                     logits=self.evil_predictions,
                     labels=self.evil_labels))
 
-            # adversarial loss = good_loss - evil_loss
-            self.adv_G_loss = self.good_fn_loss - self.evil_fn_loss
+            # adversarial loss = good_loss - evil_c * evil_loss
+            self.adv_G_loss = self.good_fn_loss - \
+                self.opts.evil_loss_coeff * self.evil_fn_loss
 
             # Predict labels for images using the pre-trained model.
             # self.predict_labels = self.model.predict(self.images)

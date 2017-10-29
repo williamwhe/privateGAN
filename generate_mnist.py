@@ -89,7 +89,10 @@ def train():
         # best_show_source_imgs = []
         # best_show_idxs = []
 
-        while iteration < 10000:
+        acc_file = open('acc.txt', 'w')
+        loss_file = open('loss.txt', 'w')
+
+        while iteration < 5000:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
             feed_data, evil_labels, real_data = loader.next_batch(
@@ -124,20 +127,19 @@ def train():
                 model.evil_labels: evil_labels
             }
 
-            summary_str, G_loss, pre_G_loss, adv_G_loss, hinge_loss, _ = \
-                sess.run([
+            summary_str, G_loss, pre_G_loss, adv_G_loss, good_fn_loss, \
+                evil_fn_loss, hinge_loss, _ = sess.run([
                     model.g_loss_add_adv_merge_sum,
                     model.G_loss_add_adv,
                     model.pre_G_loss,
                     model.adv_G_loss,
-                    # model.L1_norm,
-                    # model.L2_norm,
+                    model.good_fn_loss,
+                    model.evil_fn_loss,
                     model.hinge_loss,
                     model.G_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
-            summary_str, D_loss, _ = \
-                sess.run([
+            summary_str, D_loss, _ = sess.run([
                     model.pre_d_loss_sum,
                     model.D_loss,
                     model.D_pre_train_op], feed)
@@ -147,6 +149,8 @@ def train():
                 print "iteration: ", iteration
                 print "D: %.4f, G: %.4f, pre_G_loss: %.4f, adv_G: %.4f, hinge_loss: %.4f" % (
                     D_loss, G_loss, pre_G_loss, adv_G_loss, hinge_loss)
+                print '\tGood loss: %.6f, Evil loss: %.6f' % (good_fn_loss, evil_fn_loss)
+                loss_file.write('%d, %.4f, %.4f\n' % (iteration, good_fn_loss, evil_fn_loss))
 
 
             if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
@@ -214,6 +218,7 @@ def train():
                 # test_accuracy = test_acc / float(test_iter_num)
                 # test_adv_accuracy = test_adv_acc / float(test_iter_num)
                 print '\tAccuracy diff: %.6f' % (good_accuracy - evil_accuracy)
+                acc_file.write('%d, %.4f, %.4f\n' % (iteration, good_accuracy, evil_accuracy))
                 # if (good_accuracy - evil_accuracy) > max_accuracy_diff:
                 #     max_accuracy_diff = good_accuracy - evil_accuracy
                 # if min_adv_accuracy > test_adv_accuracy:
@@ -227,6 +232,9 @@ def train():
                 print 'Saving the best model yet at "%s"' % best_model_path
                 model.saver.save(sess, best_model_path)
             iteration += 1
+
+        acc_file.close()
+        loss_file.close()
 
 if __name__ == "__main__":
     train()

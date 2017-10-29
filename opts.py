@@ -9,6 +9,7 @@ def parse_opt():
     Parses experiment options.
     """
     parser = argparse.ArgumentParser()
+
     # Data input settings
 
     # whitebox
@@ -59,6 +60,8 @@ def parse_opt():
                         help='Generator loss coefficient')
     parser.add_argument('--c', type=float, default=1,
                         help='c')
+    parser.add_argument('--evil_loss_coeff', type=float, default=.5,
+                        help='Coefficient for the evil classifier loss value.')
 
 
     parser.add_argument('--s_l', type=int, default=0, help="source_label")
@@ -106,7 +109,7 @@ def parse_opt():
                         help='directory to store checkpointed models')
     parser.add_argument('--checkpoint_path', type=str, default='GAN/save',
                         help='directory to store checkpointed models')
-    parser.add_argument('--learning_rate', type=float, default=0.01,
+    parser.add_argument('--learning_rate', type=float, default=0.001,
                         help='learning rate')
     parser.add_argument('--learning_rate_decay_start', type=int, default=-1,
                         help='at what iteration to start decaying learning rate?' + \
