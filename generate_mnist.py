@@ -93,7 +93,7 @@ def train():
 
         save_anything = False
 
-        while iteration < 5000:
+        while iteration < 300:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
             feed_data, evil_labels, real_data = loader.next_batch(
@@ -173,6 +173,7 @@ def train():
                 # input_samples = []
                 fake_samples = [[] for _ in range(test_loader._num_labels)]
                 fake_noise = [[] for _ in range(test_loader._num_labels)]
+                original_samples = [[] for _ in range(test_loader._num_labels)]
 
                 for _ in range(test_iter_num):
 
@@ -209,6 +210,7 @@ def train():
                             if idx.shape[0] >= 10:
                                 fake_samples[lbl] = fake_images[idx[:10]]
                                 fake_noise[lbl] = g_x[idx[:10]]
+                                original_samples[lbl] = test_input_data[idx[:10]]
 
 
                     # for lbl, sample, noise in zip(test_evil_labels, fake_images, fake_noise):
@@ -243,6 +245,7 @@ def train():
 
                 # Resizing the samples to save them later on.
                 fake_samples = np.reshape(np.array(fake_samples), [100, -1])
+                original_samples = np.reshape(np.array(original_samples), [100, -1])
                 fake_noise = np.reshape(np.array(fake_noise), [100, -1])
 
                 # if (good_accuracy - evil_accuracy) > max_accuracy_diff:
@@ -255,8 +258,14 @@ def train():
                 #     min_adv_accuracy = test_adv_accuracy
                 # save_images(fake_images[:100], [10, 10], 'fake.png')
                 # save_images(test_input_data[:100], [10, 10], 'real.png')
-                save_images(fake_samples[:100], [10, 10], 'best_images.png')
-                save_images(fake_noise[:100], [10, 10], 'best_noise.png')
+                all_idx = np.arange(100)
+                odds = np.where((all_idx / 10) % 2 == 1)[0]
+                evens = np.where((all_idx / 10) % 2 == 0)[0]
+                order = np.concatenate((odds, evens))
+                save_images(fake_samples[order], [10, 10], 'best_images.png')
+                save_images(fake_noise[order], [10, 10], 'best_noise.png')
+                save_images(original_samples[order], [10, 10], 'best_original.png')
+
                 # save_anything = True
                 # Saving the best yet model.
                 # best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
