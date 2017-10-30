@@ -12,7 +12,7 @@ python train_models.py
 Models are saved under 'models/' floder.
 - adversary attack
 ```
-python generate_mnist.py --c 1  --ld 500 --H_lambda 0 --G_lambda 500 --learning_rate 0.001 --cgan_flag 1 --patch_flag 1 --max_iteration 2000
+python generate_mnist.py --c 1  --ld 500 --H_lambda 0 --L1_lambda 50 --G_lambda 500 --learning_rate 0.001 --cgan_flag 1 --patch_flag 1 --max_iteration 2000
 ```
 Adversary images will be saved as 'result.png'
 

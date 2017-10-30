@@ -154,8 +154,8 @@ def train():
                 print '\tgood_loss: %.4f, evil_loss: %.4f, adv_loss: %.4f' % (
                     good_loss, evil_loss, adv_loss)
                 print '\thinge_loss(%d): %.4f, l1_loss(%d): %.4f, l2_loss(%d): %.4f' % (
-                    hinge_loss, opt.H_lambda, l1_loss,
-                    opt.L1_lambda, l2_loss, opt.L2_lambda)
+                    opt.H_lambda, hinge_loss, opt.L1_lambda,
+                    l1_loss, opt.L2_lambda, l2_loss)
                 print '\tTotal loss: %.4f' % total_loss
                 # print "D: %.4f, G: %.4f, adv loss: %.4f, total loss: %.4f, hinge_loss: %.4f, l1_loss: %.4f" % (
                 #     d_loss, g_loss, pre_G_loss, adv_G_loss, hinge_loss)
