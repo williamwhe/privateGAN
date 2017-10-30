@@ -155,10 +155,10 @@ def train():
 
 
             if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
-                checkpoint_path = os.path.join(opt.checkpoint_path, 'checkpoint.ckpt')
-                print 'Saving the model in "%s"' % checkpoint_path
+                # checkpoint_path = os.path.join(opt.checkpoint_path, 'checkpoint.ckpt')
+                # print 'Saving the model in "%s"' % checkpoint_path
 
-                model.saver.save(sess, checkpoint_path, global_step=iteration)
+                # model.saver.save(sess, checkpoint_path, global_step=iteration)
 
                 test_loader = Dataset2(test_data, test_label)
 
@@ -245,29 +245,29 @@ def train():
                 fake_samples = np.reshape(np.array(fake_samples), [100, -1])
                 fake_noise = np.reshape(np.array(fake_noise), [100, -1])
 
-                if (good_accuracy - evil_accuracy) > max_accuracy_diff:
-                    max_accuracy_diff = good_accuracy - evil_accuracy
-                    # test_accuracy = test_acc / float(test_iter_num)
-                    # test_adv_accuracy = test_adv_acc / float(test_iter_num)
-                    # if (good_accuracy - evil_accuracy) > max_accuracy_diff:
-                    #     max_accuracy_diff = good_accuracy - evil_accuracy
-                    # if min_adv_accuracy > test_adv_accuracy:
-                    #     min_adv_accuracy = test_adv_accuracy
-                    # save_images(fake_images[:100], [10, 10], 'fake.png')
-                    # save_images(test_input_data[:100], [10, 10], 'real.png')
-                    save_images(fake_samples[:100], [10, 10], 'best_images.png')
-                    save_images(fake_noise[:100], [10, 10], 'best_noise.png')
-                    save_anything = True
-                    # Saving the best yet model.
-                    best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
-                    print 'Saving the best model yet at "%s"' % best_model_path
-                    model.saver.save(sess, best_model_path)
+                # if (good_accuracy - evil_accuracy) > max_accuracy_diff:
+                max_accuracy_diff = good_accuracy - evil_accuracy
+                # test_accuracy = test_acc / float(test_iter_num)
+                # test_adv_accuracy = test_adv_acc / float(test_iter_num)
+                # if (good_accuracy - evil_accuracy) > max_accuracy_diff:
+                #     max_accuracy_diff = good_accuracy - evil_accuracy
+                # if min_adv_accuracy > test_adv_accuracy:
+                #     min_adv_accuracy = test_adv_accuracy
+                # save_images(fake_images[:100], [10, 10], 'fake.png')
+                # save_images(test_input_data[:100], [10, 10], 'real.png')
+                save_images(fake_samples[:100], [10, 10], 'best_images.png')
+                save_images(fake_noise[:100], [10, 10], 'best_noise.png')
+                # save_anything = True
+                # Saving the best yet model.
+                # best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
+                # print 'Saving the best model yet at "%s"' % best_model_path
+                # model.saver.save(sess, best_model_path)
 
-                if save_anything is False:
-                    # Nothing is saved. We save a version here.
-                    save_images(fake_samples[:100], [10, 10], 'last_images.png')
-                    save_images(fake_noise[:100], [10, 10], 'last_noise.png')
-                    save_anything = True
+                # if save_anything is False:
+                #     # Nothing is saved. We save a version here.
+                #     save_images(fake_samples[:100], [10, 10], 'last_images.png')
+                #     save_images(fake_noise[:100], [10, 10], 'last_noise.png')
+                #     save_anything = True
 
             iteration += 1
         acc_file.close()

@@ -60,7 +60,7 @@ def parse_opt():
                         help='Generator loss coefficient')
     parser.add_argument('--c', type=float, default=1,
                         help='c')
-    parser.add_argument('--evil_loss_coeff', type=float, default=.5,
+    parser.add_argument('--evil_loss_coeff', type=float, default=.75,
                         help='Coefficient for the evil classifier loss value.')
 
 
