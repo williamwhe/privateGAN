@@ -171,7 +171,6 @@ def train():
 
                 # save_samples = []
                 # input_samples = []
-
                 fake_samples = [[] for _ in test_loader._num_labels]
                 fake_noise = [[] for _ in test_loader._num_labels]
 
@@ -254,15 +253,14 @@ def train():
                     best_model_path = os.path.join(opt.checkpoint_path, 'best.ckpt')
                     print 'Saving the best model yet at "%s"' % best_model_path
                     model.saver.save(sess, best_model_path)
+
+                if save_anything is False:
+                    # Nothing is saved. We save a version here.
+                    save_images(fake_samples[:100], [10, 10], 'last_images.png')
+                    save_images(fake_noise[:100], [10, 10], 'last_noise.png')
+                    save_anything = True
+
             iteration += 1
-
-
-        if save_anything is False:
-            # Nothing is saved. We save a version here.
-            save_images(fake_samples[:100], [10, 10], 'last_images.png')
-            save_images(fake_noise[:100], [10, 10], 'last_noise.png')
-            save_anything = True
-
         acc_file.close()
         loss_file.close()
 
