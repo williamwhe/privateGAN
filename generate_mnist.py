@@ -174,8 +174,6 @@ def train():
                 fake_samples = [[] for _ in range(test_loader._num_labels)]
                 fake_noise = [[] for _ in range(test_loader._num_labels)]
 
-                print '\t\tfake samples shape is ' + str(fake_samples.shape) 
-
                 for _ in range(test_iter_num):
 
                     # Loading the next batch of test images
