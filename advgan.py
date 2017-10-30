@@ -278,7 +278,7 @@ class advGAN():
             # G loss and D loss.
             self.pre_G_loss = G_loss
             self.hinge_loss = hinge_loss
-            self.G_loss = G_loss + L1_lambda * L1_norm + \
+            self.G_loss = G_lambda * G_loss + L1_lambda * L1_norm + \
                 L2_lambda * L2_norm + hinge_lambda * hinge_loss
             self.l1_loss = L1_norm
             self.l2_loss = L2_norm
@@ -349,7 +349,6 @@ class advGAN():
                 hinge_lambda * hinge_loss + \
                 L1_lambda * L1_norm + \
                 L2_lambda * L2_norm
-                # HINGE LOSS IS ADDED AT G_LOSS, WHY IS IT APPLIED AGAIN?
 
             self.adv_g_loss_sum = \
                 tf.summary.scalar("adv_G_loss", self.adv_G_loss)
