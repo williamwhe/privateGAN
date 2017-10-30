@@ -129,8 +129,8 @@ def train():
                 model.evil_labels: evil_labels
             }
 
-            summary_str, total_loss, g_loss, adv_loss, good_loss, \
-                evil_loss, hinge_loss, l1_loss, l2_loss = sess.run([
+            summary_str, G_loss, pre_G_loss, adv_G_loss, good_fn_loss, \
+                evil_fn_loss, hinge_loss, _ = sess.run([
                     model.g_loss_add_adv_merge_sum,
                     model.G_loss_add_adv,
                     model.pre_G_loss,
@@ -138,29 +138,21 @@ def train():
                     model.good_fn_loss,
                     model.evil_fn_loss,
                     model.hinge_loss,
-                    model.l1_loss,
-                    model.l2_loss], feed)
+                    model.G_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
-            summary_str, d_loss, _ = sess.run([
-                model.pre_d_loss_sum,
-                model.D_loss,
-                model.D_pre_train_op], feed)
+            summary_str, D_loss, _ = sess.run([
+                    model.pre_d_loss_sum,
+                    model.D_loss,
+                    model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:
                 print "iteration: ", iteration
-                print '\tD_loss: %.4f, G_loss: %.4f' % (d_loss, g_loss)
-                print '\tgood_loss: %.4f, evil_loss: %.4f, adv_loss: %.4f' % (
-                    good_loss, evil_loss, adv_loss)
-                print '\thinge_loss(%d): %.4f, l1_loss(%d): %.4f, l2_loss(%d): %.4f' % (
-                    opt.H_lambda, hinge_loss, opt.L1_lambda,
-                    l1_loss, opt.L2_lambda, l2_loss)
-                print '\tTotal loss: %.4f' % total_loss
-                # print "D: %.4f, G: %.4f, adv loss: %.4f, total loss: %.4f, hinge_loss: %.4f, l1_loss: %.4f" % (
-                #     d_loss, g_loss, pre_G_loss, adv_G_loss, hinge_loss)
-                # print '\tGood loss: %.6f, Evil loss: %.6f' % (good_fn_loss, evil_fn_loss)
-                loss_file.write('%d, %.4f, %.4f\n' % (iteration, good_loss, evil_loss))
+                print "D: %.4f, G: %.4f, pre_G_loss: %.4f, adv_G: %.4f, hinge_loss: %.4f" % (
+                    D_loss, G_loss, pre_G_loss, adv_G_loss, hinge_loss)
+                print '\tGood loss: %.6f, Evil loss: %.6f' % (good_fn_loss, evil_fn_loss)
+                loss_file.write('%d, %.4f, %.4f\n' % (iteration, good_fn_loss, evil_fn_loss))
 
 
             if iteration != 0 and iteration % opt.save_checkpoint_every == 0:

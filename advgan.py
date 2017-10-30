@@ -278,10 +278,7 @@ class advGAN():
             # G loss and D loss.
             self.pre_G_loss = G_loss
             self.hinge_loss = hinge_loss
-            self.G_loss = G_lambda * G_loss + L1_lambda * L1_norm + \
-                L2_lambda * L2_norm + hinge_lambda * hinge_loss
-            self.l1_loss = L1_norm
-            self.l2_loss = L2_norm
+            self.G_loss = G_loss + hinge_lambda * hinge_loss + L1_lambda * L1_norm
 
             # test with D_loss
             # self.G_loss = G_loss + D_loss + hinge_lambda * hinge_loss
@@ -345,10 +342,9 @@ class advGAN():
             #     self.labels, tf.nn.softmax(self.fake_predict_labels))
 
             self.G_loss_add_adv = G_lambda * G_loss + \
-                ld * self.adv_G_loss + \
-                hinge_lambda * hinge_loss + \
-                L1_lambda * L1_norm + \
-                L2_lambda * L2_norm
+                ld * self.adv_G_loss # + \
+                # hinge_lambda * hinge_loss
+                # HINGE LOSS IS ADDED AT G_LOSS, WHY IS IT APPLIED AGAIN?
 
             self.adv_g_loss_sum = \
                 tf.summary.scalar("adv_G_loss", self.adv_G_loss)
@@ -387,12 +383,10 @@ class advGAN():
             # G loss with adversary loss
             G_opt = tf.train.AdamOptimizer(self.lr)
             G_grads_and_vars = G_opt.compute_gradients(self.G_loss_add_adv, self.g_vars)
-            G_grads_and_vars = \
-                [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
+            G_grads_and_vars = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
             self.G_train_op = G_opt.apply_gradients(G_grads_and_vars)
 
-    def discriminator(self, image, y=None, reuse=False):
-        """Creates a discriminator neural net"""
+    def discriminator(self, image, y = None, reuse=False):
 
         with tf.variable_scope("discriminator") as scope:
             s = 32
