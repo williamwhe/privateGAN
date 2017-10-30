@@ -79,6 +79,8 @@ def parse_opt():
                         help="using adverarial loss or not ")
     parser.add_argument('--pretrain_iteration', type=int, default=3000,
                         help="pretrain iteration")
+    parser.add_argument('--max_iteration', type=int, default=2000,
+                        help="Maximum training iteration (default: 2000).")
 
     parser.add_argument('--confidence', type=float, default=0.0,
                         help="confidence")
