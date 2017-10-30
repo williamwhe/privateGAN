@@ -344,7 +344,7 @@ class advGAN():
             self.G_loss_add_adv = G_lambda * G_loss + \
                 ld * self.adv_G_loss # + \
                 # hinge_lambda * hinge_loss
-                # HINGE LOSS IS ADDED AT G_LOSS, SHOULDN'T BE ADDED HERE AGAIN!
+                # HINGE LOSS IS ADDED AT G_LOSS, WHY IS IT APPLIED AGAIN?
 
             self.adv_g_loss_sum = \
                 tf.summary.scalar("adv_G_loss", self.adv_G_loss)
