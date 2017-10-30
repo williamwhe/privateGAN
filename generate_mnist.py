@@ -93,7 +93,7 @@ def train():
 
         save_anything = False
 
-        while iteration < 250:
+        while iteration < 5000:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
             feed_data, evil_labels, real_data = loader.next_batch(
