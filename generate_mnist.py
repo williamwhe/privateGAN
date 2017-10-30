@@ -93,7 +93,7 @@ def train():
 
         save_anything = False
 
-        while iteration < 200:
+        while iteration < 250:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
             feed_data, evil_labels, real_data = loader.next_batch(
@@ -171,14 +171,17 @@ def train():
 
                 # save_samples = []
                 # input_samples = []
-                fake_samples = [[] for _ in test_loader._num_labels]
-                fake_noise = [[] for _ in test_loader._num_labels]
+                fake_samples = [[] for _ in range(test_loader._num_labels)]
+                fake_noise = [[] for _ in range(test_loader._num_labels)]
+
+                print '\t\tfake samples shape is ' + str(fake_samples.shape) 
 
                 for _ in range(test_iter_num):
 
                     # Loading the next batch of test images
                     test_input_data, test_evil_labels, _ = \
                         test_loader.next_batch(batch_size)
+                    evil_categorical_labels = np.argmax(test_evil_labels, axis=1)
                     test_good_labels = odd_even_labels(test_evil_labels)
                     feed = {
                         model.source: test_input_data,
@@ -198,16 +201,24 @@ def train():
                     # test_acc += test_accuracy
                     # test_adv_acc += test_adv_accuracy
 
-                    fake_images, fake_noise = sess.run(
+                    fake_images, g_x = sess.run(
                         [model.fake_images, model.g_x],
                         {model.source: test_input_data})
+                    print '\t\tThe shape of noise is ' + str(g_x.shape)
 
-                    for lbl, sample, noise in zip(
-                        test_evil_labels, fake_images, fake_noise):
-                        if len(fake_samples[lbl]) > 10:
-                            continue
-                        fake_samples[lbl].append(sample)
-                        fake_noise[lbl].append(noise)
+                    for lbl in range(test_loader._num_labels):
+                        if len(fake_samples[lbl]) < 10:
+                            idx = np.where(evil_categorical_labels == lbl)[0]
+                            if idx.shape[0] >= 10:
+                                fake_samples[lbl] = fake_images[idx[:10]]
+                                fake_noise[lbl] = g_x[idx[:10]]
+
+
+                    # for lbl, sample, noise in zip(test_evil_labels, fake_images, fake_noise):
+                    #     if len(fake_samples[lbl]) > 10:
+                    #         continue
+                    #     fake_samples[lbl].append(sample)
+                    #     fake_noise[lbl].append(noise)
 
                     # pdb.set_trace()
                     # print fake_images.shape
@@ -233,8 +244,9 @@ def train():
                 acc_file.write('%d, %.4f, %.4f\n' % (
                     iteration, good_accuracy, evil_accuracy))
 
-                fake_samples = np.array(fake_samples).flatten()
-                fake_noise = np.array(fake_noise).flatten()
+                # Resizing the samples to save them later on.
+                fake_samples = np.reshape(np.array(fake_samples), [100, -1])
+                fake_noise = np.reshape(np.array(fake_noise), [100, -1])
 
                 if (good_accuracy - evil_accuracy) > max_accuracy_diff:
                     max_accuracy_diff = good_accuracy - evil_accuracy
