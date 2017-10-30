@@ -202,7 +202,6 @@ def train():
                     fake_images, g_x = sess.run(
                         [model.fake_images, model.g_x],
                         {model.source: test_input_data})
-                    print '\t\tThe shape of noise is ' + str(g_x.shape)
 
                     for lbl in range(test_loader._num_labels):
                         if len(fake_samples[lbl]) < 10:
