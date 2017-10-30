@@ -93,6 +93,7 @@ def train():
 
         save_anything = False
 
+        print 'Maximum iterations: %d' % opt.max_iteration
         while iteration < opt.max_iteration:
             # this function returns (data, label, np.array(target)).
             data = loader.next_batch(batch_size, negative=False)
