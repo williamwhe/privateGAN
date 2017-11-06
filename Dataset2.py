@@ -4,66 +4,66 @@ import scipy.io as sio
 import random
 import os
 
-from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import train_test_split
 from tensorflow.examples.tutorials.mnist import input_data
 
-def get_input_data(path):
-    """
-    Reads and returns the MNIST dataset.
+# def get_input_data(path):
+#     """
+#     Reads and returns the MNIST dataset.
 
-    :args:
-        - `path`: saved data file path.
+#     :args:
+#         - `path`: saved data file path.
 
-    :returns:
-        - `train_data`: Training data.
-        - `train_label`: Training label.
-        - `test_data`: Test data.
-        - `test_label`: Test label
-    """
-    if os.path.isfile(path):
-        print 'Prior data found. Loading it ...',
-        loaded = np.load(path)
-        print '[DONE]'
-        return loaded['train_data'], loaded['train_label'], \
-            loaded['test_data'], loaded['test_label']
+#     :returns:
+#         - `train_data`: Training data.
+#         - `train_label`: Training label.
+#         - `test_data`: Test data.
+#         - `test_label`: Test label
+#     """
+#     if os.path.isfile(path):
+#         print 'Prior data found. Loading it ...',
+#         loaded = np.load(path)
+#         print '[DONE]'
+#         return loaded['train_data'], loaded['train_label'], \
+#             loaded['test_data'], loaded['test_label']
 
-    # There are no saved data.
-    print 'No prior data found. Loading original.'
-    mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-    train_data = mnist.train.images * 2.0 - 1.0
-    train_label = mnist.train.labels
+#     # There are no saved data.
+#     print 'No prior data found. Loading original.'
+#     mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+#     train_data = mnist.train.images * 2.0 - 1.0
+#     train_label = mnist.train.labels
 
-    test_data = mnist.test.images * 2.0 - 1.0
-    test_label = mnist.test.labels
+#     test_data = mnist.test.images * 2.0 - 1.0
+#     test_label = mnist.test.labels
 
-    train_left_data, train_held_data, train_left_label, train_held_label = \
-        train_test_split(train_data, train_label, test_size=train_data.shape[0]/2)
+#     train_left_data, train_kept_data, train_left_label, train_kept_label = \
+#         train_test_split(train_data, train_label, test_size=train_data.shape[0]/2)
 
-    test_left_data, test_held_data, test_left_label, test_held_label = \
-        train_test_split(test_data, test_label, test_size=test_data.shape[0]/2)
+#     test_left_data, test_kept_data, test_left_label, test_kept_label = \
+#         train_test_split(test_data, test_label, test_size=test_data.shape[0]/2)
 
-    print 'Number of instances per class in training(left/held) and test(left/held) data.'
-    print np.sum(train_left_label, axis=0)
-    print np.sum(train_held_label, axis=0)
-    print np.sum(test_left_label, axis=0)
-    print np.sum(test_held_label, axis=0)
+#     print 'Number of instances per class in training(left/kept) and test(left/kept) data.'
+#     print np.sum(train_left_label, axis=0)
+#     print np.sum(train_kept_label, axis=0)
+#     print np.sum(test_left_label, axis=0)
+#     print np.sum(test_kept_label, axis=0)
 
-    print 'Saving pieces ...',
-    np.savez_compressed('MNIST_data/left_data',
-                        train_data=train_left_data,
-                        train_label=train_left_label,
-                        test_data=test_left_data,
-                        test_label=test_left_label)
+#     print 'Saving pieces ...',
+#     np.savez_compressed('MNIST_data/left_data',
+#                         train_data=train_left_data,
+#                         train_label=train_left_label,
+#                         test_data=test_left_data,
+#                         test_label=test_left_label)
 
-    np.savez_compressed('MNIST_data/held_data',
-                        train_data=train_held_data,
-                        train_label=train_held_label,
-                        test_data=test_held_data,
-                        test_label=test_held_label)
-    print '[DONE]'
+#     np.savez_compressed('MNIST_data/kept_data',
+#                         train_data=train_kept_data,
+#                         train_label=train_kept_label,
+#                         test_data=test_kept_data,
+#                         test_label=test_kept_label)
+#     print '[DONE]'
 
-    # Return the held data.
-    return train_held_data, train_held_label, test_held_data, test_held_label
+#     # Return the kept data.
+#     return train_kept_data, train_kept_label, test_kept_data, test_kept_label
 
 def odd_even_labels(labels, one_hot=True):
     """

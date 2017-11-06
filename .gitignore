@@ -93,6 +93,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+gan/
 
 # Spyder project settings
 .spyderproject

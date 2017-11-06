@@ -4,6 +4,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 from ops import *
 import os.path
 import pickle
+import scipy
 import scipy.io as sio
 import time
 import random
@@ -11,10 +12,10 @@ import pdb
 import opts
 import cifar10
 # from utils import plot
-from utils import save_images
+from utils import merge
 from advgan import advGAN
 from Dataset2 import Dataset2, odd_even_labels
-from sklearn import model_selection
+# from sklearn import model_selection
 from setup_mnist import MNIST, MNISTModel, MNISTModel2, MNISTModel3, OddEvenMNIST
 from setup_cifar import CIFARModel, CIFARModel2, CIFARModel3
 
@@ -33,16 +34,17 @@ def train():
     # test_data = mnist.test.images * 2.0 - 1.0
     # test_label = mnist.test.labels
 
-
+    loaded = np.load('MNIST_data/kept_data.npz')
     train_data, train_label, test_data, test_label = \
-        get_input_data('MNIST_data/held_data.npz')
+        loaded['train_data'], loaded['train_label'], \
+        loaded['test_data'], loaded['test_label']
 
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
     print '\tTraining label: ' + str(train_label.shape)
     print '\tTest data: ' + str(test_data.shape)
     print '\tTest label: ' + str(test_label.shape)
-    exit()
+
     x_dim = train_data.shape[1]
     y_dim = train_label.shape[1]
 
@@ -75,7 +77,6 @@ def train():
         evil_model = MNISTModel(opt.evil_model_path)
         print '\tRetrieving good model from "%s"' % opt.good_model_path
         good_model = OddEvenMNIST(opt.good_model_path)
-        # exit()
         # model = advGAN(whitebox_model, model_store, opt, sess)
         model = advGAN(good_model, evil_model, opt, sess)
 
@@ -153,9 +154,9 @@ def train():
             writer.add_summary(summary_str, iteration)
 
             summary_str, D_loss, _ = sess.run([
-                    model.pre_d_loss_sum,
-                    model.D_loss,
-                    model.D_pre_train_op], feed)
+                model.pre_d_loss_sum,
+                model.D_loss,
+                model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:
@@ -274,12 +275,11 @@ def train():
                 odds = np.where((all_idx / 10) % 2 == 1)[0]
                 evens = np.where((all_idx / 10) % 2 == 0)[0]
                 order = np.concatenate((odds, evens))
-                save_images(
-                    np.concatenate((fake_samples[order],
-                                    fake_noise[order],
-                                    original_samples[order])),
-                    [10, 30],
-                    'res_%d.png' % iteration)
+                fakes = merge(fake_samples[order], [10, 10])
+                noise = merge(fake_noise[order], [10, 10])
+                original = merge(original_samples[order], [10, 10])
+                scipy.misc.imsave('snapshot_%d.png' % iteration,
+                                  np.concatenate([fakes, noise, original], axis=1))
                 # save_images(fake_samples[order], [10, 10], 'best_images.png')
                 # save_images(fake_noise[order], [10, 10], 'best_noise.png')
                 # save_images(original_samples[order], [10, 10], 'best_original.png')
@@ -303,18 +303,45 @@ def train():
         # We can transform the training and test data given in the beginning here.
         # This is only half the actual data.
         print 'Making new training data ...',
-        new_train_data = sess.run([model.fake_images], {model.source: train_data})
+        loader = Dataset2(train_data, train_label)
+        iter_num = (loader._num_examples - batch_size) / batch_size
+        new_train_data = []
+        new_train_label = []
+        for _ in range(iter_num):
+            batch_data, batch_label, _ = loader.next_batch(batch_size)
+            new_data = sess.run(model.fake_images, {model.source: batch_data})
+            new_train_data.append(new_data)
+            new_train_label.append(batch_label)
+        new_train_data = np.concatenate(new_train_data)
+        new_train_label = np.concatenate(new_train_label)
         print '[DONE]'
         print 'Making new test data ...',
-        new_test_data = sess.run([model.fake_images], {model.source: test_data})
+        loader = Dataset2(test_data, test_label)
+        iter_num = (loader._num_examples - batch_size) / batch_size
+        new_test_data = []
+        new_test_label = []
+        for _ in range(iter_num):
+            batch_data, batch_label, _ = loader.next_batch(batch_size)
+            new_data = sess.run(model.fake_images, {model.source: batch_data})
+            new_test_data.append(new_data)
+            new_test_label.append(batch_label)
+        new_test_data = np.concatenate(new_test_data)
+        new_test_label = np.concatenate(new_test_label)
         print '[DONE]'
 
+        print 'Training:'
+        print new_train_data.shape
+        print new_train_label.shape
+        print 'Test:'
+        print new_test_data.shape
+        print new_test_label.shape
+
         print 'Saving ...',
-        np.savez('MNIST_data/distorted_data',
-                 train_data=new_train_data,
-                 train_label=train_label,
-                 test_data=new_test_data,
-                 test_label=test_label)
+        np.savez_compressed('MNIST_data/distorted_data',
+                            train_data=new_train_data,
+                            train_label=new_train_label,
+                            test_data=new_test_data,
+                            test_label=new_test_label)
         print '[DONE]'
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ from keras.optimizers import SGD
 
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
-from Dataset2 import odd_even_labels, get_input_data
+from Dataset2 import odd_even_labels
 # from setup_mnist import MNIST
 # from setup_cifar import CIFAR
 
@@ -37,15 +37,19 @@ def train(file_name,
     """
     # opt = opts.parse_opt()
     # mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+    if data_path == None:
+        data_path = 'MNIST_data/held_data.npz'
+
+    loaded = np.load(data_path)
     train_data, train_label, test_data, test_label = \
-        get_input_data('MNIST_data/held_data.npz')
+        loaded['train_data'], loaded['train_label'], \
+        loaded['test_data'], loaded['test_label']
 
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
     print '\tTraining label: ' + str(train_label.shape)
     print '\tTest data: ' + str(test_data.shape)
     print '\tTest label: ' + str(test_label.shape)
-    exit()
     # train_data = mnist.train.images * 2.0 - 1.0
     # train_label = mnist.train.labels
 
@@ -141,6 +145,9 @@ def main():
                         help="path to save trained model. e.g.: 'models/mnist'")
     parser.add_argument('--type', type=str, default='all_digits',
                         help="(all_digits/odd_even) Determines type of classifier.")
+    
+    parser.add_argument('--data_path', type=str, default='MNIST_data/held_data.npz',
+                        help='Dataset path.')
 
     options = parser.parse_known_args()[0]
     odd_even = (options.type == 'odd_even')
@@ -148,7 +155,8 @@ def main():
     print 'Saving the model in %s' % options.path
     print 'Classifier type is %s' % options.type
     print 'Odd even flag is %s' % str(odd_even)
-    train(options.path, [32, 32, 64, 64, 200, 200], num_epochs=10, odd_even=odd_even)
+    train(options.path, [32, 32, 64, 64, 200, 200], num_epochs=10,
+          odd_even=odd_even, data_path=options.data_path)
     # train(CIFAR(), "models/cifar", [64, 64, 128, 128, 256, 256], num_epochs=50)
     # train( "models/cifar_model1", [64, 64, 128, 128, 256, 256], num_epochs=50)
 

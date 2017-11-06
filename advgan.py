@@ -124,9 +124,6 @@ class advGAN():
         self.real_images = tf.reshape(
             self.target, [-1, img_dim, img_dim, input_c_dim])
 
-        # DEPRECATED: we now have evil and good labels, for each classifier.
-        # self.labels = tf.placeholder(tf.float32, [None, label_dim], name="label")
-
         # labels for the evil classifier.
         self.evil_labels = tf.placeholder(
             tf.float32, [None, evil_label_num], name="evil_label")
