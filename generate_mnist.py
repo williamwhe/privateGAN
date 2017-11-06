@@ -2,36 +2,47 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 from ops import *
-import os
-import time
+import os.path
+import pickle
 import scipy.io as sio
+import time
 import random
 import pdb
 import opts
+import cifar10
 # from utils import plot
 from utils import save_images
 from advgan import advGAN
-import cifar10
 from Dataset2 import Dataset2, odd_even_labels
-
+from sklearn import model_selection
 from setup_mnist import MNIST, MNISTModel, MNISTModel2, MNISTModel3, OddEvenMNIST
 from setup_cifar import CIFARModel, CIFARModel2, CIFARModel3
 
 tag_num = 0
 
 def train():
-    flatten_flag = True  # the output of G need to flatten or not?
+    flatten_flag = True  # flatten output of G or not?
     opt = opts.parse_opt()
     opt.input_data = "MNIST"
     # mapping [0,1] -> [-1,1]
     # load data
-    mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-    train_data = mnist.train.images * 2.0 - 1.0
-    train_label = mnist.train.labels
+    # mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+    # train_data = mnist.train.images * 2.0 - 1.0
+    # train_label = mnist.train.labels
 
-    test_data = mnist.test.images * 2.0 - 1.0
-    test_label = mnist.test.labels
+    # test_data = mnist.test.images * 2.0 - 1.0
+    # test_label = mnist.test.labels
 
+
+    train_data, train_label, test_data, test_label = \
+        get_input_data('MNIST_data/held_data.npz')
+
+    print 'Shape of data:'
+    print '\tTraining data: ' + str(train_data.shape)
+    print '\tTraining label: ' + str(train_label.shape)
+    print '\tTest data: ' + str(test_data.shape)
+    print '\tTest label: ' + str(test_label.shape)
+    exit()
     x_dim = train_data.shape[1]
     y_dim = train_label.shape[1]
 
@@ -263,9 +274,15 @@ def train():
                 odds = np.where((all_idx / 10) % 2 == 1)[0]
                 evens = np.where((all_idx / 10) % 2 == 0)[0]
                 order = np.concatenate((odds, evens))
-                save_images(fake_samples[order], [10, 10], 'best_images.png')
-                save_images(fake_noise[order], [10, 10], 'best_noise.png')
-                save_images(original_samples[order], [10, 10], 'best_original.png')
+                save_images(
+                    np.concatenate((fake_samples[order],
+                                    fake_noise[order],
+                                    original_samples[order])),
+                    [10, 30],
+                    'res_%d.png' % iteration)
+                # save_images(fake_samples[order], [10, 10], 'best_images.png')
+                # save_images(fake_noise[order], [10, 10], 'best_noise.png')
+                # save_images(original_samples[order], [10, 10], 'best_original.png')
 
                 # save_anything = True
                 # Saving the best yet model.
@@ -282,6 +299,23 @@ def train():
             iteration += 1
         acc_file.close()
         loss_file.close()
+
+        # We can transform the training and test data given in the beginning here.
+        # This is only half the actual data.
+        print 'Making new training data ...',
+        new_train_data = sess.run([model.fake_images], {model.source: train_data})
+        print '[DONE]'
+        print 'Making new test data ...',
+        new_test_data = sess.run([model.fake_images], {model.source: test_data})
+        print '[DONE]'
+
+        print 'Saving ...',
+        np.savez('MNIST_data/distorted_data',
+                 train_data=new_train_data,
+                 train_label=train_label,
+                 test_data=new_test_data,
+                 test_label=test_label)
+        print '[DONE]'
 
 if __name__ == "__main__":
     train()

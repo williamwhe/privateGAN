@@ -18,25 +18,40 @@ from keras.optimizers import SGD
 
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
-from Dataset2 import odd_even_labels
+from Dataset2 import odd_even_labels, get_input_data
 # from setup_mnist import MNIST
 # from setup_cifar import CIFAR
 
 mnist_flag = 1
 
-def train(file_name, params, num_epochs=50,
-          batch_size=128, train_temp=1, init=None, odd_even=False):
+def train(file_name,
+          params,
+          data_path=None,
+          num_epochs=50,
+          batch_size=128,
+          train_temp=1,
+          init=None,
+          odd_even=False):
     """
     Standard neural network training procedure.
     """
     # opt = opts.parse_opt()
-    mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-    train_data = mnist.train.images * 2.0 - 1.0
-    train_label = mnist.train.labels
+    # mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+    train_data, train_label, test_data, test_label = \
+        get_input_data('MNIST_data/held_data.npz')
+
+    print 'Shape of data:'
+    print '\tTraining data: ' + str(train_data.shape)
+    print '\tTraining label: ' + str(train_label.shape)
+    print '\tTest data: ' + str(test_data.shape)
+    print '\tTest label: ' + str(test_label.shape)
+    exit()
+    # train_data = mnist.train.images * 2.0 - 1.0
+    # train_label = mnist.train.labels
 
 
-    test_data = mnist.test.images * 2.0 - 1.0
-    test_label = mnist.test.labels
+    # test_data = mnist.test.images * 2.0 - 1.0
+    # test_label = mnist.test.labels
 
     if odd_even is True:
         train_label = odd_even_labels(train_label, one_hot=True)
