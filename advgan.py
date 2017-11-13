@@ -273,6 +273,8 @@ class advGAN():
             G_loss, D_loss, L1_norm, L2_norm, hinge_loss = self._GAN_model(
                 self.images, self.fake_images, self.real_images, self.g_x)
             # G loss and D loss.
+            self.l1_loss = L1_norm
+            self.l2_loss = L2_norm
             self.g_loss = G_loss
             self.hinge_loss = hinge_loss
             self.gan_loss = G_lambda * G_loss + hinge_lambda * hinge_loss + L1_lambda * L1_norm

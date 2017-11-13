@@ -141,29 +141,46 @@ def train():
                 model.evil_labels: evil_labels
             }
 
-            summary_str, G_loss, pre_G_loss, adv_G_loss, good_fn_loss, \
-                evil_fn_loss, hinge_loss, _ = sess.run([
-                    model.g_loss_add_adv_merge_sum,
-                    model.G_loss_add_adv,
-                    model.pre_G_loss,
-                    model.adv_G_loss,
+            # summary_str, G_loss, pre_G_loss, adv_G_loss, good_fn_loss, \
+            #     evil_fn_loss, hinge_loss, _ = sess.run([
+            #         model.g_loss_add_adv_merge_sum,
+            #         model.total_loss,
+            #         model.pre_G_loss,
+            #         model.adv_G_loss,
+            #         model.good_fn_loss,
+            #         model.evil_fn_loss,
+            #         model.hinge_loss,
+            #         model.G_train_op], feed)
+
+            G_loss, D_loss, gan_loss, hinge_loss, l1_loss, l2_loss, \
+                good_fn_loss, evil_fn_loss, adv_loss, total_loss = sess.run([
+                    model.g_loss,
+                    model.d_loss,
+                    model.gan_loss,
+                    model.hinge_loss,
+                    model.l1_loss,
+                    model.l2_loss,
                     model.good_fn_loss,
                     model.evil_fn_loss,
-                    model.hinge_loss,
-                    model.G_train_op], feed)
-            writer.add_summary(summary_str, iteration)
+                    model.adv_loss,
+                    model.total_loss
+                ])
+            # writer.add_summary(summary_str, iteration)
 
-            summary_str, D_loss, _ = sess.run([
-                model.pre_d_loss_sum,
-                model.D_loss,
-                model.D_pre_train_op], feed)
-            writer.add_summary(summary_str, iteration)
+            # summary_str, D_loss, _ = sess.run([
+            #     model.pre_d_loss_sum,
+            #     model.D_loss,
+            #     model.D_pre_train_op], feed)
+            # writer.add_summary(summary_str, iteration)
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:
                 print "iteration: ", iteration
-                print "D: %.4f, G: %.4f, pre_G_loss: %.4f, adv_G: %.4f, hinge_loss: %.4f" % (
-                    D_loss, G_loss, pre_G_loss, adv_G_loss, hinge_loss)
-                print '\tGood loss: %.6f, Evil loss: %.6f' % (good_fn_loss, evil_fn_loss)
+                print '\tD: %.4f, G: %.4f\n\thinge(%d): %.4f, L1(%d): %.4f, L2(%d): %.4f' % (
+                    D_loss, G_loss, opt.H_lambda, hinge_loss,
+                    opt.L1_lambda, l1_loss, opt.L2_lambda, l2_loss)
+                print '\t\tGAN total loss: %.4f' % gan_loss
+                print '\tGood: %.4f, Evil: %.4f' % (good_fn_loss, evil_fn_loss)
+                print '\tAdv: %.4f, Total: %.4f' % (adv_loss, total_loss)
                 loss_file.write('%d, %.4f, %.4f\n' % (iteration, good_fn_loss, evil_fn_loss))
 
 
