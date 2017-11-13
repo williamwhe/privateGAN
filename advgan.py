@@ -342,6 +342,7 @@ class advGAN():
             self.total_loss = G_lambda * G_loss + \
                 hinge_lambda * hinge_loss + \
                 L1_lambda * L1_norm + \
+                L2_lambda * L2_norm + \
                 ld * self.adv_loss # This is only added to self.gan_loss. For unknown reasons.
 
             self.adv_loss_sum = \
