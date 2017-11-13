@@ -166,7 +166,7 @@ def train():
                     model.evil_fn_loss,
                     model.adv_loss,
                     model.total_loss
-                ])
+                ], feed)
             # writer.add_summary(summary_str, iteration)
 
             # summary_str, D_loss, _ = sess.run([
