@@ -273,21 +273,19 @@ class advGAN():
             G_loss, D_loss, L1_norm, L2_norm, hinge_loss = self._GAN_model(
                 self.images, self.fake_images, self.real_images, self.g_x)
             # G loss and D loss.
-            self.pre_G_loss = G_loss
+            self.g_loss = G_loss
             self.hinge_loss = hinge_loss
-            self.G_loss = G_loss + hinge_lambda * hinge_loss + L1_lambda * L1_norm
+            self.gan_loss = G_lambda * G_loss + hinge_lambda * hinge_loss + L1_lambda * L1_norm
 
             # test with D_loss
             # self.G_loss = G_loss + D_loss + hinge_lambda * hinge_loss
 
-            self.D_loss = D_loss
+            self.d_loss = D_loss
 
             # Adding the values to Summary.
-            self.pre_g_loss_sum = \
-                tf.summary.scalar("pre_G_loss", self.pre_G_loss)
-            self.pre_g_totoal_loss_sum = \
-                tf.summary.scalar("pre_G_loss_total", self.G_loss)
-            self.pre_d_loss_sum = tf.summary.scalar("pre_d_loss", self.D_loss)
+            self.g_loss_sum = tf.summary.scalar("G loss", self.g_loss)
+            self.gan_loss_sum = tf.summary.scalar("GAN loss", self.gan_loss)
+            self.d_loss_sum = tf.summary.scalar("D loss", self.d_loss)
             # self.l1_norm_sum = tf.summary.scalar("l1_loss", self.L1_norm)
             # self.l2_norm_sum = tf.summary.scalar("l2_loss", self.L2_norm)
             self.hinge_loss_sum = \
@@ -311,8 +309,8 @@ class advGAN():
                     logits=self.evil_predictions,
                     labels=self.evil_labels))
 
-            # adversarial loss = good_loss - evil_c * evil_loss
-            self.adv_G_loss = self.good_fn_loss - \
+            # adversarial loss = good_c * good_loss - evil_c * evil_loss.
+            self.adv_loss = self.opts.good_loss_coeff * self.good_fn_loss - \
                 self.opts.evil_loss_coeff * self.evil_fn_loss
 
             # Predict labels for images using the pre-trained model.
@@ -338,28 +336,29 @@ class advGAN():
             # self.adv_accuracy = self._metric(
             #     self.labels, tf.nn.softmax(self.fake_predict_labels))
 
-            self.G_loss_add_adv = G_lambda * G_loss + \
-                ld * self.adv_G_loss # + \
-                # hinge_lambda * hinge_loss
-                # HINGE LOSS IS ADDED AT G_LOSS, WHY IS IT APPLIED AGAIN?
+            # Why is it only the G_loss? Why not gan_loss?
+            self.total_loss = G_lambda * G_loss + \
+                hinge_lambda * hinge_loss + \
+                L1_lambda * L1_norm + \
+                ld * self.adv_loss # This is only added to self.gan_loss. For unknown reasons.
 
-            self.adv_g_loss_sum = \
-                tf.summary.scalar("adv_G_loss", self.adv_G_loss)
+            self.adv_loss_sum = \
+                tf.summary.scalar("Adversarial loss", self.adv_loss)
             self.g_loss_add_adv_sum = \
-                tf.summary.scalar("G_loss_total", self.G_loss_add_adv)
+                tf.summary.scalar("Total loss", self.total_loss)
             self.good_accuracy_sum = \
-                tf.summary.scalar("good_accuracy", self.good_accuracy)
+                tf.summary.scalar("Good accuracy", self.good_accuracy)
             self.evil_accuracy_sum = \
-                tf.summary.scalar("evil_accuracy", self.evil_accuracy)
+                tf.summary.scalar("Evil accuracy", self.evil_accuracy)
             # self.adv_accuracy_sum = \
             #     tf.summary.scalar("adv_accuracy", self.adv_accuracy)
 
             self.g_loss_add_adv_merge_sum = tf.summary.merge([
-                self.adv_g_loss_sum,
+                self.adv_loss_sum,
                 # self.l1_norm_sum,
                 # self.l2_norm_sum,
                 self.g_loss_add_adv_sum,
-                self.pre_g_loss_sum,
+                self.g_loss_sum,
                 self.hinge_loss_sum])
 
             t_vars = tf.trainable_variables()
@@ -367,19 +366,19 @@ class advGAN():
             self.g_vars = [var for var in t_vars if 'g_' in var.name and 'evagan' in var.name]
 
             D_pre_opt = tf.train.AdamOptimizer(self.lr)
-            D_grads_and_vars_pre = D_pre_opt.compute_gradients(self.D_loss, self.d_vars)
+            D_grads_and_vars_pre = D_pre_opt.compute_gradients(self.d_loss, self.d_vars)
             D_grads_and_vars_pre = \
                 [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in D_grads_and_vars_pre]
             self.D_pre_train_op = D_pre_opt.apply_gradients(D_grads_and_vars_pre)
 
             # G loss without adversary loss
             G_pre_opt = tf.train.AdamOptimizer(self.lr)
-            G_grads_and_vars_pre = G_pre_opt.compute_gradients(self.G_loss, self.g_vars)
+            G_grads_and_vars_pre = G_pre_opt.compute_gradients(self.gan_loss, self.g_vars)
             G_grads_and_vars_pre = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars_pre]
             self.G_pre_train_op = G_pre_opt.apply_gradients(G_grads_and_vars_pre)
             # G loss with adversary loss
             G_opt = tf.train.AdamOptimizer(self.lr)
-            G_grads_and_vars = G_opt.compute_gradients(self.G_loss_add_adv, self.g_vars)
+            G_grads_and_vars = G_opt.compute_gradients(self.total_loss, self.g_vars)
             G_grads_and_vars = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
             self.G_train_op = G_opt.apply_gradients(G_grads_and_vars)
 
