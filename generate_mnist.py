@@ -113,8 +113,6 @@ def train():
                 batch_size, negative=False)
             good_labels = odd_even_labels(evil_labels)
 
-            print 'size of feed_data is: ' + str(feed_data.shape)
-
             # if opt.is_advGAN is True:
             #     labels = np.zeros_like(data[1])
             #     labels[:, target_label] = 1
@@ -219,8 +217,6 @@ def train():
                         model.evil_labels: test_evil_labels,
                         model.good_labels: test_good_labels
                     }
-
-                    print 'Size of test_input_data is ' + str(test_input_data.shape)
                     evil_accuracy, good_accuracy = sess.run(
                         [model.evil_accuracy, model.good_accuracy], feed)
                     # We divide the total accuracy by the number of test iterations.
