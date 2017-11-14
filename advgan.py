@@ -339,7 +339,7 @@ class advGAN():
             #     self.labels, tf.nn.softmax(self.fake_predict_labels))
 
             # Why is it only the G_loss? Why not gan_loss?
-            self.total_loss = G_lambda * G_loss + \
+            self.total_loss = G_loss + \
                 hinge_lambda * hinge_loss + \
                 L1_lambda * L1_norm + \
                 L2_lambda * L2_norm + \
