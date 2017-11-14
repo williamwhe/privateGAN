@@ -38,7 +38,8 @@ def train(file_name,
     # opt = opts.parse_opt()
     # mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
     if data_path == None:
-        data_path = 'MNIST_data/held_data.npz'
+        print 'Using default dataset A.'
+        data_path = 'MNIST_data/A.npz'
 
     loaded = np.load(data_path)
     train_data, train_label, test_data, test_label = \
