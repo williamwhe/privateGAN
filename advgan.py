@@ -378,7 +378,7 @@ class advGAN():
 
             # G loss without adversary loss
             G_pre_opt = tf.train.AdamOptimizer(self.lr)
-            G_grads_and_vars_pre = G_pre_opt.compute_gradients(self.total_loss, self.g_vars)
+            G_grads_and_vars_pre = G_pre_opt.compute_gradients(self.gan_loss, self.g_vars)
             G_grads_and_vars_pre = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars_pre]
             self.G_pre_train_op = G_pre_opt.apply_gradients(G_grads_and_vars_pre)
             # G loss with adversary loss
