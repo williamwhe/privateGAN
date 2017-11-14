@@ -34,7 +34,7 @@ def train():
     # test_data = mnist.test.images * 2.0 - 1.0
     # test_label = mnist.test.labels
 
-    loaded = np.load('MNIST_data/kept_data.npz')
+    loaded = np.load('MNIST_data/B.npz')
     train_data, train_label, test_data, test_label = \
         loaded['train_data'], loaded['train_label'], \
         loaded['test_data'], loaded['test_label']
