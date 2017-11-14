@@ -381,21 +381,21 @@ class advGAN():
             self.D_pre_train_op = D_pre_opt.apply_gradients(D_grads_and_vars_pre)
 
             # G loss without adversary loss
-            G_pre_opt = tf.train.AdamOptimizer(self.lr)
-            G_grads_and_vars_pre = G_pre_opt.compute_gradients(self.gan_loss, self.g_vars)
-            G_grads_and_vars_pre = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars_pre]
-            self.G_pre_train_op = G_pre_opt.apply_gradients(G_grads_and_vars_pre)
+            # G_pre_opt = tf.train.AdamOptimizer(self.lr)
+            # G_grads_and_vars_pre = G_pre_opt.compute_gradients(self.gan_loss, self.g_vars)
+            # G_grads_and_vars_pre = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars_pre]
+            # self.G_pre_train_op = G_pre_opt.apply_gradients(G_grads_and_vars_pre)
             # G loss with adversary loss
             G_opt = tf.train.AdamOptimizer(self.lr)
             G_grads_and_vars = G_opt.compute_gradients(self.total_loss, self.g_vars)
             G_grads_and_vars = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
             self.G_train_op = G_opt.apply_gradients(G_grads_and_vars)
 
-    def discriminator(self, image, y = None, reuse=False):
+    def discriminator(self, image, y=None, reuse=False):
 
         with tf.variable_scope("discriminator") as scope:
             s = 32
-            s2, s4, s8, s16  = int(s/2), int(s/4), int(s/8), int(s/16)            
+            s2, s4, s8, s16 = int(s/2), int(s/4), int(s/8), int(s/16)
             if reuse:
                 tf.get_variable_scope().reuse_variables()
             else:
