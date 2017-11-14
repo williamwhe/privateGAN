@@ -153,7 +153,7 @@ def train():
             #         model.G_train_op], feed)
 
             # Training G once.
-            G_loss, _ = sess.run([model.g_loss, model.G_pre_train_op], feed)
+            # G_loss, _ = sess.run([model.g_loss, model.G_pre_train_op], feed)
 
             # Training G twice.
             G_loss, gan_loss, hinge_loss, l1_loss, l2_loss, \
