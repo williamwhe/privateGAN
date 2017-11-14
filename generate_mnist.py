@@ -176,7 +176,7 @@ def train():
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:
                 print "iteration: ", iteration
-                print '\tD: %.4f, G: %.4f\n\thinge(%d): %.4f, L1(%d): %.4f, L2(%d): %.4f' % (
+                print '\tD: %.4f, G: %.4f\n\thinge(%.1f): %.4f, L1(%.1f): %.4f, L2(%.1f): %.4f' % (
                     D_loss, G_loss, opt.H_lambda, hinge_loss,
                     opt.L1_lambda, l1_loss, opt.L2_lambda, l2_loss)
                 print '\t\tGAN total loss: %.4f' % gan_loss
