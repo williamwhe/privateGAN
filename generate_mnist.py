@@ -152,10 +152,13 @@ def train():
             #         model.hinge_loss,
             #         model.G_train_op], feed)
 
-            G_loss, D_loss, gan_loss, hinge_loss, l1_loss, l2_loss, \
-                good_fn_loss, evil_fn_loss, adv_loss, total_loss = sess.run([
+            # Training G once.
+            G_loss, _ = sess.run([model.g_loss, model.G_pre_train_op], feed)
+
+            # Training G twice.
+            G_loss, gan_loss, hinge_loss, l1_loss, l2_loss, \
+                good_fn_loss, evil_fn_loss, adv_loss, total_loss, _ = sess.run([
                     model.g_loss,
-                    model.d_loss,
                     model.gan_loss,
                     model.hinge_loss,
                     model.l1_loss,
@@ -163,14 +166,12 @@ def train():
                     model.good_fn_loss,
                     model.evil_fn_loss,
                     model.adv_loss,
-                    model.total_loss
-                ], feed)
+                    model.total_loss,
+                    model.G_train_op], feed)
             # writer.add_summary(summary_str, iteration)
 
-            # summary_str, D_loss, _ = sess.run([
-            #     model.pre_d_loss_sum,
-            #     model.D_loss,
-            #     model.D_pre_train_op], feed)
+            # Training D.
+            D_loss, _ = sess.run([model.d_loss, model.D_pre_train_op], feed)
             # writer.add_summary(summary_str, iteration)
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:

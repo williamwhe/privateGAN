@@ -277,7 +277,7 @@ class advGAN():
             self.l2_loss = L2_norm
             self.g_loss = G_loss
             self.hinge_loss = hinge_loss
-            self.gan_loss = G_loss + L1_lambda * L1_norm + \
+            self.gan_loss = G_lambda * G_loss + L1_lambda * L1_norm + \
                 L2_lambda * L2_norm + hinge_lambda * hinge_loss
 
             # test with D_loss
@@ -339,11 +339,7 @@ class advGAN():
             # self.adv_accuracy = self._metric(
             #     self.labels, tf.nn.softmax(self.fake_predict_labels))
 
-            self.total_loss = G_lambda * self.g_loss + \
-                ld * self.adv_loss + \
-                L1_lambda * self.l1_loss + \
-                L2_lambda * self.l2_loss + \
-                hinge_lambda * self.hinge_loss
+            self.total_loss = self.gan_loss + ld * self.adv_loss
             # # Why is it only the G_loss? Why not gan_loss?
             # self.total_loss = G_lambda * G_loss + \
             #     ld * self.adv_loss # This is only added to self.gan_loss. For unknown reasons.
