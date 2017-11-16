@@ -16,10 +16,10 @@ def parse_opt():
     parser.add_argument('--model_restore', type=str, default="models/mnist",
                         help="checkpoint model name of whitebox")
     parser.add_argument('--good_model_path', type=str,
-                        default='models/oe_kept_deep',
+                        default='models/A_odd_even',
                         help='path for saved GOOD model')
     parser.add_argument('--evil_model_path', type=str,
-                        default='models/all_kept_deep',
+                        default='models/A_digits',
                         help='path for saved EVIL model')
 
     parser.add_argument('--evil_label_num', type=int, default=10,
