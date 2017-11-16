@@ -354,7 +354,7 @@ def train():
         print new_test_label.shape
 
         print 'Saving ...',
-        np.savez_compressed('MNIST_data/distorted_data',
+        np.savez_compressed(opt.output_path,
                             train_data=new_train_data,
                             train_label=new_train_label,
                             test_data=new_test_data,

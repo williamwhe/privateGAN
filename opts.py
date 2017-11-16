@@ -10,7 +10,8 @@ def parse_opt():
     """
     parser = argparse.ArgumentParser()
 
-    # Data input settings
+    parser.add_argument('--output_path', type=str, default='MNIST_data/perturbed',
+                        help='Path for the output perturbed data.')
 
     # whitebox
     parser.add_argument('--model_restore', type=str, default="models/mnist",
