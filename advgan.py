@@ -370,22 +370,25 @@ class advGAN():
             self.d_vars = [var for var in t_vars if 'd_' in var.name and 'evagan' in var.name]
             self.g_vars = [var for var in t_vars if 'g_' in var.name and 'evagan' in var.name]
 
-            D_pre_opt = tf.train.AdamOptimizer(self.lr)
-            D_grads_and_vars_pre = D_pre_opt.compute_gradients(self.d_loss, self.d_vars)
-            D_grads_and_vars_pre = \
-                [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in D_grads_and_vars_pre]
-            self.D_pre_train_op = D_pre_opt.apply_gradients(D_grads_and_vars_pre)
+
+            self.d_optim = tf.train.AdamOptimizer(self.lr).minimize(self.d_loss, self.d_vars)
+            # D_pre_opt = tf.train.AdamOptimizer(self.lr)
+            # D_grads_and_vars_pre = D_pre_opt.compute_gradients(self.d_loss, self.d_vars)
+            # D_grads_and_vars_pre = \
+            #     [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in D_grads_and_vars_pre]
+            # self.D_pre_train_op = D_pre_opt.apply_gradients(D_grads_and_vars_pre)
 
             # G loss without adversary loss
-            G_pre_opt = tf.train.AdamOptimizer(self.lr)
-            G_grads_and_vars_pre = G_pre_opt.compute_gradients(G_loss, self.g_vars)
-            G_grads_and_vars_pre = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars_pre]
-            self.G_pre_train_op = G_pre_opt.apply_gradients(G_grads_and_vars_pre)
+            # G_pre_opt = tf.train.AdamOptimizer(self.lr)
+            # G_grads_and_vars_pre = G_pre_opt.compute_gradients(G_loss, self.g_vars)
+            # G_grads_and_vars_pre = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars_pre]
+            # self.G_pre_train_op = G_pre_opt.apply_gradients(G_grads_and_vars_pre)
             # G loss with adversary loss
-            G_opt = tf.train.AdamOptimizer(self.lr)
-            G_grads_and_vars = G_opt.compute_gradients(self.total_loss, self.g_vars)
-            G_grads_and_vars = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
-            self.G_train_op = G_opt.apply_gradients(G_grads_and_vars)
+            self.g_optim = tf.train.AdamOptimizer(self.lr).minimize(self.total_loss, self.g_vars)
+            # G_opt = tf.train.AdamOptimizer(self.lr)
+            # G_grads_and_vars = G_opt.compute_gradients(self.total_loss, self.g_vars)
+            # G_grads_and_vars = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
+            # self.G_train_op = G_opt.apply_gradients(G_grads_and_vars)
 
     def discriminator(self, image, y=None, reuse=False):
 
