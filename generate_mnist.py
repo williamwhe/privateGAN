@@ -102,6 +102,7 @@ def train():
 
         acc_file = open('acc.txt', 'w')
         loss_file = open('loss.txt', 'w')
+        gan_file = open('gan.txt', 'w')
 
         save_anything = False
 
@@ -183,6 +184,7 @@ def train():
                 print '\tGood: %.4f, Evil: %.4f' % (good_fn_loss, evil_fn_loss)
                 print '\tAdv: %.4f, Total: %.4f' % (adv_loss, total_loss)
                 loss_file.write('%d, %.4f, %.4f\n' % (iteration, good_fn_loss, evil_fn_loss))
+                gan_file.write('%d, %.4f, %.4f\n' % (iteration, G_loss, D_loss))
 
 
             if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
@@ -316,6 +318,7 @@ def train():
             iteration += 1
         acc_file.close()
         loss_file.close()
+        gan_file.close()
 
         # We can transform the training and test data given in the beginning here.
         # This is only half the actual data.
