@@ -367,7 +367,7 @@ class advGAN():
                 self.good_loss_sum,
                 self.evil_loss_sum,
                 self.adv_loss_sum,
-                self.total_loss])
+                self.total_loss_sum])
 
             t_vars = tf.trainable_variables()
             self.d_vars = [var for var in t_vars if 'd_' in var.name and 'evagan' in var.name]
