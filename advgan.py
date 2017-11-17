@@ -289,10 +289,9 @@ class advGAN():
             self.g_loss_sum = tf.summary.scalar("G loss", self.g_loss)
             self.gan_loss_sum = tf.summary.scalar("GAN loss", self.gan_loss)
             self.d_loss_sum = tf.summary.scalar("D loss", self.d_loss)
-            # self.l1_norm_sum = tf.summary.scalar("l1_loss", self.L1_norm)
-            # self.l2_norm_sum = tf.summary.scalar("l2_loss", self.L2_norm)
-            self.hinge_loss_sum = \
-                tf.summary.scalar("hinge_loss", self.hinge_loss)
+            self.l1_loss_sum = tf.summary.scalar("l1_loss", self.l1_loss)
+            self.l2_loss_sum = tf.summary.scalar("l2_loss", self.l2_loss)
+            self.hinge_loss_sum = tf.summary.scalar("hinge_loss", self.hinge_loss)
 
             # Two competing good/evil classifiers.
             # 1. The good model.
@@ -347,10 +346,10 @@ class advGAN():
             #     # L1_lambda * L1_norm + \
             #     # L2_lambda * L2_norm
 
-            self.adv_loss_sum = \
-                tf.summary.scalar("Adversarial loss", self.adv_loss)
-            self.g_loss_add_adv_sum = \
-                tf.summary.scalar("Total loss", self.total_loss)
+            self.good_loss_sum = tf.summary.scalar("Good loss", self.good_fn_loss)
+            self.evil_loss_sum = tf.summary.scalar("Evil loss", self.evil_fn_loss)
+            self.adv_loss_sum = tf.summary.scalar("Adversarial loss", self.adv_loss)
+            self.total_loss_sum = tf.summary.scalar("Total loss", self.total_loss)
             self.good_accuracy_sum = \
                 tf.summary.scalar("Good accuracy", self.good_accuracy)
             self.evil_accuracy_sum = \
@@ -358,13 +357,17 @@ class advGAN():
             # self.adv_accuracy_sum = \
             #     tf.summary.scalar("adv_accuracy", self.adv_accuracy)
 
-            self.g_loss_add_adv_merge_sum = tf.summary.merge([
-                self.adv_loss_sum,
-                # self.l1_norm_sum,
-                # self.l2_norm_sum,
-                self.g_loss_add_adv_sum,
+            self.total_loss_merge_sum = tf.summary.merge([
+                self.l1_loss_sum,
+                self.l2_loss_sum,
+                self.hinge_loss_sum,
                 self.g_loss_sum,
-                self.hinge_loss_sum])
+                self.d_loss_sum,
+                self.gan_loss_sum,
+                self.good_loss_sum,
+                self.evil_loss_sum,
+                self.adv_loss_sum,
+                self.total_loss])
 
             t_vars = tf.trainable_variables()
             self.d_vars = [var for var in t_vars if 'd_' in var.name and 'evagan' in var.name]

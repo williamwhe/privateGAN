@@ -64,14 +64,6 @@ def train():
         # Initialize the variables, and restore the variables form checkpoint if there is.
         # and initialize the writer
         iteration = 0
-        # sample_matrix = []
-        # source_matrix = []
-        # magnitude_matrix = []
-        # min_adv_accuracys = []
-        # corsp_magnitudes = []
-        #initial whitebox model
-        # model_store = opt.model_restore
-        # whitebox_model = MNISTModel(model_store, sess)
 
         print '\tRetrieving evil model from "%s"' % opt.evil_model_path
         evil_model = MNISTModel(opt.evil_model_path)
@@ -83,22 +75,10 @@ def train():
         iteration = 0
         min_adv_accuracy = 10e10
         max_accuracy_diff = -np.inf
-        # if opt.is_advGAN:
-        #     source_label = opt.s_l
-        #     target_label = opt.t_l
-        #     if source_label == target_label:
-        #         raise ValueError("source and target labels are equal.")
-        #     print "source: {}, target: {}.".format(source_label, target_label)
 
         writer = tf.summary.FileWriter("logs", sess.graph)
         loader = Dataset2(train_data, train_label)
         print 'Training data loaded.'
-        # model_num = 0
-
-        # best_show_samples_magintude = []
-        # best_show_samples = []
-        # best_show_source_imgs = []
-        # best_show_idxs = []
 
         acc_file = open('acc.txt', 'w')
         loss_file = open('loss.txt', 'w')
@@ -114,27 +94,6 @@ def train():
                 batch_size, negative=False)
             good_labels = odd_even_labels(evil_labels)
 
-            # if opt.is_advGAN is True:
-            #     labels = np.zeros_like(data[1])
-            #     labels[:, target_label] = 1
-            # else: # opts.is_advGAN is False.
-            #     labels = data[1]
-
-            # feed = {}
-            # if opt.is_advGAN is True:
-            #     # This is the setting used for advGAN.
-            #     feed = {
-            #         model.source: data[0],
-            #         model.labels: labels,
-            #         model.target: data[2]
-            #     }
-            # else: # opt.is_advGAN == False. Using privateGAN.
-            #     feed = {
-            #         model.source: data[0],
-            #         model.labels: data[1],
-            #         model.target: data[0]
-            #     }
-
             feed = {
                 model.source: feed_data,
                 model.target: real_data,
@@ -142,23 +101,15 @@ def train():
                 model.evil_labels: evil_labels
             }
 
-            # summary_str, G_loss, pre_G_loss, adv_G_loss, good_fn_loss, \
-            #     evil_fn_loss, hinge_loss, _ = sess.run([
-            #         model.g_loss_add_adv_merge_sum,
-            #         model.total_loss,
-            #         model.pre_G_loss,
-            #         model.adv_G_loss,
-            #         model.good_fn_loss,
-            #         model.evil_fn_loss,
-            #         model.hinge_loss,
-            #         model.G_train_op], feed)
-
             # Training G once.
-            G_loss, _ = sess.run([model.g_loss, model.G_train_op], feed)
+            summary_str, G_loss, _ = sess.run(
+                [model.total_loss_merge_sum, model.g_loss, model.G_train_op], feed)
+            writer.add_summary(summary_str, iteration)
 
             # Training G twice.
-            G_loss, gan_loss, hinge_loss, l1_loss, l2_loss, \
+            summary_str, G_loss, gan_loss, hinge_loss, l1_loss, l2_loss, \
                 good_fn_loss, evil_fn_loss, adv_loss, total_loss, _ = sess.run([
+                    model.total_loss_merge_sum,
                     model.g_loss,
                     model.gan_loss,
                     model.hinge_loss,
@@ -169,11 +120,11 @@ def train():
                     model.adv_loss,
                     model.total_loss,
                     model.G_train_op], feed)
-            # writer.add_summary(summary_str, iteration)
+            writer.add_summary(summary_str, iteration)
 
             # Training D.
-            D_loss, _ = sess.run([model.d_loss, model.D_pre_train_op], feed)
-            # writer.add_summary(summary_str, iteration)
+            summary_str, D_loss, _ = sess.run([model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
+            writer.add_summary(summary_str, iteration)
 
             if iteration != 0 and iteration % opt.losses_log_every == 0:
                 print "iteration: ", iteration
