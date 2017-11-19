@@ -280,7 +280,7 @@ def train():
         new_train_label = []
         for _ in range(iter_num):
             batch_data, batch_label, _ = loader.next_batch(batch_size)
-            new_data = sess.run(model.fake_images, {model.source: batch_data})
+            new_data = sess.run(model.fake_images_sample, {model.source: batch_data})
             new_train_data.append(new_data)
             new_train_label.append(batch_label)
         new_train_data = np.concatenate(new_train_data)
@@ -293,7 +293,7 @@ def train():
         new_test_label = []
         for _ in range(iter_num):
             batch_data, batch_label, _ = loader.next_batch(batch_size)
-            new_data = sess.run(model.fake_images, {model.source: batch_data})
+            new_data = sess.run(model.fake_images_sample, {model.source: batch_data})
             new_test_data.append(new_data)
             new_test_label.append(batch_label)
         new_test_data = np.concatenate(new_test_data)
