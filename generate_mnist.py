@@ -247,7 +247,7 @@ def train():
                 order = np.concatenate((odds, evens))
                 fakes = merge(fake_samples[order], [10, 10])
                 original = merge(original_samples[order], [10, 10])
-                noise = merge(fakes - original, [10, 10])
+                noise = fakes - original
                 scipy.misc.imsave('snapshot_%d.png' % iteration,
                                   np.concatenate([fakes, noise, original], axis=1))
                 # save_images(fake_samples[order], [10, 10], 'best_images.png')
