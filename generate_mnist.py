@@ -184,7 +184,7 @@ def train():
                     # test_adv_acc += test_adv_accuracy
 
                     fake_images, g_x = sess.run(
-                        [model.fake_images_sample, model.g_x],
+                        [model.fake_images_sample, model.sample_noise],
                         {model.source: test_input_data})
 
                     for lbl in range(test_loader._num_labels):
@@ -247,7 +247,7 @@ def train():
                 order = np.concatenate((odds, evens))
                 fakes = merge(fake_samples[order], [10, 10])
                 original = merge(original_samples[order], [10, 10])
-                noise = fakes - original
+                noise = merge(fake_noise[order], [10, 10])
                 scipy.misc.imsave('snapshot_%d.png' % iteration,
                                   np.concatenate([fakes, noise, original], axis=1))
                 # save_images(fake_samples[order], [10, 10], 'best_images.png')

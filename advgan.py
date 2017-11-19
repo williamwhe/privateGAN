@@ -262,7 +262,7 @@ class advGAN():
             self.fake_images, self.g_x = self.generator(self.images)
 
             # We sample an image
-            self.fake_images_sample = self.sampler(self.images)
+            self.fake_images_sample, self.sample_noise = self.sampler(self.images)
             self.fake_images_sample_flatten = \
                 tf.reshape(self.fake_images_sample, [-1, 28 * 28])
             self.fake_images_correct = \
@@ -585,4 +585,5 @@ class advGAN():
 
             # return tf.clip_by_value( tf.clip_by_value( tf.nn.tanh(self.d5) , -0.6, 0.6) + image, -1.0, 1.0)
             return tf.clip_by_value(
-                self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0)
+                self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0), \
+                tf.nn.tanh(self.d5)
