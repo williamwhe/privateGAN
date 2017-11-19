@@ -41,6 +41,8 @@ class advGAN():
         self.saver = tf.train.Saver(max_to_keep=1000)
         self.sess.run(tf.initialize_all_variables())
 
+        self.good_model.model.load_weights(self.good_model.model_path)
+        self.evil_model.model.load_weights(self.evil_model.model_path)
         # self.model.model.load_weights(self.model_restore)
         # self.evil_model.model.load_weights(self.model_restore)
 
@@ -486,7 +488,7 @@ class advGAN():
             d3 = tf.nn.dropout(self.g_bn_d3(self.d3), 0.5)
             d3 = tf.concat([d3, e2], 3)
             # d3 is (8 x 8 x self.gf_dim*2*2)
-            
+
             self.d4, self.d4_w, self.d4_b = deconv2d(
                 tf.nn.relu(d3),
                 [self.batch_size, 14, 14, self.gf_dim],

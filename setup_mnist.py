@@ -63,6 +63,7 @@ class MNISTModel:
     Standad MNIST classifier.
     """
     def __init__(self, restore):
+        self.model_path = restore
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 10
@@ -102,6 +103,7 @@ class OddEvenMNIST:
     An Odd/Even classifier for MNIST data.
     """
     def __init__(self, restore):
+        self.model_path = restore
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 2
@@ -139,6 +141,7 @@ class OddEvenMNIST:
 
 class MNISTModel2:
     def __init__(self, restore):
+        self.model_path = restore
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 10
@@ -164,6 +167,7 @@ class MNISTModel2:
 
 class MNISTModel3:
     def __init__(self, restore):
+        self.model_path = restore
         self.num_channels = 1
         self.image_size = 28
         self.num_labels = 10
