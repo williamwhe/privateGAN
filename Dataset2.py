@@ -69,13 +69,15 @@ def output_sample(data, labels):
     """
     creates a specific batch for image sampling.
     """
+    if  len(data.shape) != 2:
+        raise ValueError("output_sample() works with flattened datasets. N rows and D columns.")
     res = []
-    flatten_dim = data.shape[1] * data.shape[2] * data.shape[3]
-    for lbl in range(labels.shape[1]):
+    num_labels = labels.shape[1]
+    for lbl in range(num_labels):
         idx = np.where(labels[:, lbl] == 1)[0]
         res.append(data[idx[:10], :])
     res.extend(res)
-    return np.array(res).reshape((-1, flatten_dim))
+    return np.array(res).reshape(num_labels * 2 * num_labels, -1)
 
 
 def odd_even_labels(labels, one_hot=True):
