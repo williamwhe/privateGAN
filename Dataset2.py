@@ -71,11 +71,14 @@ def output_sample(data, labels):
     """
     if  len(data.shape) != 2:
         raise ValueError("output_sample() works with flattened datasets. N rows and D columns.")
-    res = []
     num_labels = labels.shape[1]
+    res = [[] for _ in range(num_labels)]
     for lbl in range(num_labels):
         idx = np.where(labels[:, lbl] == 1)[0]
-        res.append(data[idx[:10], :])
+        if lbl % 2 == 0:
+            res[lbl // 2 + 5] = data[idx[:10], :]
+        else:
+            res[lbl // 2] = data[idx[:10], :]
     res.extend(res)
     return np.array(res).reshape(num_labels * 2 * num_labels, -1)
 
