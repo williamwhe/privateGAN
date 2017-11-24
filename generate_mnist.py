@@ -230,9 +230,6 @@ def train():
                 fake_samples, fake_noise = sess.run(
                     [model.fake_images_sample, model.sample_noise],
                     {model.source: output_samples})
-
-                print fake_samples.shape
-                print fake_noise.shape
                 # Resizing the samples to save them later on.
                 # fake_samples = np.reshape(np.array(fake_samples), [100, -1])
                 # original_samples = np.reshape(np.array(original_samples), [100, -1])
