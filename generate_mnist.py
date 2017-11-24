@@ -14,7 +14,7 @@ import cifar10
 # from utils import plot
 from utils import merge
 from advgan import advGAN
-from Dataset2 import Dataset2, odd_even_labels
+from Dataset2 import Dataset2, odd_even_labels, output_sample
 # from sklearn import model_selection
 from setup_mnist import MNIST, MNISTModel, MNISTModel2, MNISTModel3, OddEvenMNIST
 from setup_cifar import CIFARModel, CIFARModel2, CIFARModel3
@@ -38,6 +38,8 @@ def train():
     train_data, train_label, test_data, test_label = \
         loaded['train_data'], loaded['train_label'], \
         loaded['test_data'], loaded['test_label']
+
+    output_samples = output_sample(test_data, test_label)
 
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
@@ -143,7 +145,6 @@ def train():
                 # print 'Saving the model in "%s"' % checkpoint_path
 
                 # model.saver.save(sess, checkpoint_path, global_step=iteration)
-
                 test_loader = Dataset2(test_data, test_label)
 
                 test_num = test_loader._num_examples
@@ -226,10 +227,13 @@ def train():
                 acc_file.write('%d, %.4f, %.4f\n' % (
                     iteration, good_accuracy, evil_accuracy))
 
+                fake_images, fake_noise = sess.run(
+                    [model.fake_images_sample, model.sample_noise],
+                    {model.source: output_samples})
                 # Resizing the samples to save them later on.
-                fake_samples = np.reshape(np.array(fake_samples), [100, -1])
-                original_samples = np.reshape(np.array(original_samples), [100, -1])
-                fake_noise = np.reshape(np.array(fake_noise), [100, -1])
+                # fake_samples = np.reshape(np.array(fake_samples), [100, -1])
+                # original_samples = np.reshape(np.array(original_samples), [100, -1])
+                # fake_noise = np.reshape(np.array(fake_noise), [100, -1])
 
                 # if (good_accuracy - evil_accuracy) > max_accuracy_diff:
                 max_accuracy_diff = good_accuracy - evil_accuracy
@@ -241,13 +245,13 @@ def train():
                 #     min_adv_accuracy = test_adv_accuracy
                 # save_images(fake_images[:100], [10, 10], 'fake.png')
                 # save_images(test_input_data[:100], [10, 10], 'real.png')
-                all_idx = np.arange(100)
-                odds = np.where((all_idx / 10) % 2 == 1)[0]
-                evens = np.where((all_idx / 10) % 2 == 0)[0]
-                order = np.concatenate((odds, evens))
-                fakes = merge(fake_samples[order], [10, 10])
-                original = merge(original_samples[order], [10, 10])
-                noise = merge(fake_noise[order], [10, 10])
+                # all_idx = np.arange(100)
+                # odds = np.where((all_idx / 10) % 2 == 1)[0]
+                # evens = np.where((all_idx / 10) % 2 == 0)[0]
+                # order = np.concatenate((odds, evens))
+                fakes = merge(fake_samples, [10, 10])
+                original = merge(output_sample, [10, 10])
+                noise = merge(fake_noise, [10, 10])
                 scipy.misc.imsave('snapshot_%d.png' % iteration,
                                   np.concatenate([fakes, noise, original], axis=1))
                 # save_images(fake_samples[order], [10, 10], 'best_images.png')

@@ -65,6 +65,19 @@ from tensorflow.examples.tutorials.mnist import input_data
 #     # Return the kept data.
 #     return train_kept_data, train_kept_label, test_kept_data, test_kept_label
 
+def output_sample(data, labels):
+    """
+    creates a specific batch for image sampling.
+    """
+    res = []
+    for lbl in range(labels.shape[1]):
+        idx = np.where(labels[:, lbl] == 1)[0]
+        print idx[:10]
+        res.append(data[idx[:10], :])
+    res.extend(res)
+    return np.array(res)
+    
+
 def odd_even_labels(labels, one_hot=True):
     """
     Turns digit classes to odd[1]/even[0].
