@@ -72,11 +72,10 @@ def output_sample(data, labels):
     res = []
     for lbl in range(labels.shape[1]):
         idx = np.where(labels[:, lbl] == 1)[0]
-        print idx[:10]
         res.append(data[idx[:10], :])
     res.extend(res)
-    return np.array(res)
-    
+    return np.array(res).reshape((-1, 28, 28, 1))
+
 
 def odd_even_labels(labels, one_hot=True):
     """
