@@ -70,11 +70,12 @@ def output_sample(data, labels):
     creates a specific batch for image sampling.
     """
     res = []
+    flatten_dim = data.shape[1] * data.shape[2] * data.shape[3]
     for lbl in range(labels.shape[1]):
         idx = np.where(labels[:, lbl] == 1)[0]
         res.append(data[idx[:10], :])
     res.extend(res)
-    return np.array(res).reshape((-1, 28, 28, 1))
+    return np.array(res).reshape((-1, flatten_dim))
 
 
 def odd_even_labels(labels, one_hot=True):
