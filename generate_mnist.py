@@ -184,17 +184,17 @@ def train():
                     # test_acc += test_accuracy
                     # test_adv_acc += test_adv_accuracy
 
-                    fake_images, g_x = sess.run(
-                        [model.fake_images_sample, model.sample_noise],
-                        {model.source: test_input_data})
+                    # fake_images, g_x = sess.run(
+                    #     [model.fake_images_sample, model.sample_noise],
+                    #     {model.source: test_input_data})
 
-                    for lbl in range(test_loader._num_labels):
-                        if len(fake_samples[lbl]) < 10:
-                            idx = np.where(evil_categorical_labels == lbl)[0]
-                            if idx.shape[0] >= 10:
-                                fake_samples[lbl] = fake_images[idx[:10]]
-                                fake_noise[lbl] = g_x[idx[:10]]
-                                original_samples[lbl] = test_input_data[idx[:10]]
+                    # for lbl in range(test_loader._num_labels):
+                    #     if len(fake_samples[lbl]) < 10:
+                    #         idx = np.where(evil_categorical_labels == lbl)[0]
+                    #         if idx.shape[0] >= 10:
+                    #             fake_samples[lbl] = fake_images[idx[:10]]
+                    #             fake_noise[lbl] = g_x[idx[:10]]
+                    #             original_samples[lbl] = test_input_data[idx[:10]]
 
 
                     # for lbl, sample, noise in zip(test_evil_labels, fake_images, fake_noise):
@@ -227,7 +227,7 @@ def train():
                 acc_file.write('%d, %.4f, %.4f\n' % (
                     iteration, good_accuracy, evil_accuracy))
 
-                fake_images, fake_noise = sess.run(
+                fake_samples, fake_noise = sess.run(
                     [model.fake_images_sample, model.sample_noise],
                     {model.source: output_samples})
                 # Resizing the samples to save them later on.
