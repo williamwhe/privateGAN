@@ -230,7 +230,7 @@ def train():
                 fake_samples, fake_noise = sess.run(
                     [model.fake_images_sample, model.sample_noise],
                     {model.source: output_samples})
-                
+
                 print fake_samples.shape
                 print fake_noise.shape
                 # Resizing the samples to save them later on.
@@ -252,7 +252,7 @@ def train():
                 # odds = np.where((all_idx / 10) % 2 == 1)[0]
                 # evens = np.where((all_idx / 10) % 2 == 0)[0]
                 # order = np.concatenate((odds, evens))
-                fakes = merge(fake_samples[:100], [10, 10])
+                fakes = merge(fake_samples[:100, :], [10, 10])
                 original = merge(output_samples[:100].reshape(-1, 28, 28, 1), [10, 10])
                 noise = merge(fake_noise[:100], [10, 10])
                 scipy.misc.imsave('snapshot_%d.png' % iteration,
