@@ -233,7 +233,6 @@ def train():
                 
                 print fake_samples.shape
                 print fake_noise.shape
-                exit()
                 # Resizing the samples to save them later on.
                 # fake_samples = np.reshape(np.array(fake_samples), [100, -1])
                 # original_samples = np.reshape(np.array(original_samples), [100, -1])
@@ -253,9 +252,9 @@ def train():
                 # odds = np.where((all_idx / 10) % 2 == 1)[0]
                 # evens = np.where((all_idx / 10) % 2 == 0)[0]
                 # order = np.concatenate((odds, evens))
-                fakes = merge(fake_samples, [10, 10])
+                fakes = merge(fake_samples[:100], [10, 10])
                 original = merge(output_samples[:100].reshape(-1, 28, 28, 1), [10, 10])
-                noise = merge(fake_noise, [10, 10])
+                noise = merge(fake_noise[:100], [10, 10])
                 scipy.misc.imsave('snapshot_%d.png' % iteration,
                                   np.concatenate([fakes, noise, original], axis=1))
                 # save_images(fake_samples[order], [10, 10], 'best_images.png')
