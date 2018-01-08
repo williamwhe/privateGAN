@@ -40,11 +40,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--min_num_pics', type=int, default=20,
                         help='Minimum number of pictures for people to be included in data.')
-    parser.add_argument('--bottleneck_dir', type=str, deafult='./bottleneck',
+    parser.add_argument('--bottleneck_dir', type=str, default='./bottleneck',
                         help='Path saved bottleneck data.')
     parser.add_argument('--bottleneck_batch_size', type=int, default=100,
                         help='Size of the batch for creating bottleneck.')
-    parser.add_argument('--image_path', type=str, default='./lfw/',
+    parser.add_argument('--image_path', type=str, default='./lfw_data/',
                         help='Path to LFW data.')
     parser.add_argument('--image_size', type=int, default=182,
                         help='Size of input images.')
