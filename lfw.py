@@ -45,7 +45,7 @@ def read_data(img_path, selected_names=None, img_size=(182, 182), categorical=Tr
 def main():
     print "Testing the input method."
     names = ['Aaron_Eckhart', 'Aaron_Tippin']
-    imgs, lbls = read_data('../facenet/data/aligned_images/', names)
+    imgs, lbls = read_data('lfw_data/', names)
     print imgs.shape
     print lbls
 
