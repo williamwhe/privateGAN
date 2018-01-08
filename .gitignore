@@ -117,3 +117,5 @@ logs/*
 *.gz
 GAN/
 MNIST_data/
+bottleneck/
+lfw_data/
