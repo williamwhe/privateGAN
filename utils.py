@@ -159,7 +159,8 @@ def merge_images(images, size):
 def merge(images, size):
     if len(images.shape) == 2:
         shapes = images.shape
-        # images = images.reshape( (shapes[0], int( math.sqrt(shapes[1])), int( math.sqrt(shapes[1])) ,1 ) )
+        # images = images.reshape((shapes[0], int(math.sqrt(shapes[1])),
+        #                         int( math.sqrt(shapes[1])) ,1))
         images = images.reshape((shapes[0], 28, 28, 1))
 
     h, w = images.shape[1], images.shape[2]

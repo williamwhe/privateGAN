@@ -147,7 +147,7 @@ def main():
                         help="path to save trained model. e.g.: 'models/mnist'")
     parser.add_argument('--type', type=str, default='all_digits',
                         help="(all_digits/odd_even) Determines type of classifier.")
-    
+
     parser.add_argument('--data_path', type=str, default='MNIST_data/A.npz',
                         help='Dataset path.')
 
