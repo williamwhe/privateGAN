@@ -111,7 +111,7 @@ def main():
                         help='Path to LFW data.')
     parser.add_argument('--image_size', type=int, default=224,
                         help='Size of input images.')
-    parser.add_argument('--batch_size', type=int, default=128,
+    parser.add_argument('--batch_size', type=int, default=32,
                         help='Batch size used for training.')
     parser.add_argument('--num_epochs', type=int, default=100,
                         help='Number of training epochs.')
