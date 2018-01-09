@@ -61,8 +61,8 @@ def train(split_data, save_path=None, input_shape=(224, 224, 3), batch_size=128,
     model = Model(vgg_notop.input, face_probs)
 
     # We make all other layers UNTRAINABLE.
-    for i in range(len(model.layers) - 3, len(model.layers)):
-        model.layers[i].trainable = False
+    # for i in range(len(model.layers) - 3, len(model.layers)):
+    #     model.layers[i].trainable = False
 
     # A softmax loss is used for training of this network.
     def fn(correct, predicted):
@@ -72,9 +72,8 @@ def train(split_data, save_path=None, input_shape=(224, 224, 3), batch_size=128,
         return tf.nn.softmax_cross_entropy_with_logits(
             labels=correct, logits=predicted)
 
-    # We use Adam optimizer for this.
-    adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    # adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
+    sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
 
     model.compile(loss=fn,
                   optimizer=sgd,
