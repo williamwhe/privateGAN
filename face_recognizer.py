@@ -100,7 +100,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=str, default="models/lfw",
                         help="Path to save trained model. e.g.: 'models/lfw'")
-    parser.add_argument('--min_num_pics', type=int, default=50,
+    parser.add_argument('--min_num_pics', type=int, default=30,
                         help='Minimum number of pictures for people to be included in data.')
     parser.add_argument('--bottleneck_dir', type=str, default='./bottleneck',
                         help='Path saved bottleneck data.')

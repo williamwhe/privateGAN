@@ -114,6 +114,16 @@ def split_dataset(data, lbls, indices):
                      valid=(Namespace(data=valid_data, lbl=valid_lbl)),
                      test=(Namespace(data=test_data, lbl=test_lbl)))
 
+def get_gender(names, gender_path='lfw_data/gender.csv'):
+    if os.path.exists(gender_path) is False:
+        raise ValueError('File %s does not exist.' % gender_path)
+
+    genders = pd.read_csv(gender_path)
+    names = pd.DataFrame(data=names, columns=['name'])
+
+    return pd.merge(genders, names, right_on='name', left_on='name').gender.values
+
+
 def main():
     print "Testing the input method."
     names = ['Aaron_Eckhart', 'Aaron_Tippin']
