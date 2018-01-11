@@ -156,8 +156,8 @@ def main():
         other_imgs, other_lbls = read_data(args.image_path, others,
                                            img_size=img_size, gender_label=True)
         split_data.train.data = np.concatenate(split_data.train.data, other_imgs)
-        split_data.train.lbl = np.concatenate(split_data.train.lbl,  other_lbls)
-    
+        split_data.train.lbl = np.concatenate(split_data.train.lbl, other_lbls)
+
     print split_data.train.data.shape
     print split_data.train.lbl.shape
 
@@ -169,6 +169,7 @@ def main():
 
     exit()
 
+    print 'Preprocessing the images.'
     for data in [split_data.train.data, split_data.valid.data, split_data.test.data]:
         data = preprocess_images(data)
 

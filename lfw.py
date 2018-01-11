@@ -167,6 +167,9 @@ def main():
                                          img_size=img_size,
                                          gender_label=True)
 
+    print other_imgs.shape
+    print imgs[train, :].shape
+    # exit()
     train_data = np.concatenate((imgs[train, :], other_imgs))
     train_gender = np.concatenate((gender[train], other_gender))
 
