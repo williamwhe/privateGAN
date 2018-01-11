@@ -105,7 +105,10 @@ def train(split_data,
               shuffle=True)
 
     if save_path:
-        model.save(save_path)
+        if gender:
+            model.save(save_path + '_gender')
+        else:
+            model.save(save_path + '_id')
 
     # We also test on the left-out test data.
     print model.evaluate(split_data.test.data,
@@ -143,20 +146,37 @@ def main():
     input_shape = (args.image_size, args.image_size, 3)
 
     names = get_people_names(args.image_path, args.min_num_pics)
-    imgs, lbls = read_data(args.image_path, names, img_size=img_size, gender_label=args.gender)
+    imgs, identity = read_data(args.image_path,
+                               names,
+                               img_size=img_size,
+                               gender_label=False)
+
+    if args.gender:
+        _, gender = read_data(args.image_path,
+                              names,
+                              img_size=img_size,
+                              gender_label=True)
+    if args.gender:
+        lbls = gender
+    else:
+        lbls = identity
+    # imgs, lbls = read_data(args.image_path, names, img_size=img_size, gender_label=args.gender)
     # numerical_lbls = np.argmax(lbls, axis=1)
     print 'Data is read.'
 
-    chunk_indices = split_indices(lbls)
+    # We split the data based on identity
+    chunk_indices = split_indices(identity)
     split_data = split_dataset(imgs, lbls, chunk_indices)
+
+    print 'Shape of labels:', lbls.shape
 
     if args.gender:
         # We take other images to train a gender identifier.
         others = np.setdiff1d(get_people_names(args.image_path), names)
         other_imgs, other_lbls = read_data(args.image_path, others,
                                            img_size=img_size, gender_label=True)
-        split_data.train.data = np.concatenate(split_data.train.data, other_imgs)
-        split_data.train.lbl = np.concatenate(split_data.train.lbl, other_lbls)
+        split_data.train.data = np.concatenate((split_data.train.data, other_imgs))
+        split_data.train.lbl = np.concatenate((split_data.train.lbl, other_lbls))
 
     print split_data.train.data.shape
     print split_data.train.lbl.shape
@@ -166,8 +186,6 @@ def main():
 
     print split_data.test.data.shape
     print split_data.test.data.shape
-
-    exit()
 
     print 'Preprocessing the images.'
     for data in [split_data.train.data, split_data.valid.data, split_data.test.data]:

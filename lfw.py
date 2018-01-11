@@ -127,9 +127,14 @@ def split_indices(lbls, training_portion=.4, validation_portion=.4):
 
 def split_dataset(data, lbls, indices):
     trn, val, tst = indices
-    train_data, train_lbl = data[trn, :], lbls[trn, :]
-    test_data, test_lbl = data[tst, :], lbls[tst, :]
-    valid_data, valid_lbl = data[val, :], lbls[val, :]
+    if len(lbls.shape) > 1:
+        train_data, train_lbl = data[trn, :], lbls[trn, :]
+        test_data, test_lbl = data[tst, :], lbls[tst, :]
+        valid_data, valid_lbl = data[val, :], lbls[val, :]
+    else:
+        train_data, train_lbl = data[trn, :], lbls[trn]
+        test_data, test_lbl = data[tst, :], lbls[tst]
+        valid_data, valid_lbl = data[val, :], lbls[val]
 
     return Namespace(train=(Namespace(data=train_data, lbl=train_lbl)),
                      valid=(Namespace(data=valid_data, lbl=valid_lbl)),
