@@ -42,7 +42,13 @@ def get_or_create_bottleneck(vgg_model, data, bottleneck_dir='./bottleneck', bat
     return features
 
 
-def train(split_data, save_path=None, input_shape=(224, 224, 3), batch_size=128, num_epochs=100):
+def train(split_data,
+          save_path=None,
+          input_shape=(224, 224, 3),
+          batch_size=128,
+          num_epochs=100,
+          gender=False):
+
     num_classes = split_data.train.lbl.shape[1]
     num_images = split_data.train.data.shape[0]
     vgg_notop = VGGFace(include_top=False, input_shape=input_shape)
@@ -65,17 +71,29 @@ def train(split_data, save_path=None, input_shape=(224, 224, 3), batch_size=128,
         model.layers[i].trainable = False
 
     # A softmax loss is used for training of this network.
-    def fn(correct, predicted):
+    def softmax(correct, predicted):
         """
-        The softmax loss function.
+        The softmax loss function. For more than 2 one-hot encoded classes.
         """
         return tf.nn.softmax_cross_entropy_with_logits(
             labels=correct, logits=predicted)
 
+    def sigmoid(correct, predicted):
+        """
+        The sigmoid loss function. For 2 classes.
+        """
+        return tf.nn.sigmoid_cross_entropy_with_logits(
+            labels=correct, logits=predicted)
+
+
     # adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
     sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
 
-    model.compile(loss=fn,
+    if gender:
+        loss_fn = sigmoid
+    else:
+        loss_fn = softmax
+    model.compile(loss=loss_fn,
                   optimizer=sgd,
                   metrics=['accuracy'])
 
@@ -114,18 +132,42 @@ def main():
                         help='Batch size used for training.')
     parser.add_argument('--num_epochs', type=int, default=100,
                         help='Number of training epochs.')
+    parser.add_argument('--gender', dest='gender', action='store_true',
+                        help='Does gender identification.')
+    parser.add_argument('--no-gender', dest='gender', action='store_false',
+                        help='Does identity recognition.')
+    parser.set_defaults(gender=False)
     args = parser.parse_args()
 
     img_size = (args.image_size, args.image_size)
     input_shape = (args.image_size, args.image_size, 3)
 
     names = get_people_names(args.image_path, args.min_num_pics)
-    imgs, lbls = read_data(args.image_path, names, img_size=img_size)
+    imgs, lbls = read_data(args.image_path, names, img_size=img_size, gender_label=args.gender)
     # numerical_lbls = np.argmax(lbls, axis=1)
     print 'Data is read.'
 
     chunk_indices = split_indices(lbls)
     split_data = split_dataset(imgs, lbls, chunk_indices)
+
+    if args.gender:
+        # We take other images to train a gender identifier.
+        others = np.setdiff1d(get_people_names(args.image_path), names)
+        other_imgs, other_lbls = read_data(args.image_path, others,
+                                           img_size=img_size, gender_label=True)
+        split_data.train.data = np.concatenate(split_data.train.data, other_imgs)
+        split_data.train.lbl = np.concatenate(split_data.train.lbl,  other_lbls)
+    
+    print split_data.train.data.shape
+    print split_data.train.lbl.shape
+
+    print split_data.valid.data.shape
+    print split_data.valid.lbl.shape
+
+    print split_data.test.data.shape
+    print split_data.test.data.shape
+
+    exit()
 
     for data in [split_data.train.data, split_data.valid.data, split_data.test.data]:
         data = preprocess_images(data)
@@ -140,7 +182,8 @@ def main():
     train(split_data, args.path,
           input_shape=input_shape,
           batch_size=args.batch_size,
-          num_epochs=args.num_epochs)
+          num_epochs=args.num_epochs,
+          gender=args.gender)
 
 
 if __name__ == '__main__':

@@ -23,24 +23,45 @@ def get_people_names(img_path, min_num_pics=1, record_file_name='lfw-names.txt')
 
     return recs[recs.num >= min_num_pics].name.values
 
-def read_data(img_path, selected_names=None, img_size=(182, 182), categorical=True):
+def read_data(img_path,
+              selected_names,
+              img_size=(224, 224),
+              one_hot_encoding=True,
+              gender_label=False,
+              to_array=True):
+
     imgs = []
     lbls = []
     cnt = 0
 
-    for folder in os.listdir(img_path):
-        if (selected_names is not None) and (folder in selected_names):
-            folder = os.path.join(img_path, folder)
+    if gender_label:
+        # We create a dictionary of people's genders.
+        genders = pd.read_csv('./lfw_data/gender.csv')
+        genders = dict(zip(genders.name.tolist(), genders.gender.tolist()))
+
+    for name in os.listdir(img_path):
+        if (selected_names is not None) and (name in selected_names):
+            print '\r%d/%d read.' % (cnt + 1, len(selected_names)),
+            folder = os.path.join(img_path, name)
+            if gender_label:
+                if genders.get(name) is None:
+                    print '\tNo gender label found for %s' % name
+                    continue
+                is_male = genders[name]
             if os.path.isdir(folder):
                 for fn in os.listdir(folder):
-                    lbls.append(cnt)
+                    if gender_label:
+                        lbls.append(is_male)
+                    else:
+                        lbls.append(cnt)
                     img = image.load_img(os.path.join(folder, fn), target_size=img_size)
                     x = image.img_to_array(img)
                     x = np.expand_dims(x, axis=0)
                     imgs.append(x)
             cnt += 1
+    print ''
     lbls = np.array(lbls)
-    if categorical:
+    if gender_label is False and one_hot_encoding is True:
         lbls = to_categorical(lbls)
     imgs = np.concatenate(imgs)
 
@@ -125,12 +146,32 @@ def get_gender(names, gender_path='lfw_data/gender.csv'):
 
 
 def main():
-    print "Testing the input method."
-    names = ['Aaron_Eckhart', 'Aaron_Tippin']
-    imgs, lbls = read_data('lfw_data/', names)
-    print imgs.shape
-    print lbls
+    image_path = 'lfw_data/'
+    img_size = (224, 224)
+
+    names = get_people_names(image_path, 30)
+    imgs, identity = read_data(image_path,
+                               names,
+                               img_size=img_size,
+                               gender_label=False)
+    _, gender = read_data(image_path,
+                          names,
+                          img_size=img_size,
+                          gender_label=True)
+
+    train, _, _ = split_indices(identity)
+
+    others = np.setdiff1d(get_people_names(image_path), names)
+    other_imgs, other_gender = read_data(image_path,
+                                         others,
+                                         img_size=img_size,
+                                         gender_label=True)
+
+    train_data = np.concatenate((imgs[train, :], other_imgs))
+    train_gender = np.concatenate((gender[train], other_gender))
+
+    print train_data.shape
+    print train_gender.shape
 
 if __name__ == '__main__':
     main()
-
