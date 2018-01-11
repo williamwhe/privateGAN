@@ -191,8 +191,6 @@ def main():
     for data in [split_data.train.data, split_data.valid.data, split_data.test.data]:
         data = preprocess_images(data)
 
-    print 'Number of images %d' % split_data.train.data.shape[0]
-    print 'Number of classes %d' % split_data.train.lbl.shape[1]
     print 'Saving directory: %s' % args.path
 
     print 'input shape:', input_shape
