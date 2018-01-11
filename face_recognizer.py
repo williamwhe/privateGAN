@@ -49,7 +49,10 @@ def train(split_data,
           num_epochs=100,
           gender=False):
 
-    num_classes = split_data.train.lbl.shape[1]
+    if gender:
+        num_classes = 1
+    else:
+        num_classes = split_data.train.lbl.shape[1]
     vgg_notop = VGGFace(include_top=False, input_shape=input_shape)
 
     # We take the output of the last MaxPooling layer.
