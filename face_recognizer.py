@@ -50,7 +50,6 @@ def train(split_data,
           gender=False):
 
     num_classes = split_data.train.lbl.shape[1]
-    num_images = split_data.train.data.shape[0]
     vgg_notop = VGGFace(include_top=False, input_shape=input_shape)
 
     # We take the output of the last MaxPooling layer.
