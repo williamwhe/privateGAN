@@ -175,6 +175,8 @@ def main():
     print split_data.test.data.shape
     print split_data.test.data.shape
 
+    exit()
+
     print 'Preprocessing the images.'
     for data in [split_data.train.data, split_data.valid.data, split_data.test.data]:
         data = preprocess_images(data)
