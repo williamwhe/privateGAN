@@ -49,10 +49,7 @@ def train(split_data,
           num_epochs=100,
           gender=False):
 
-    if gender:
-        num_classes = 1
-    else:
-        num_classes = split_data.train.lbl.shape[1]
+    num_classes = split_data.train.lbl.shape[1]
     vgg_notop = VGGFace(include_top=False, input_shape=input_shape)
 
     # We take the output of the last MaxPooling layer.
@@ -80,22 +77,11 @@ def train(split_data,
         return tf.nn.softmax_cross_entropy_with_logits(
             labels=correct, logits=predicted)
 
-    def sigmoid(correct, predicted):
-        """
-        The sigmoid loss function. For 2 classes.
-        """
-        return tf.nn.sigmoid_cross_entropy_with_logits(
-            labels=correct, logits=predicted)
-
 
     # adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
     sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
 
-    if gender:
-        loss_fn = sigmoid
-    else:
-        loss_fn = softmax
-    model.compile(loss=loss_fn,
+    model.compile(loss=softmax,
                   optimizer=sgd,
                   metrics=['accuracy'])
 

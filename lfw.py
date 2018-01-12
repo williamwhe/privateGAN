@@ -61,7 +61,7 @@ def read_data(img_path,
             cnt += 1
     print ''
     lbls = np.array(lbls)
-    if gender_label is False and one_hot_encoding is True:
+    if one_hot_encoding is True:
         lbls = to_categorical(lbls)
     imgs = np.concatenate(imgs)
 
@@ -131,10 +131,6 @@ def split_dataset(data, lbls, indices):
         train_data, train_lbl = data[trn, :], lbls[trn, :]
         test_data, test_lbl = data[tst, :], lbls[tst, :]
         valid_data, valid_lbl = data[val, :], lbls[val, :]
-    else:
-        train_data, train_lbl = data[trn, :], lbls[trn]
-        test_data, test_lbl = data[tst, :], lbls[tst]
-        valid_data, valid_lbl = data[val, :], lbls[val]
 
     return Namespace(train=(Namespace(data=train_data, lbl=train_lbl)),
                      valid=(Namespace(data=valid_data, lbl=valid_lbl)),
