@@ -27,10 +27,9 @@ def test_30_recognizer(args):
 
     print 'images shape:', X.shape
     print 'labels shape:', y.shape
-    return
 
     identity_recognizer = FaceRecognizer(args.model_path + '_id',
-                                         y.shape[0],
+                                         y.shape[1],
                                          input_shape,
                                          args.num_channels)
 

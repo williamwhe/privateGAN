@@ -37,7 +37,9 @@ class FaceRecognizer:
         x = Dense(VGG_HIDDEN_DIM, activation='relu', name='fc7')(x)
 
         # Finally, a Dense layer for the output of classes.
+        print 'Number of classes inside the FaceRecognizer class: %d' % self.num_classes
         face_probs = Dense(self.num_classes, name='fc8')(x)
+        print 'Shape of last layer:', face_probs.shape
 
         model = Model(vgg_notop.input, face_probs)
 
