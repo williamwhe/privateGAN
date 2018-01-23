@@ -428,12 +428,12 @@ class advGAN():
             # h0 is (128 x 128 x self.df_dim) 16 x 16 x df_dim 14x14
             h1 = lrelu(self.d_bn1(conv2d(h0, self.df_dim*2, name='d_h1_conv')))
             # h1 is (64 x 64 x self.df_dim*2) 8 x 8 x df_dim*2 7x 7
-            h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim*4, d_h = 1, d_w = 1, name='d_h2_conv')))
+            h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim*4, d_h=1, d_w=1, name='d_h2_conv')))
             # h2 is (32x 32 x self.df_dim*4)  4 x 4 x df_dim*4
             h3 = lrelu(self.d_bn3(conv2d(h2, self.df_dim*8, d_h=1, d_w=1, name='d_h3_conv')))
             h4 = lrelu(self.d_bn5(conv2d(h3, 1, d_h=1, d_w=1, name='d_h5_conv')))
 
-            return tf.nn.sigmoid(h4), h4 
+            return tf.nn.sigmoid(h4), h4
 
     def generator(self, image, y=None, reuse=False):
         with tf.variable_scope("generator") as scope:

@@ -145,37 +145,33 @@ def get_gender(names, gender_path='lfw_data/gender.csv'):
 
     return pd.merge(genders, names, right_on='name', left_on='name').gender.values
 
+def get_30_people_chunk(image_path,
+                        chunk_number,
+                        gender_label=False,
+                        preprocess=True,
+                        img_size=(224, 224)):
+
+    if chunk_number < 0 or chunk_number >= 3:
+        raise ValueError('chunk_number(%d) should be between 0 and 3' % chunk_number)
+    names = get_people_names(image_path, 30)
+    imgs, lbls = read_data(image_path, names, img_size=img_size, gender_label=gender_label)
+
+    indices = split_indices(lbls)
+    imgs = imgs[indices[chunk_number], :]
+    lbls = lbls[indices[chunk_number], :]
+
+    if preprocess:
+        imgs = preprocess_images(imgs)
+
+    return imgs, lbls
 
 def main():
     image_path = 'lfw_data/'
     img_size = (224, 224)
 
-    names = get_people_names(image_path, 30)
-    imgs, identity = read_data(image_path,
-                               names,
-                               img_size=img_size,
-                               gender_label=False)
-    _, gender = read_data(image_path,
-                          names,
-                          img_size=img_size,
-                          gender_label=True)
-
-    train, _, _ = split_indices(identity)
-
-    others = np.setdiff1d(get_people_names(image_path), names)
-    other_imgs, other_gender = read_data(image_path,
-                                         others,
-                                         img_size=img_size,
-                                         gender_label=True)
-
-    print other_imgs.shape
-    print imgs[train, :].shape
-    # exit()
-    train_data = np.concatenate((imgs[train, :], other_imgs))
-    train_gender = np.concatenate((gender[train], other_gender))
-
-    print train_data.shape
-    print train_gender.shape
+    imgs, lbls = get_30_people_chunk(image_path, 1)
+    print imgs.shape
+    print lbls.shape
 
 if __name__ == '__main__':
     main()

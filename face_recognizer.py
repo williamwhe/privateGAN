@@ -19,28 +19,35 @@ from lfw import get_people_names, read_data, split_dataset, split_indices, prepr
 
 VGG_HIDDEN_DIM = 512
 
-def get_or_create_bottleneck(vgg_model, data, bottleneck_dir='./bottleneck', batch_size=100):
-    """Creates or, if previously created and saved, loads the bottleneck for the data"""
-    start_time = time.time()
-    if os.path.exists(os.path.join(bottleneck_dir, 'bottleneck.pkl')):
-        print 'hello :)'
-        with open(os.path.join(bottleneck_dir, 'bottleneck.pkl')) as bn_file:
-            features = pickle.load(bn_file)
-    else:
-        print 'No save file detected. Creating features and saving them at %s' % \
-            os.path.join(bottleneck_dir, 'bottleneck.pkl')
-        num_data = data.shape[0]
-        features = []
-        for i in range(0, num_data, batch_size):
-            print '\r%d/%d' % (min(i + batch_size, num_data), num_data),
-            features.append(vgg_model.predict(data[i:min(i + batch_size, num_data), :]))
-        print ''
-        features = np.concatenate(features)
-        with open(os.path.join(bottleneck_dir, 'bottleneck.pkl'), 'w') as bn_file:
-            pickle.dump(features, bn_file)
-    print 'Elapsed time: %.2f' % (time.time() - start_time)
-    return features
+class FaceRecognizer:
+    """A face recognizing model based on VGG"""
+    def __init__(self, restore, num_classes, image_size, num_channels=3):
+        self.model_path = restore
+        self.num_channels = num_channels
+        self.image_size = image_size
+        self.num_classes = num_classes
 
+        vgg_notop = VGGFace(include_top=False, input_shape=self.image_size)
+
+        last_layer = vgg_notop.get_layer('pool5').output
+        x = Flatten(name='flatten')(last_layer)
+
+        # Put two fully-connected layers after it.
+        x = Dense(VGG_HIDDEN_DIM, activation='relu', name='fc6')(x)
+        x = Dense(VGG_HIDDEN_DIM, activation='relu', name='fc7')(x)
+
+        # Finally, a Dense layer for the output of classes.
+        face_probs = Dense(self.num_classes, name='fc8')(x)
+
+        model = Model(vgg_notop.input, face_probs)
+
+        model.load_weights(restore)
+
+        self.model = model
+
+    def predict(self, data):
+        """Wrapper function for prediction"""
+        return self.model(data)
 
 def train(split_data,
           save_path=None,
@@ -194,7 +201,6 @@ def main():
           batch_size=args.batch_size,
           num_epochs=args.num_epochs,
           gender=args.gender)
-
 
 if __name__ == '__main__':
     main()
