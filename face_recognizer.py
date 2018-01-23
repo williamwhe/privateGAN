@@ -21,13 +21,13 @@ VGG_HIDDEN_DIM = 512
 
 class FaceRecognizer:
     """A face recognizing model based on VGG"""
-    def __init__(self, restore, num_classes, image_size, num_channels=3):
+    def __init__(self, restore, num_classes, input_shape, num_channels=3):
         self.model_path = restore
         self.num_channels = num_channels
-        self.image_size = image_size
+        self.input_shape = input_shape
         self.num_classes = num_classes
 
-        vgg_notop = VGGFace(include_top=False, input_shape=self.image_size)
+        vgg_notop = VGGFace(include_top=False, input_shape=self.input_shape)
 
         last_layer = vgg_notop.get_layer('pool5').output
         x = Flatten(name='flatten')(last_layer)

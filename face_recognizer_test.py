@@ -21,10 +21,12 @@ def TEST_SOFTMAX(correct, predicted):
 
 def test_30_recognizer(args):
     print 'Identity Recognizer:'
+    input_shape = (args.image_size, args.image_size, args.num_channels)
     X, y = get_30_people_chunk(args.image_path, 0)
+
     identity_recognizer = FaceRecognizer(args.model_path,
                                          y.shape[0],
-                                         args.image_size,
+                                         input_shape,
                                          args.num_channels)
 
     identity_recognizer.model.compile(loss=TEST_SOFTMAX,
@@ -39,6 +41,7 @@ def test_30_recognizer(args):
     print '\tAccuracy on training data: %.4f' % acc
 
 def test_gender_recognizer(args):
+    input_shape = (args.image_size, args.image_size, args.num_channels)
     pass
 
 def main():
