@@ -24,7 +24,7 @@ def test_30_recognizer(args):
     input_shape = (args.image_size, args.image_size, args.num_channels)
     X, y = get_30_people_chunk(args.image_path, 0)
 
-    identity_recognizer = FaceRecognizer(args.model_path,
+    identity_recognizer = FaceRecognizer(args.model_path + '_id',
                                          y.shape[0],
                                          input_shape,
                                          args.num_channels)
