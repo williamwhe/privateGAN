@@ -22,7 +22,12 @@ def TEST_SOFTMAX(correct, predicted):
 def test_30_recognizer(args):
     print 'Identity Recognizer:'
     input_shape = (args.image_size, args.image_size, args.num_channels)
+    print 'Input shape:', input_shape
     X, y = get_30_people_chunk(args.image_path, 0)
+
+    print 'images shape:', X.shape
+    print 'labels shape:', y.shape
+    return
 
     identity_recognizer = FaceRecognizer(args.model_path + '_id',
                                          y.shape[0],
