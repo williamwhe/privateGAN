@@ -44,9 +44,46 @@ def test_30_recognizer(args):
 
     print '\tAccuracy on training data: %.4f' % acc
 
+    X_val, y_val = get_30_people_chunk(args.image_path, 1)
+    y_pred = identity_recognizer.model.predict(X_val)
+    y_pred_ct = np.argmax(y_pred, axis=1)
+    y_true_ct = np.argmax(y_val, axis=1)
+    acc = np.sum(y_pred_ct == y_true_ct) / y_true_ct.shape[0]
+
+    print '\tAccuracy on validation data: %.4f' % acc
+
 def test_gender_recognizer(args):
+    print 'Identity Recognizer:'
     input_shape = (args.image_size, args.image_size, args.num_channels)
-    pass
+    print 'Input shape:', input_shape
+    X, y = get_30_people_chunk(args.image_path, 0, gender_label=True)
+
+    print 'images shape:', X.shape
+    print 'labels shape:', y.shape
+
+    identity_recognizer = FaceRecognizer(args.model_path + '_gender',
+                                         y.shape[1],
+                                         input_shape,
+                                         args.num_channels)
+
+    identity_recognizer.model.compile(loss=TEST_SOFTMAX,
+                                      optimizer=TEST_SGD,
+                                      metrics=['accuracy'])
+
+    y_pred = identity_recognizer.model.predict(X)
+    y_pred_ct = np.argmax(y_pred, axis=1)
+    y_true_ct = np.argmax(y, axis=1)
+    acc = np.sum(y_pred_ct == y_true_ct) / y_true_ct.shape[0]
+
+    print '\tAccuracy on training data: %.4f' % acc
+
+    X_val, y_val = get_30_people_chunk(args.image_path, 1, gender_label=True)
+    y_pred = identity_recognizer.model.predict(X_val)
+    y_pred_ct = np.argmax(y_pred, axis=1)
+    y_true_ct = np.argmax(y_val, axis=1)
+    acc = np.sum(y_pred_ct == y_true_ct) / y_true_ct.shape[0]
+
+    print '\tAccuracy on validation data: %.4f' % acc
 
 def main():
     parser = argparse.ArgumentParser()
