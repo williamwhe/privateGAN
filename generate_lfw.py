@@ -59,7 +59,7 @@ def train():
 
 
     NUM_REPR = 5
-    NUM_SAMPLES_EACH = batch_size / NUM_REPR / 2
+    NUM_SAMPLES_EACH = int(batch_size / NUM_REPR / 2)
     output_samples = get_output_samples(train_data, train_label, id_gender,
                                         NUM_REPR, NUM_SAMPLES_EACH)
 
