@@ -138,6 +138,14 @@ def parse_opt():
     parser.add_argument('--targeted', type=int, default=1,
                         help='c&w loss or not')
 
+    # LFW Arguments
+    parser.add_argument('--lfw_input_path', type=str, default='./lfw_data/',
+                        help='Path to LFW data.')
+    parser.add_argument('--gender_model_path', type=str, default='./models/lfw_gender',
+                        help='Path to LFW data.')
+    parser.add_argument('--id_model_path', type=str, default='./models/lfw_id',
+                        help='Path to LFW data.')
+
     args = parser.parse_args()
 
     return args

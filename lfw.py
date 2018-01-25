@@ -28,21 +28,24 @@ def read_data(img_path,
               img_size=(224, 224),
               one_hot_encoding=True,
               gender_label=False,
-              to_array=True):
+              to_array=True,
+              gender_meta=False):
 
     imgs = []
     lbls = []
     cnt = 0
 
-    if gender_label:
+    if gender_label or gender_meta:
         # We create a dictionary of people's genders.
         genders = pd.read_csv('./lfw_data/gender.csv')
         genders = dict(zip(genders.name.tolist(), genders.gender.tolist()))
 
+    id_gender = []
     for name in os.listdir(img_path):
         if (selected_names is not None) and (name in selected_names):
             print '\r%d/%d read.' % (cnt + 1, len(selected_names)),
             folder = os.path.join(img_path, name)
+            id_gender.append(genders[name])
             if gender_label:
                 if genders.get(name) is None:
                     print '\tNo gender label found for %s' % name
@@ -60,12 +63,16 @@ def read_data(img_path,
                     imgs.append(x)
             cnt += 1
     print ''
+    id_gender = to_categorical(np.array(id_gender))
     lbls = np.array(lbls)
     if one_hot_encoding is True:
         lbls = to_categorical(lbls)
     imgs = np.concatenate(imgs)
 
-    return imgs, lbls
+    if gender_meta:
+        return imgs, lbls, id_gender
+    else:
+        return imgs, lbls
 
 def postprocess_images(x, data_format=None, version=1):
     if data_format is None:
@@ -99,6 +106,9 @@ def postprocess_images(x, data_format=None, version=1):
         raise NotImplementedError
 
     return x
+
+def print_ready(img):
+    return image.array_to_img(postprocess_images(img, version=1))
 
 def preprocess_images(x, version=1):
     print x.shape
@@ -149,12 +159,17 @@ def get_30_people_chunk(image_path,
                         chunk_number,
                         gender_label=False,
                         preprocess=True,
-                        img_size=(224, 224)):
+                        img_size=(224, 224),
+                        gender_meta=False):
 
     if chunk_number < 0 or chunk_number >= 3:
         raise ValueError('chunk_number(%d) should be between 0 and 3' % chunk_number)
     names = get_people_names(image_path, 30)
-    imgs, lbls = read_data(image_path, names, img_size=img_size, gender_label=gender_label)
+    if gender_meta:
+        imgs, lbls, id_gender = read_data(image_path, names, img_size=img_size,
+                                          gender_label=gender_label, gender_meta=True)
+    else:
+        imgs, lbls = read_data(image_path, names, img_size=img_size, gender_label=gender_label)
 
     indices = split_indices(lbls)
     imgs = imgs[indices[chunk_number], :]
@@ -163,6 +178,9 @@ def get_30_people_chunk(image_path,
     if preprocess:
         imgs = preprocess_images(imgs)
 
+    if gender_meta:
+        return imgs, lbls, id_gender
+    # if gender_meta is False:
     return imgs, lbls
 
 def main():

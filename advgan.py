@@ -16,7 +16,7 @@ class advGAN():
     opts: advGAN parameters. See opts.py.
     sess: TensorFlow Session() object.
     """
-    def __init__(self, good_model, evil_model, opts, sess):
+    def __init__(self, good_model, evil_model, opts, sess, flat_input=True):
         """
         :param D: the discriminator object
         :param params: the dict used to train the generative neural networks
@@ -25,6 +25,7 @@ class advGAN():
         self.evil_model = evil_model
         self.opts = opts
         self.sess = sess
+        self.flat_input = flat_input  # Whether or not input is a flat vector.
         # self.model_restore = restore
 
         ####  test flags  ####
@@ -112,19 +113,27 @@ class advGAN():
         evil_label_num = self.opts.evil_label_num
         img_dim = self.opts.img_dim
 
-        # the source image which we want to attack.
-        self.source = tf.placeholder(
-            tf.float32, [None, input_dim], name="source_image")
-        # resize to img_dim x img_dim x img_color_dim (1 in Grayscale images)
-        self.images = tf.reshape(
-            self.source, [-1, img_dim, img_dim, input_c_dim])
+        if self.flat_input:
+            # the source image which we want to attack.
+            self.source = tf.placeholder(
+                tf.float32, [None, input_dim], name="source_image")
+            # resize to img_dim x img_dim x img_color_dim (1 in Grayscale images)
+            self.images = tf.reshape(
+                self.source, [-1, img_dim, img_dim, input_c_dim])
 
-        # the target images, shuffled with the same labels.
-        # this is to learn the distribution, not simply images.
-        self.target = tf.placeholder(
-            tf.float32, [None, input_dim], name='target_image')
-        self.real_images = tf.reshape(
-            self.target, [-1, img_dim, img_dim, input_c_dim])
+            # the target images, shuffled with the same labels.
+            # this is to learn the distribution, not simply images.
+            self.target = tf.placeholder(
+                tf.float32, [None, input_dim], name='target_image')
+            self.real_images = tf.reshape(
+                self.target, [-1, img_dim, img_dim, input_c_dim])
+        else:
+            # No need for resizes. The input is n-dimensional.
+            self.source = tf.placeholder(
+                tf.float32, [None, img_dim, img_dim, input_c_dim])
+            self.target = tf.placeholder(
+                tf.float32, [None, img_dim, img_dim, input_c_dim])
+
 
         # labels for the evil classifier.
         self.evil_labels = tf.placeholder(

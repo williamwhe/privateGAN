@@ -2,15 +2,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 from ops import *
-import os.path
-import pickle
 import scipy
-import scipy.io as sio
-import time
-import random
-import pdb
 import opts
-import cifar10
 # from utils import plot
 from utils import merge
 from advgan import advGAN
@@ -91,7 +84,7 @@ def train():
         print 'Maximum iterations: %d' % opt.max_iteration
         while iteration < opt.max_iteration:
             # this function returns (data, label, np.array(target)).
-            data = loader.next_batch(batch_size, negative=False)
+            # data = loader.next_batch(batch_size, negative=False)
             feed_data, evil_labels, real_data = loader.next_batch(
                 batch_size, negative=False)
             good_labels = odd_even_labels(evil_labels)
