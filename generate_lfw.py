@@ -81,7 +81,7 @@ def train():
 
         print '\tRetrieving good model from "%s"' % opt.gender_model_path
         good_model = FaceRecognizer(opt.gender_model_path, 2, input_shape, opt.input_c_dim)
-        model = advGAN(good_model, evil_model, opt, sess, flat_input=False)
+        model = advGAN(good_model, evil_model, opt, sess, mnist=False)
 
         iteration = 0
         writer = tf.summary.FileWriter("logs", sess.graph)
