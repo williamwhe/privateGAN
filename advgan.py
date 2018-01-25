@@ -111,6 +111,10 @@ class advGAN():
         evil_label_num = self.opts.evil_label_num
         img_dim = self.opts.img_dim
 
+        print 'Creating placeholders:'
+        print '\timg_dim:', img_dim
+        print '\tinput_c_dim', input_c_dim
+
         if self.mnist:
             # the source image which we want to attack.
             self.source = tf.placeholder(
