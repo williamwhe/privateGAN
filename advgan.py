@@ -131,8 +131,10 @@ class advGAN():
             # No need for resizes. The input is n-dimensional.
             self.source = tf.placeholder(
                 tf.float32, [None, img_dim, img_dim, input_c_dim])
+            self.images = tf.identity(self.source)
             self.target = tf.placeholder(
                 tf.float32, [None, img_dim, img_dim, input_c_dim])
+            self.real_images = tf.identity(self.source)
 
 
         # labels for the evil classifier.
