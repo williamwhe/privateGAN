@@ -66,7 +66,6 @@ def parse_opt():
     parser.add_argument('--good_loss_coeff', type=float, default=1.0,
                         help='Coefficient for the good classifier loss value.')
 
-
     parser.add_argument('--s_l', type=int, default=0, help="source_label")
     parser.add_argument('--t_l', type=int, default=1, help="target_label")
 

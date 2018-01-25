@@ -12,7 +12,6 @@ from advgan import advGAN
 from Dataset2 import Dataset2
 from lfw import get_30_people_chunk, print_ready
 from face_recognizer import FaceRecognizer
-from keras.preprocessing import keras_image
 
 def get_output_samples(imgs, lbls, id_gender, num_repr, num_samples_each):
     id_gender_ct = np.argmax(id_gender, axis=1)
