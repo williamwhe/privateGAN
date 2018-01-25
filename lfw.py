@@ -45,7 +45,8 @@ def read_data(img_path,
         if (selected_names is not None) and (name in selected_names):
             print '\r%d/%d read.' % (cnt + 1, len(selected_names)),
             folder = os.path.join(img_path, name)
-            id_gender.append(genders[name])
+            if gender_meta:
+                id_gender.append(genders[name])
             if gender_label:
                 if genders.get(name) is None:
                     print '\tNo gender label found for %s' % name
@@ -63,7 +64,8 @@ def read_data(img_path,
                     imgs.append(x)
             cnt += 1
     print ''
-    id_gender = to_categorical(np.array(id_gender))
+    if gender_meta:
+        id_gender = to_categorical(np.array(id_gender))
     lbls = np.array(lbls)
     if one_hot_encoding is True:
         lbls = to_categorical(lbls)
