@@ -36,8 +36,11 @@ def train():
     opt = opts.parse_opt()
     opt.input_data = "MNIST"
 
-    train_data, train_label, id_gender = get_30_people_chunk(opt.image_path, 1, gender_meta=True)
-    test_data, test_label = get_30_people_chunk(opt.image_path, 2)
+    img_size = (opt.img_dim, opt.img_dim)
+    print 'Dimension of images:', img_size
+    train_data, train_label, id_gender = \
+        get_30_people_chunk(opt.image_path, 1, gender_meta=True, img_size=img_size)
+    test_data, test_label = get_30_people_chunk(opt.image_path, 2, img_size=img_size)
 
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
