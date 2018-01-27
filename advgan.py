@@ -315,7 +315,7 @@ class advGAN():
             self.good_accuracy = self._metric(
                 self.good_labels, tf.nn.softmax(self.good_predictions))
             self.good_fn_loss = tf.reduce_mean(
-                tf.nn.sigmoid_cross_entropy_with_logits(
+                tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.good_predictions,
                     labels=self.good_labels))
             # 2. The evil model.
