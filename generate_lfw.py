@@ -172,6 +172,8 @@ def train():
 
                 good_accuracy = total_good_accuracy / float(test_iter_num)
                 evil_accuracy = total_evil_accuracy / float(test_iter_num)
+                print '\tGood Accuracy: %.4f, Evil Accuracy: %.4f' % (
+                    good_accuracy, evil_accuracy)
                 print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
 
                 fake_samples, fake_noise = sess.run(
@@ -181,7 +183,11 @@ def train():
                 fakes = merge(fake_samples, [2 * NUM_REPR, NUM_SAMPLES_EACH])
                 original = merge(output_samples, [2 * NUM_REPR, NUM_SAMPLES_EACH])
                 noise = merge(fake_noise, [2 * NUM_REPR, NUM_SAMPLES_EACH])
-                final_image = print_ready(np.concatenate([fakes, noise, original]))
+                final_image = print_ready(np.concatenate([fakes, noise, original], axis=1))
+                np.savez_compressed('./samples_%d.npz' % iteration,
+                                    fakes=fakes,
+                                    original=original,
+                                    noise=noise)
 
                 scipy_imsave('snapshot_%d.png' % iteration, final_image)
 
