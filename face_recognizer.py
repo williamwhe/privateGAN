@@ -54,6 +54,7 @@ def train(split_data,
           input_shape=(224, 224, 3),
           batch_size=128,
           num_epochs=100,
+          lr=0.001,
           gender=False):
 
     num_classes = split_data.train.lbl.shape[1]
@@ -86,10 +87,6 @@ def train(split_data,
 
 
     # adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
-    if gender:
-        lr = 0.0001
-    else:
-        lr = 0.001
     print 'Learning rate: %f' % lr
     sgd = SGD(lr=lr, decay=1e-6, momentum=0.9, nesterov=True)
 
@@ -131,6 +128,8 @@ def main():
                         help='Batch size used for training.')
     parser.add_argument('--num_epochs', type=int, default=100,
                         help='Number of training epochs.')
+    parser.add_argument('--lr', type=float, default=0.001,
+                        help='Learning rate.')
     parser.add_argument('--gender', dest='gender', action='store_true',
                         help='Does gender identification.')
     parser.add_argument('--no-gender', dest='gender', action='store_false',
@@ -196,6 +195,7 @@ def main():
           input_shape=input_shape,
           batch_size=args.batch_size,
           num_epochs=args.num_epochs,
+          lr=args.lr,
           gender=args.gender)
 
 if __name__ == '__main__':
