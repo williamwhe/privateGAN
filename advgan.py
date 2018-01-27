@@ -523,10 +523,12 @@ class advGAN():
                 name='g_d5',
                 with_w=True)
             # return tf.clip_by_value( tf.clip_by_value( tf.nn.tanh(self.d5) , -0.6, 0.6) + image, -1.0, 1.0) , tf.nn.tanh(self.d5)
-            return \
-                tf.clip_by_value(
+            if self.mnist:
+                return tf.clip_by_value(
                     self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0), \
-                tf.nn.tanh(self.d5)
+                    tf.nn.tanh(self.d5)
+            else:
+                return tf.nn.tanh(self.d5) + image, tf.nn.tanh(self.d5)
 
             # return tf.nn.tanh(self.d5)
 
@@ -604,6 +606,9 @@ class advGAN():
                 with_w=True)
 
             # return tf.clip_by_value( tf.clip_by_value( tf.nn.tanh(self.d5) , -0.6, 0.6) + image, -1.0, 1.0)
-            return tf.clip_by_value(
-                self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0), \
-                tf.nn.tanh(self.d5)
+            if self.mnist:
+                return tf.clip_by_value(
+                    self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0), \
+                    tf.nn.tanh(self.d5)
+            else:
+                return tf.nn.tanh(self.d5) + image, tf.nn.tanh(self.d5)
