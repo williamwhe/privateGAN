@@ -89,7 +89,7 @@ def train(split_data,
     if gender:
         lr = 0.0001
     else:
-        lr = 0.01
+        lr = 0.001
     print 'Learning rate: %f' % lr
     sgd = SGD(lr=lr, decay=1e-6, momentum=0.9, nesterov=True)
 
