@@ -141,7 +141,7 @@ def train():
                 test_loader = Dataset2(test_data, test_label)
 
                 test_num = test_loader._num_examples
-                test_iter_num = (test_num - batch_size) / batch_size
+                test_iter_num = int((test_num - batch_size) / batch_size)
                 total_evil_accuracy = 0.0
                 total_good_accuracy = 0.0
                 fake_samples = [[] for _ in range(test_loader._num_labels)]
@@ -184,47 +184,49 @@ def train():
 
         # We can transform the training and test data given in the beginning here.
         # This is only half the actual data.
-        print 'Making new training data ...',
-        loader = Dataset2(train_data, train_label)
-        iter_num = (loader._num_examples - batch_size) / batch_size
-        new_train_data = []
-        new_train_label = []
-        for _ in range(iter_num):
-            batch_data, batch_label, _ = loader.next_batch(batch_size)
-            new_data = sess.run(model.fake_images_sample, {model.source: batch_data})
-            new_train_data.append(new_data)
-            new_train_label.append(batch_label)
-        new_train_data = np.concatenate(new_train_data)
-        new_train_label = np.concatenate(new_train_label)
-        print '[DONE]'
-        print 'Making new test data ...',
-        loader = Dataset2(test_data, test_label)
-        iter_num = (loader._num_examples - batch_size) / batch_size
-        new_test_data = []
-        new_test_label = []
-        for _ in range(iter_num):
-            batch_data, batch_label, _ = loader.next_batch(batch_size)
-            new_data = sess.run(model.fake_images_sample, {model.source: batch_data})
-            new_test_data.append(new_data)
-            new_test_label.append(batch_label)
-        new_test_data = np.concatenate(new_test_data)
-        new_test_label = np.concatenate(new_test_label)
-        print '[DONE]'
+        print "We don't make new datasets for now. This is only training tuning."
+        # Not making new dataset for now. First, do some successful training.
+        # print 'Making new training data ...',
+        # loader = Dataset2(train_data, train_label)
+        # iter_num = int((loader._num_examples - batch_size) / batch_size)
+        # new_train_data = []
+        # new_train_label = []
+        # for _ in range(iter_num):
+        #     batch_data, batch_label, _ = loader.next_batch(batch_size)
+        #     new_data = sess.run(model.fake_images_sample, {model.source: batch_data})
+        #     new_train_data.append(new_data)
+        #     new_train_label.append(batch_label)
+        # new_train_data = np.concatenate(new_train_data)
+        # new_train_label = np.concatenate(new_train_label)
+        # print '[DONE]'
+        # print 'Making new test data ...',
+        # loader = Dataset2(test_data, test_label)
+        # iter_num = int((loader._num_examples - batch_size) / batch_size)
+        # new_test_data = []
+        # new_test_label = []
+        # for _ in range(iter_num):
+        #     batch_data, batch_label, _ = loader.next_batch(batch_size)
+        #     new_data = sess.run(model.fake_images_sample, {model.source: batch_data})
+        #     new_test_data.append(new_data)
+        #     new_test_label.append(batch_label)
+        # new_test_data = np.concatenate(new_test_data)
+        # new_test_label = np.concatenate(new_test_label)
+        # print '[DONE]'
 
-        print 'Training:'
-        print new_train_data.shape
-        print new_train_label.shape
-        print 'Test:'
-        print new_test_data.shape
-        print new_test_label.shape
+        # print 'Training:'
+        # print new_train_data.shape
+        # print new_train_label.shape
+        # print 'Test:'
+        # print new_test_data.shape
+        # print new_test_label.shape
 
-        print 'Saving ...',
-        np.savez_compressed(opt.output_path,
-                            train_data=new_train_data,
-                            train_label=new_train_label,
-                            test_data=new_test_data,
-                            test_label=new_test_label)
-        print '[DONE]'
+        # print 'Saving ...',
+        # np.savez_compressed(opt.output_path,
+        #                     train_data=new_train_data,
+        #                     train_label=new_train_label,
+        #                     test_data=new_test_data,
+        #                     test_label=new_test_label)
+        # print '[DONE]'
 
 if __name__ == "__main__":
     train()

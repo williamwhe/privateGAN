@@ -461,6 +461,7 @@ class advGAN():
             else:
                 s = self.opts.img_dim
                 s2, s4, s8, s16 = int(s/2), int(s/4), int(s/8), int(s/16)
+                print s2, s4, s8, s16
             # s = 32
             # # s2, s4, s8, s16, s32, s64, s128 = \
             # #   int(s/2), int(s/4), int(s/8), int(s/16), \
