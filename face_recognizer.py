@@ -106,9 +106,9 @@ def train(split_data,
 
     if save_path:
         if gender:
-            model.save(save_path + '_gender')
+            model.save(save_path + '_%d_gender' % input_shape[0])
         else:
-            model.save(save_path + '_id')
+            model.save(save_path + '_%d_id' % input_shape[0])
 
     # We also test on the left-out test data.
     print model.evaluate(split_data.test.data,
@@ -123,10 +123,6 @@ def main():
                         help="Path to save trained model. e.g.: 'models/lfw'")
     parser.add_argument('--min_num_pics', type=int, default=30,
                         help='Minimum number of pictures for people to be included in data.')
-    parser.add_argument('--bottleneck_dir', type=str, default='./bottleneck',
-                        help='Path saved bottleneck data.')
-    parser.add_argument('--bottleneck_batch_size', type=int, default=100,
-                        help='Size of the batch for creating bottleneck.')
     parser.add_argument('--image_path', type=str, default='./lfw_data/',
                         help='Path to LFW data.')
     parser.add_argument('--image_size', type=int, default=224,
