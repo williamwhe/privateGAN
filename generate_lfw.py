@@ -73,14 +73,16 @@ def train():
         # and initialize the writer
         iteration = 0
 
-        print '\tRetrieving evil model from "%s"' % opt.id_model_path
-        evil_model = FaceRecognizer(opt.id_model_path,
+        id_model_path = '%s_%d_id' % (opt.lfw_base_path, x_dim)
+        print '\tRetrieving evil model from "%s"' % id_model_path
+        evil_model = FaceRecognizer(id_model_path,
                                     train_label.shape[1],
                                     input_shape,
                                     opt.input_c_dim)
 
-        print '\tRetrieving good model from "%s"' % opt.gender_model_path
-        good_model = FaceRecognizer(opt.gender_model_path, 2, input_shape, opt.input_c_dim)
+        gender_model_path = '%s_%d_gender' % (opt.lfw_base_path, x_dim)
+        print '\tRetrieving good model from "%s"' % gender_model_path
+        good_model = FaceRecognizer(gender_model_path, 2, input_shape, opt.input_c_dim)
         model = advGAN(good_model, evil_model, opt, sess, mnist=False)
 
         iteration = 0

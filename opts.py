@@ -144,6 +144,8 @@ def parse_opt():
                         help='Path to LFW data.')
     parser.add_argument('--id_model_path', type=str, default='./models/lfw_id',
                         help='Path to LFW data.')
+    parser.add_argument('--lfw_base_path', type=str, default='./models/lfw',
+                        help='Path to LFW two models.')
 
     args = parser.parse_args()
 
