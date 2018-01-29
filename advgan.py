@@ -97,6 +97,7 @@ class advGAN():
         self.g_bn_e7 = batch_norm(name='g_bn_e7')
         self.g_bn_e8 = batch_norm(name='g_bn_e8')
 
+        self.g_bn_d0 = batch_norm(name='g_bn_d0')
         self.g_bn_d1 = batch_norm(name='g_bn_d1')
         self.g_bn_d2 = batch_norm(name='g_bn_d2')
         self.g_bn_d3 = batch_norm(name='g_bn_d3')
@@ -488,9 +489,9 @@ class advGAN():
                 s, s2, s4, s8, s16 = 28, 14, 7, 4, 2
             else:
                 s = self.opts.img_dim
-                s2, s4, s8, s16, s32, s64 = \
-                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3
-                print s2, s4, s8, s16, s32, s64
+                s2, s4, s8, s16, s32, s64, s128 = \
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3, 2
+                print s2, s4, s8, s16, s32, s64, s128
             # s = 32
             # # s2, s4, s8, s16, s32, s64, s128 = \
             # #   int(s/2), int(s/4), int(s/8), int(s/16), \
@@ -515,9 +516,20 @@ class advGAN():
                 print 'Shape of e6:', e6.shape
                 e7 = self.g_bn_e7(conv2d(lrelu(e6), self.gf_dim*8, name='g_e7_conv'))
                 print 'Shape of e7:', e7.shape
+                e8 = self.g_bn_e8(conv2d(lrelu(e7), self.gf_dim*8, name='g_e8_conv'))
+                print 'Shape of e8:', e8.shape
+
+                self.d0, self.d0_w, self.d0_b = deconv2d(
+                    tf.nn.relu(e8),
+                    [self.batch_size, s128, s128, self.gf_dim * 8],
+                    name='g_d0',
+                    with_w=True)
+                d0 = tf.nn.dropout(self.g_bn_d0(self.d0), 0.5)
+                d0 = tf.concat([d0, e7], 3)
+                print 'Shape of d0:', d0.shape
 
                 self.d1, self.d1_w, self.d1_b = deconv2d(
-                    tf.nn.relu(e7),
+                    tf.nn.relu(d0),
                     [self.batch_size, s64, s64, self.gf_dim * 8],
                     name='g_d1',
                     with_w=True)
@@ -640,8 +652,9 @@ class advGAN():
                 s, s2, s4, s8, s16 = 28, 14, 7, 4, 2
             else:
                 s = self.opts.img_dim
-                s2, s4, s8, s16, s32, s64 = \
-                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3
+                s2, s4, s8, s16, s32, s64, s128 = \
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3, 2
+                print s2, s4, s8, s16, s32, s64, s128
             #16, 8 ,4, 2,1 s:32
             # image is (32 x 32 x input_c_dim)
             e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
@@ -661,6 +674,17 @@ class advGAN():
                 print 'Shape of e6:', e6.shape
                 e7 = self.g_bn_e7(conv2d(lrelu(e6), self.gf_dim*8, name='g_e7_conv'))
                 print 'Shape of e7:', e7.shape
+                e8 = self.g_bn_e8(conv2d(lrelu(e7), self.gf_dim*8, name='g_e8_conv'))
+                print 'Shape of e8:', e8.shape
+
+                self.d0, self.d0_w, self.d0_b = deconv2d(
+                    tf.nn.relu(e8),
+                    [self.batch_size, s128, s128, self.gf_dim * 8],
+                    name='g_d0',
+                    with_w=True)
+                d0 = tf.nn.dropout(self.g_bn_d0(self.d0), 0.5)
+                d0 = tf.concat([d0, e7], 3)
+                print 'Shape of d0:', d0.shape
 
                 self.d1, self.d1_w, self.d1_b = deconv2d(
                     tf.nn.relu(e7),
