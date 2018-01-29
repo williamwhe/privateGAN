@@ -89,6 +89,40 @@ def train():
         print '\tRetrieving good model from "%s"' % gender_model_path
         good_model = FaceRecognizer(gender_model_path, 2, input_shape, opt.input_c_dim)
         model = advGAN(good_model, evil_model, opt, sess, mnist=False)
+        
+        test_loader = Dataset2(test_data, test_label)
+
+        test_num = test_loader._num_examples
+        test_iter_num = int((test_num - batch_size) / batch_size)
+        total_evil_accuracy = 0.0
+        total_good_accuracy = 0.0
+        fake_samples = [[] for _ in range(test_loader._num_labels)]
+        fake_noise = [[] for _ in range(test_loader._num_labels)]
+
+        for _ in range(test_iter_num):
+
+            # Loading the next batch of test images
+            test_input_data, test_evil_labels, _ = \
+                test_loader.next_batch(batch_size)
+            evil_categorical_labels = np.argmax(test_evil_labels, axis=1)
+            test_good_labels = id_gender[evil_categorical_labels]
+            feed = {
+                model.source: test_input_data,
+                model.evil_labels: test_evil_labels,
+                model.good_labels: test_good_labels
+            }
+            evil_accuracy, good_accuracy = sess.run(
+                [model.evil_accuracy, model.good_accuracy], feed)
+            # We divide the total accuracy by the number of test iterations.
+            total_good_accuracy += good_accuracy
+            total_evil_accuracy += evil_accuracy
+
+        good_accuracy = total_good_accuracy / float(test_iter_num)
+        evil_accuracy = total_evil_accuracy / float(test_iter_num)
+        print '\tGood Accuracy: %.4f, Evil Accuracy: %.4f' % (
+            good_accuracy, evil_accuracy)
+        print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
+        exit()
 
         iteration = 0
         writer = tf.summary.FileWriter("logs", sess.graph)
