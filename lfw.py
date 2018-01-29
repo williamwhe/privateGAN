@@ -111,9 +111,6 @@ def postprocess_images(x, data_format=None, version=1):
 
 def abs_one_to_prediction(imgs):
     # from (-1, 1) to (0, 255)
-    if np.max(imgs) > 1.0 or np.min(imgs) < -1.0:
-        raise ValueError('Images are not scaled to (-1, 1). Max: %.4f, Min: %.4f' % (
-            np.max(imgs), np.min(imgs)))
     return preprocess_images((imgs + 1) * 127.5, version=1)
 
 def print_ready(img):
