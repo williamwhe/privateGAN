@@ -489,7 +489,7 @@ class advGAN():
             else:
                 s = self.opts.img_dim
                 s2, s4, s8, s16, s32, s64 = \
-                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), int(s/64)
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3
                 print s2, s4, s8, s16, s32, s64
             # s = 32
             # # s2, s4, s8, s16, s32, s64, s128 = \
@@ -511,9 +511,9 @@ class advGAN():
 
             print 'Shape of previous last layer:', e5.shape
             if self.mnist is False:
-                e6 = self.g_bn_e6(conv2d(lrelu(e5), self.gf_dim*16, name='g_e6_conv'))
+                e6 = self.g_bn_e6(conv2d(lrelu(e5), self.gf_dim*8, name='g_e6_conv'))
                 print 'Shape of e6:', e6.shape
-                e7 = self.g_bn_e7(conv2d(lrelu(e6), self.gf_dim*16, name='g_e7_conv'))
+                e7 = self.g_bn_e7(conv2d(lrelu(e6), self.gf_dim*8, name='g_e7_conv'))
                 print 'Shape of e7:', e7.shape
 
                 self.d1, self.d1_w, self.d1_b = deconv2d(
@@ -641,7 +641,7 @@ class advGAN():
             else:
                 s = self.opts.img_dim
                 s2, s4, s8, s16, s32, s64 = \
-                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), int(s/64)
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3
             #16, 8 ,4, 2,1 s:32
             # image is (32 x 32 x input_c_dim)
             e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
