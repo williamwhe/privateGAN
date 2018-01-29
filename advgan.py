@@ -687,7 +687,7 @@ class advGAN():
                 print 'Shape of d0:', d0.shape
 
                 self.d1, self.d1_w, self.d1_b = deconv2d(
-                    tf.nn.relu(e7),
+                    tf.nn.relu(d0),
                     [self.batch_size, s64, s64, self.gf_dim * 8],
                     name='g_d1',
                     with_w=True)
