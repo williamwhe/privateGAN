@@ -109,11 +109,17 @@ def postprocess_images(x, data_format=None, version=1):
 
     return x
 
+def abs_one_to_prediction(imgs):
+    # from (-1, 1) to (0, 255)
+    if np.max(imgs) > 1.0 or np.min(imgs) < -1.0:
+        raise ValueError('Images are not scaled to (-1, 1). Max: %.4f, Min: %.4f' % (
+            np.max(imgs), np.min(imgs)))
+    return preprocess_images((imgs + 1) * 127.5, version=1)
+
 def print_ready(img):
     return image.array_to_img(postprocess_images(img, version=1))
 
 def preprocess_images(x, version=1):
-    print x.shape
     return keras_vggface.utils.preprocess_input(x, version=version)
 
 def split_indices(lbls, training_portion=.4, validation_portion=.4):
@@ -175,10 +181,8 @@ def get_30_people_chunk(image_path,
 
     indices = split_indices(lbls)
     imgs = imgs[indices[chunk_number], :]
+    imgs = imgs / 255.0
     lbls = lbls[indices[chunk_number], :]
-
-    if preprocess:
-        imgs = preprocess_images(imgs)
 
     if gender_meta:
         return imgs, lbls, id_gender

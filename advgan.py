@@ -6,6 +6,7 @@ import time
 import scipy.io  as sio
 import random
 
+# pylint: disable = C0103, W0201, C0111
 
 class advGAN():
     """
@@ -133,10 +134,12 @@ class advGAN():
             # No need for resizes. The input is n-dimensional.
             self.source = tf.placeholder(
                 tf.float32, [None, img_dim, img_dim, input_c_dim])
-            self.images = tf.identity(self.source)
+            # Scale (0, 1) to (-1, 1)
+            self.images = (self.source) * 2.0 - 1
             self.target = tf.placeholder(
                 tf.float32, [None, img_dim, img_dim, input_c_dim])
-            self.real_images = tf.identity(self.source)
+            # Scale (0, 1) to (-1, 1)
+            self.real_images = (self.target) * 2.0 - 1
 
 
         # labels for the evil classifier.
@@ -276,6 +279,12 @@ class advGAN():
 
             # We sample an image
             self.fake_images_sample, self.sample_noise = self.sampler(self.images)
+
+            # *** FOR LFW ***
+            # We scale the fake images and the noise from (-1, 1) to (0, 1) for output.
+            self.fake_images_output = (self.fake_images_sample + 1) / 2.0
+            self.fake_noise_output = (self.sample_noise + 1) / 2.0
+
             # self.fake_images_sample_flatten = \
             #     tf.reshape(self.fake_images_sample, [-1, 28 * 28])
             # self.fake_images_correct = \
@@ -406,7 +415,8 @@ class advGAN():
             # self.g_optim = tf.train.AdamOptimizer(self.lr).minimize(self.total_loss, self.g_vars)
             G_opt = tf.train.AdamOptimizer(self.lr)
             G_grads_and_vars = G_opt.compute_gradients(self.total_loss, self.g_vars)
-            G_grads_and_vars = [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
+            G_grads_and_vars = \
+                [(tf.clip_by_value(gv[0], -1.0, 1.0), gv[1]) for gv in G_grads_and_vars]
             self.G_train_op = G_opt.apply_gradients(G_grads_and_vars)
 
     def discriminator(self, image, y=None, reuse=False):
@@ -488,7 +498,7 @@ class advGAN():
                 with_w=True)
             d1 = tf.nn.dropout(self.g_bn_d1(self.d1), 0.5)
             d1 = tf.concat([d1, e4], 3)
-            # d1 is ( 2 x 2 x self.gf_dim*8*2)
+            # d1 is (2 x 2 x self.gf_dim*8*2)
 
             self.d2, self.d2_w, self.d2_b = deconv2d(
                 tf.nn.relu(d1),
@@ -522,15 +532,10 @@ class advGAN():
                 [self.batch_size, s, s, self.output_c_dim],
                 name='g_d5',
                 with_w=True)
-            # return tf.clip_by_value( tf.clip_by_value( tf.nn.tanh(self.d5) , -0.6, 0.6) + image, -1.0, 1.0) , tf.nn.tanh(self.d5)
-            if self.mnist:
-                return tf.clip_by_value(
-                    self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0), \
-                    tf.nn.tanh(self.d5)
-            else:
-                return tf.nn.tanh(self.d5) + image, tf.nn.tanh(self.d5)
 
-            # return tf.nn.tanh(self.d5)
+            return tf.clip_by_value(
+                self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0), \
+                tf.nn.tanh(self.d5)
 
     def sampler(self, image, y=None):
         """
@@ -605,10 +610,117 @@ class advGAN():
                 name='g_d5',
                 with_w=True)
 
-            # return tf.clip_by_value( tf.clip_by_value( tf.nn.tanh(self.d5) , -0.6, 0.6) + image, -1.0, 1.0)
-            if self.mnist:
-                return tf.clip_by_value(
-                    self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0), \
-                    tf.nn.tanh(self.d5)
-            else:
-                return tf.nn.tanh(self.d5) + image, tf.nn.tanh(self.d5)
+            return tf.clip_by_value(
+                self.opts.c * tf.nn.tanh(self.d5) + image, -1.0, 1.0), \
+                tf.nn.tanh(self.d5)
+
+    def generator_resnet(self, image, y=None):
+        print "resnet Generator."
+
+        with tf.variable_scope("generator") as scope:
+
+            # image is 160 x 160 x input_c_dim
+            s = self.opts.img_dim  # s = 160.
+            # 80, 40, 20, 10, 5, 2
+            s2, s4, s8, s16, s32, s64, s128 = \
+                int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 2
+
+            def residule_block(x, dim, ks=3, s=1, name='res'):
+                ##we can also try zero padding here.
+                p = int((ks - 1) / 2)
+                y = tf.pad(x, [[0, 0], [p, p], [p, p], [0, 0]], "REFLECT")
+                y = instance_norm(conv2d(y, dim, ks, ks, s, s, padding='VALID', name=name+'_c1'),
+                                  name+'_bn1')
+                y = tf.pad(tf.nn.relu(y), [[0, 0], [p, p], [p, p], [0, 0]], "REFLECT")
+                y = instance_norm(conv2d(y, dim, ks, ks, s, s, padding='VALID', name=name+'_c2'),
+                                  name+'_bn2')
+                # y = instance_norm(conv2d(y, dim, ks, s, padding='VALID', name=name+'_c2'), name+'_bn2')
+                return y + x
+            #################
+            # c0 = tf.pad(image, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
+
+            # e1 = tf.nn.relu( instance_norm( conv2d(c0, self.gf_dim,  k_w = 7, k_h = 7, d_h =1, d_w = 1, padding = "VALID", name='g_e1_conv'),name = "g_e1_conv_bn" ))
+            ###############
+            #224, 224
+            # image = tf.image.resize_bilinear(image, [224,224])
+            e1 = tf.nn.relu(instance_norm(
+                conv2d(image, self.gf_dim, k_w=7, k_h=7, d_h=1, d_w=1, name='g_e1_conv'),
+                name="g_e1_conv_bn"))
+            #112x112
+            e2 = tf.nn.relu(instance_norm(
+                conv2d(e1, self.gf_dim *2, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e2_conv'),
+                name="g_e2_conv_bn"))
+            # 56x56
+            e3 = tf.nn.relu(instance_norm(
+                conv2d(e2, self.gf_dim *4, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e3_conv'),
+                name="g_e3_conv_bn"))
+            #28x28
+            e4 = tf.nn.relu(instance_norm(
+                conv2d(e3, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e4_conv'),
+                name="g_e4_conv_bn"))
+            #14x14
+            e5 = tf.nn.relu(instance_norm(
+                conv2d(e4, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e5_conv'),
+                name="g_e5_conv_bn"))
+            #7x7
+            e6 = tf.nn.relu(instance_norm(
+                conv2d(e5, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e6_conv'),
+                name="g_e6_conv_bn"))
+            #4x4
+            e7 = tf.nn.relu(instance_norm(
+                conv2d(e6, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e7_conv'),
+                name="g_e7_conv_bn"))
+            #2x3
+            e8 = instance_norm(
+                conv2d(e7, self.gf_dim*8, k_w=3, k_h=3, name='g_e8_conv'), "g_e8_conv_bn")
+            st()
+            #7X7
+            r1 = residule_block(e8, self.gf_dim * 8, name="g_r1")
+            r2 = residule_block(r1, self.gf_dim * 8, name="g_r2")
+            r3 = residule_block(r2, self.gf_dim * 8, name="g_r3")
+            r4 = residule_block(r3, self.gf_dim * 8, name="g_r4")
+
+            # r5 = residule_block(r4, self.gf_dim * 8, name = "g_r5")
+            # r6 = residule_block(r5, self.gf_dim * 8, name = "g_r6")
+            # r7 = residule_block(r6, self.gf_dim * 8, name = "g_r7")
+            # r8 = residule_block(r7, self.gf_dim * 8, name = "g_r8")
+
+
+            # r9 = residule_block(r8, self.gf_dim * 8, name = "g_r9")
+            # r10 = residule_block(r9, self.gf_dim * 8, name = "g_r10")
+            # r11 = residule_block(r10, self.gf_dim * 8, name = "g_r11")
+            # r12 = residule_block(r11, self.gf_dim * 8, name = "g_r12")
+            #####
+            # TODO: Change the dimensions here.
+            d1 = deconv2d(r4, [self.batch_size, 4, 4, self.gf_dim*8],
+                          k_h=3, k_w=3, name="g_d1", with_w=False)
+            d1 = tf.nn.relu(instance_norm(d1, "g_d1_bn"))
+            # [d1, e7]
+            d2 = deconv2d(d1, [self.batch_size, 7, 7, self.gf_dim * 8],
+                          k_h=3, k_w=3, name="g_d2", with_w=False)
+            d2 = tf.nn.relu(instance_norm(d2, "g_d2_bn"))
+
+            d3 = deconv2d(d2, [self.batch_size, 14, 14, self.gf_dim * 8],
+                          k_h=3, k_w=3, name="g_d3", with_w=False)
+            d3 = tf.nn.relu(instance_norm(d3, "g_d3_bn"))
+
+            d4 = deconv2d(d3, [self.batch_size, 28, 28, self.gf_dim * 8],
+                          k_h=3, k_w=3, name="g_d4", with_w=False)
+            d4 = tf.nn.relu(instance_norm(d4, "g_d4_bn"))
+
+            d5 = deconv2d(d4, [self.batch_size, 56, 56, self.gf_dim * 4],
+                          k_h=3, k_w=3, name="g_d5", with_w=False)
+            d5 = tf.nn.relu(instance_norm(d5, "g_d5_bn"))
+
+            d6 = deconv2d(d5, [self.batch_size, 112, 112, self.gf_dim * 2],
+                          k_h=3, k_w=3, name="g_d6", with_w=False)
+            d6 = tf.nn.relu(instance_norm(d6, "g_d6_bn"))
+
+            d7 = deconv2d(d6, [self.batch_size, 224, 224, self.gf_dim],
+                          k_h=3, k_w=3, name="g_d7", with_w=False)
+            d7 = tf.nn.relu(instance_norm(d7, "g_d7_bn"))
+
+            d8 = deconv2d(d7, [self.batch_size, 224, 224, self.output_c_dim],
+                          k_h=7, k_w=7, d_h=1, d_w=1, name="g_d8", with_w=False)
+            return tf.clip_by_value(self.opts.c * tf.nn.tanh(d8) + image, -1.0, 1.0),\
+                tf.nn.tanh(d8)

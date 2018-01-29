@@ -15,7 +15,7 @@ from keras.engine import  Model
 from keras.layers import Flatten, Dense, Input
 from keras.optimizers import Adam, SGD
 
-from lfw import get_people_names, read_data, split_dataset, split_indices, preprocess_images
+from lfw import get_people_names, read_data, split_dataset, split_indices, preprocess_images, abs_one_to_prediction
 
 VGG_HIDDEN_DIM = 512
 
@@ -47,7 +47,7 @@ class FaceRecognizer:
 
     def predict(self, data):
         """Wrapper function for prediction"""
-        return self.model(data)
+        return self.model(abs_one_to_prediction(data))
 
 def train(split_data,
           save_path=None,

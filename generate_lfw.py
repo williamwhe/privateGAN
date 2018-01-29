@@ -45,8 +45,10 @@ def train():
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
     print '\tTraining label: ' + str(train_label.shape)
+    print '\tMax, Min Train: %.4f, %.4f' % (np.max(train_data), np.min(train_data))
     print '\tTest data: ' + str(test_data.shape)
     print '\tTest label: ' + str(test_label.shape)
+    print '\tMax, Min Test: %.4f, %.4f' % (np.max(test_data), np.min(test_data))
 
     x_dim = train_data.shape[1]
     y_dim = train_label.shape[1]
@@ -133,7 +135,8 @@ def train():
                 sess.run([model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
-            if iteration != 0 and iteration % opt.losses_log_every == 0:
+            # if iteration != 0 and iteration % opt.losses_log_every == 0:
+            if iteration % opt.losses_log_every == 0:
                 print "iteration: ", iteration
                 print '\tD: %.4f, G: %.4f\n\thinge(%.1f): %.4f, L1(%.1f): %.4f, L2(%.1f): %.4f' % (
                     D_loss, G_loss, opt.H_lambda, hinge_loss,
@@ -177,13 +180,13 @@ def train():
                 print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
 
                 fake_samples, fake_noise = sess.run(
-                    [model.fake_images_sample, model.sample_noise],
+                    [model.fake_images_output, model.fake_noise_output],
                     {model.source: output_samples})
 
                 fakes = merge(fake_samples, [2 * NUM_REPR, NUM_SAMPLES_EACH])
                 original = merge(output_samples, [2 * NUM_REPR, NUM_SAMPLES_EACH])
                 noise = merge(fake_noise, [2 * NUM_REPR, NUM_SAMPLES_EACH])
-                final_image = print_ready(np.concatenate([fakes, noise, original], axis=1))
+                final_image = np.concatenate([fakes, noise, original], axis=1)
                 np.savez_compressed('./samples_%d.npz' % iteration,
                                     fakes=fakes,
                                     original=original,
