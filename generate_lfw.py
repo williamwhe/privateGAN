@@ -89,6 +89,8 @@ def train():
         good_model = FaceRecognizer(gender_model_path, 2, input_shape, opt.input_c_dim)
         model = advGAN(good_model, evil_model, opt, sess, mnist=False)
 
+        exit()
+
         iteration = 0
         writer = tf.summary.FileWriter("logs", sess.graph)
         loader = Dataset2(train_data, train_label)
