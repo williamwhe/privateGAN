@@ -47,7 +47,7 @@ class FaceRecognizer:
 
     def predict(self, data):
         """Wrapper function for prediction"""
-        return self.model(abs_one_to_prediction(data))
+        return self.model(data)
 
 def train(split_data,
           save_path=None,

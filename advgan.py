@@ -317,10 +317,18 @@ class advGAN():
             self.l2_loss_sum = tf.summary.scalar("l2_loss", self.l2_loss)
             self.hinge_loss_sum = tf.summary.scalar("hinge_loss", self.hinge_loss)
 
+            # Preparing data for LFW predictions
+            self.reversed_channels = self.fake_images[..., ::-1]
+            self.prediction_ready = self.reversed_channels - [93.5940, 104.7624, 129.1863]
+
             # Two competing good/evil classifiers.
             # 1. The good model.
             print 'Fake images shape:', self.fake_images.shape
-            self.good_predictions = self.good_model.predict(self.fake_images)
+            if self.mnist is True:
+                self.good_predictions = self.good_model.predict(self.fake_images)
+            else:
+                print '\tUsing prediction prepared images.'
+                self.good_predictions = self.good_model.predict(self.prediction_ready)
             self.good_accuracy = self._metric(
                 self.good_labels, tf.nn.softmax(self.good_predictions))
             self.good_fn_loss = tf.reduce_mean(
@@ -328,7 +336,10 @@ class advGAN():
                     logits=self.good_predictions,
                     labels=self.good_labels))
             # 2. The evil model.
-            self.evil_predictions = self.evil_model.predict(self.fake_images)
+            if self.mnist is True:
+                self.evil_predictions = self.evil_model.predict(self.fake_images)
+            else:
+                self.evil_predictions = self.evil_model.predict(self.prediction_ready)
             self.evil_accuracy = self._metric(
                 self.evil_labels, tf.nn.softmax(self.evil_predictions))
             self.evil_fn_loss = tf.reduce_mean(
