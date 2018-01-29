@@ -548,7 +548,7 @@ class advGAN():
                     [self.batch_size, s8, s8, self.gf_dim * 4],
                     name='g_d4',
                     with_w=True)
-                d4 = tf.nn.dropout(self.g_bn_d4(self.d4))
+                d4 = tf.nn.dropout(self.g_bn_d4(self.d4), 0.5)
                 d4 = tf.concat([d4, e3], 3)
                 print 'Shape of d4:', d4.shape
 
@@ -557,7 +557,7 @@ class advGAN():
                     [self.batch_size, s4, s4, self.gf_dim * 2],
                     name='g_d5',
                     with_w=True)
-                d5 = tf.nn.dropout(self.g_bn_d5(self.d5))
+                d5 = tf.nn.dropout(self.g_bn_d5(self.d5), 0.5)
                 d5 = tf.concat([d5, e2], 3)
                 print 'Shape of d5:', d5.shape
 
@@ -694,7 +694,7 @@ class advGAN():
                     [self.batch_size, s8, s8, self.gf_dim * 4],
                     name='g_d4',
                     with_w=True)
-                d4 = tf.nn.dropout(self.g_bn_d4(self.d4))
+                d4 = tf.nn.dropout(self.g_bn_d4(self.d4), 0.5)
                 d4 = tf.concat([d4, e3], 3)
                 print 'Shape of d4:', d4.shape
 
@@ -703,7 +703,7 @@ class advGAN():
                     [self.batch_size, s4, s4, self.gf_dim * 2],
                     name='g_d5',
                     with_w=True)
-                d5 = tf.nn.dropout(self.g_bn_d5(self.d5))
+                d5 = tf.nn.dropout(self.g_bn_d5(self.d5), 0.5)
                 d5 = tf.concat([d5, e2], 3)
                 print 'Shape of d5:', d5.shape
 
