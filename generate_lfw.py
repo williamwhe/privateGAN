@@ -89,6 +89,8 @@ def train():
         good_model = FaceRecognizer(gender_model_path, 2, input_shape, opt.input_c_dim)
         model = advGAN(good_model, evil_model, opt, sess, mnist=False)
 
+        exit()
+
         iteration = 0
         writer = tf.summary.FileWriter("logs", sess.graph)
         loader = Dataset2(train_data, train_label)
@@ -137,7 +139,7 @@ def train():
             # if iteration != 0 and iteration % opt.losses_log_every == 0:
             if iteration % opt.losses_log_every == 0:
                 print "iteration: ", iteration
-                print '\tD: %.4f, G: %.4f\n\thinge(%.1f): %.4f, L1(%.1f): %.4f, L2(%.1f): %.4f' % (
+                print '\tD: %.4f, G: %.4f\n\thinge(%.2f): %.4f, L1(%.2f): %.4f, L2(%.2f): %.4f' % (
                     D_loss, G_loss, opt.H_lambda, hinge_loss,
                     opt.L1_lambda, l1_loss, opt.L2_lambda, l2_loss)
                 print '\t\tGAN total loss: %.4f' % gan_loss
