@@ -511,9 +511,9 @@ class advGAN():
 
             print 'Shape of previous last layer:', e5.shape
             if self.mnist is False:
-                e6 = self.g_bn_e6(conv2d(lrelu(e5), self.gf_dim*8, name='g_e6_conv'))
+                e6 = self.g_bn_e6(conv2d(lrelu(e5), self.gf_dim*16, name='g_e6_conv'))
                 print 'Shape of e6:', e6.shape
-                e7 = self.g_bn_e7(conv2d(lrelu(e6), self.gf_dim*8, name='g_e7_conv'))
+                e7 = self.g_bn_e7(conv2d(lrelu(e6), self.gf_dim*16, name='g_e7_conv'))
                 print 'Shape of e7:', e7.shape
 
                 self.d1, self.d1_w, self.d1_b = deconv2d(
