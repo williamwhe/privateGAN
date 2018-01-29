@@ -187,10 +187,10 @@ def train():
                 original = merge(output_samples, [2 * NUM_REPR, NUM_SAMPLES_EACH])
                 noise = merge(fake_noise, [2 * NUM_REPR, NUM_SAMPLES_EACH])
                 final_image = np.concatenate([fakes, noise, original], axis=1)
-                np.savez_compressed('./samples_%d.npz' % iteration,
-                                    fakes=fakes,
-                                    original=original,
-                                    noise=noise)
+                # np.savez_compressed('./samples_%d.npz' % iteration,
+                #                     fakes=fakes,
+                #                     original=original,
+                #                     noise=noise)
 
                 scipy_imsave('snapshot_%d.png' % iteration, final_image)
 
