@@ -74,8 +74,8 @@ def train(split_data,
     model = Model(vgg_notop.input, face_probs)
 
     # We make all other layers UNTRAINABLE.
-    for i in range(len(model.layers) - 3, len(model.layers)):
-        model.layers[i].trainable = False
+    # for i in range(len(model.layers) - 3, len(model.layers)):
+    #     model.layers[i].trainable = False
 
     # A softmax loss is used for training of this network.
     def softmax(correct, predicted):
