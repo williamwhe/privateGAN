@@ -855,7 +855,7 @@ class advGAN():
             #2x3
             e8 = instance_norm(
                 conv2d(e7, self.gf_dim*8, k_w=3, k_h=3, name='g_e8_conv'), "g_e8_conv_bn")
-            print 'Shape of e8:', e7.shape
+            print 'Shape of e8:', e8.shape
             # st()
             #7X7
             r1 = residule_block(e8, self.gf_dim * 8, name="g_r1")
@@ -879,7 +879,7 @@ class advGAN():
                           k_h=3, k_w=3, name="g_d0", with_w=False)
             d0 = tf.nn.relu(instance_norm(d0, "g_d0_bn"))
             print 'Shape of d0:', d0.shape
-            d1 = deconv2d(r4, [self.batch_size, s64, s64, self.gf_dim*8],
+            d1 = deconv2d(d0, [self.batch_size, s64, s64, self.gf_dim*8],
                           k_h=3, k_w=3, name="g_d1", with_w=False)
             d1 = tf.nn.relu(instance_norm(d1, "g_d1_bn"))
             print 'Shape of d1:', d1.shape
@@ -981,7 +981,7 @@ class advGAN():
             #2x3
             e8 = instance_norm(
                 conv2d(e7, self.gf_dim*8, k_w=3, k_h=3, name='g_e8_conv'), "g_e8_conv_bn")
-            print 'Shape of e8:', e7.shape
+            print 'Shape of e8:', e8.shape
             # st()
             #7X7
             r1 = residule_block(e8, self.gf_dim * 8, name="g_r1")
@@ -995,7 +995,6 @@ class advGAN():
             # r7 = residule_block(r6, self.gf_dim * 8, name = "g_r7")
             # r8 = residule_block(r7, self.gf_dim * 8, name = "g_r8")
 
-
             # r9 = residule_block(r8, self.gf_dim * 8, name = "g_r9")
             # r10 = residule_block(r9, self.gf_dim * 8, name = "g_r10")
             # r11 = residule_block(r10, self.gf_dim * 8, name = "g_r11")
@@ -1005,7 +1004,7 @@ class advGAN():
                           k_h=3, k_w=3, name="g_d0", with_w=False)
             d0 = tf.nn.relu(instance_norm(d0, "g_d0_bn"))
             print 'Shape of d0:', d0.shape
-            d1 = deconv2d(r4, [self.batch_size, s64, s64, self.gf_dim*8],
+            d1 = deconv2d(d0, [self.batch_size, s64, s64, self.gf_dim*8],
                           k_h=3, k_w=3, name="g_d1", with_w=False)
             d1 = tf.nn.relu(instance_norm(d1, "g_d1_bn"))
             print 'Shape of d1:', d1.shape
