@@ -437,7 +437,7 @@ class advGAN():
             with open('vars.txt', 'w') as var_file:
                 for var in self.g_vars:
                     var_file.write(str(var.name) + '\t' + str(var.shape) + '\n')
-            exit()
+            # exit()
 
 
             # self.d_optim = tf.train.AdamOptimizer(self.lr).minimize(self.d_loss, self.d_vars)
