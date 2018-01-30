@@ -343,9 +343,11 @@ class advGAN():
                 tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.good_predictions,
                     labels=self.good_labels))
+            print 'Shape of good labels:', self.good_labels.shape
+            print 'SHape of good predictions:', self.good_predictions.shape
             self.good_confusion = tf.confusion_matrix(
-                np.argmax(self.good_labels, axis=1),
-                np.argmax(self.good_predictions, axis=1), num_classes=2)
+                tf.argmax(self.good_labels, axis=1),
+                tf.argmax(self.good_predictions, axis=1), num_classes=2)
             # 2. The evil model.
             if self.mnist is True:
                 self.evil_predictions = self.evil_model.predict(self.fake_images)
@@ -357,9 +359,11 @@ class advGAN():
                 tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.evil_predictions,
                     labels=self.evil_labels))
+            print 'Shape of evil labels:', self.evil_labels.shape
+            print 'Shape of evil predictions:', self.evil_predictions
             self.evil_confusion = tf.confusion_matrix(
-                np.argmax(self.evil_labels, axis=1),
-                np.argmax(self.evil_predictions, axis=1), num_classes=2)
+                tf.argmax(self.evil_labels, axis=1),
+                tf.argmax(self.evil_predictions, axis=1), num_classes=2)
 
             # adversarial loss = good_c * good_loss - evil_c * evil_loss.
             self.adv_loss = self.opts.good_loss_coeff * self.good_fn_loss - \
@@ -516,14 +520,10 @@ class advGAN():
             e5 = self.g_bn_e5(conv2d(lrelu(e4), self.gf_dim * 8, name='g_e5_conv'))
             # # e5 is (1 x 1 x self.gf_dim*8)
 
-            print 'Shape of previous last layer:', e5.shape
             if self.mnist is False:
                 e6 = self.g_bn_e6(conv2d(lrelu(e5), self.gf_dim*8, name='g_e6_conv'))
-                print 'Shape of e6:', e6.shape
                 e7 = self.g_bn_e7(conv2d(lrelu(e6), self.gf_dim*8, name='g_e7_conv'))
-                print 'Shape of e7:', e7.shape
                 e8 = self.g_bn_e8(conv2d(lrelu(e7), self.gf_dim*8, name='g_e8_conv'))
-                print 'Shape of e8:', e8.shape
 
                 self.d0, self.d0_w, self.d0_b = deconv2d(
                     tf.nn.relu(e8),
@@ -532,7 +532,6 @@ class advGAN():
                     with_w=True)
                 d0 = tf.nn.dropout(self.g_bn_d0(self.d0), 0.5)
                 d0 = tf.concat([d0, e7], 3)
-                print 'Shape of d0:', d0.shape
 
                 self.d1, self.d1_w, self.d1_b = deconv2d(
                     tf.nn.relu(d0),
@@ -541,7 +540,6 @@ class advGAN():
                     with_w=True)
                 d1 = tf.nn.dropout(self.g_bn_d1(self.d1), 0.5)
                 d1 = tf.concat([d1, e6], 3)
-                print 'Shape of d1:', d1.shape
 
                 self.d2, self.d2_w, self.d2_b = deconv2d(
                     tf.nn.relu(d1),
@@ -550,7 +548,6 @@ class advGAN():
                     with_w=True)
                 d2 = tf.nn.dropout(self.g_bn_d2(self.d2), 0.5)
                 d2 = tf.concat([d2, e5], 3)
-                print 'Shape of d2:', d2.shape
 
                 self.d3, self.d3_w, self.d3_b = deconv2d(
                     tf.nn.relu(d2),
@@ -559,7 +556,6 @@ class advGAN():
                     with_w=True)
                 d3 = tf.nn.dropout(self.g_bn_d3(self.d3), 0.5)
                 d3 = tf.concat([d3, e4], 3)
-                print 'Shape of d3:', d3.shape
 
                 self.d4, self.d4_w, self.d4_b = deconv2d(
                     tf.nn.relu(d3),
@@ -568,7 +564,6 @@ class advGAN():
                     with_w=True)
                 d4 = tf.nn.dropout(self.g_bn_d4(self.d4), 0.5)
                 d4 = tf.concat([d4, e3], 3)
-                print 'Shape of d4:', d4.shape
 
                 self.d5, self.d5_w, self.d5_b = deconv2d(
                     tf.nn.relu(d4),
@@ -577,7 +572,6 @@ class advGAN():
                     with_w=True)
                 d5 = tf.nn.dropout(self.g_bn_d5(self.d5), 0.5)
                 d5 = tf.concat([d5, e2], 3)
-                print 'Shape of d5:', d5.shape
 
                 self.d6, self.d6_w, self.d6_b = deconv2d(
                     tf.nn.relu(d5),
@@ -586,7 +580,6 @@ class advGAN():
                     with_w=True)
                 d6 = self.g_bn_d6(self.d6)
                 d6 = tf.concat([d6, e1], 3)
-                print 'Shape of d6:', d6.shape
 
                 self.d7, self.d7_w, self.d7_b = deconv2d(
                     tf.nn.relu(d6),
@@ -674,14 +667,10 @@ class advGAN():
             e5 = self.g_bn_e5(conv2d(lrelu(e4), self.gf_dim*8, name='g_e5_conv'))
             # # e5 is (1 x 1 x self.gf_dim*8)
 
-            print 'Shape of previous last layer:', e5.shape
             if self.mnist is False:
                 e6 = self.g_bn_e6(conv2d(lrelu(e5), self.gf_dim*8, name='g_e6_conv'))
-                print 'Shape of e6:', e6.shape
                 e7 = self.g_bn_e7(conv2d(lrelu(e6), self.gf_dim*8, name='g_e7_conv'))
-                print 'Shape of e7:', e7.shape
                 e8 = self.g_bn_e8(conv2d(lrelu(e7), self.gf_dim*8, name='g_e8_conv'))
-                print 'Shape of e8:', e8.shape
 
                 self.d0, self.d0_w, self.d0_b = deconv2d(
                     tf.nn.relu(e8),
@@ -690,7 +679,6 @@ class advGAN():
                     with_w=True)
                 d0 = tf.nn.dropout(self.g_bn_d0(self.d0), 0.5)
                 d0 = tf.concat([d0, e7], 3)
-                print 'Shape of d0:', d0.shape
 
                 self.d1, self.d1_w, self.d1_b = deconv2d(
                     tf.nn.relu(d0),
@@ -699,7 +687,6 @@ class advGAN():
                     with_w=True)
                 d1 = tf.nn.dropout(self.g_bn_d1(self.d1), 0.5)
                 d1 = tf.concat([d1, e6], 3)
-                print 'Shape of d1:', d1.shape
 
                 self.d2, self.d2_w, self.d2_b = deconv2d(
                     tf.nn.relu(d1),
@@ -708,7 +695,6 @@ class advGAN():
                     with_w=True)
                 d2 = tf.nn.dropout(self.g_bn_d2(self.d2), 0.5)
                 d2 = tf.concat([d2, e5], 3)
-                print 'Shape of d2:', d2.shape
 
                 self.d3, self.d3_w, self.d3_b = deconv2d(
                     tf.nn.relu(d2),
@@ -717,7 +703,6 @@ class advGAN():
                     with_w=True)
                 d3 = tf.nn.dropout(self.g_bn_d3(self.d3), 0.5)
                 d3 = tf.concat([d3, e4], 3)
-                print 'Shape of d3:', d3.shape
 
                 self.d4, self.d4_w, self.d4_b = deconv2d(
                     tf.nn.relu(d3),
@@ -726,7 +711,6 @@ class advGAN():
                     with_w=True)
                 d4 = tf.nn.dropout(self.g_bn_d4(self.d4), 0.5)
                 d4 = tf.concat([d4, e3], 3)
-                print 'Shape of d4:', d4.shape
 
                 self.d5, self.d5_w, self.d5_b = deconv2d(
                     tf.nn.relu(d4),
@@ -735,7 +719,6 @@ class advGAN():
                     with_w=True)
                 d5 = tf.nn.dropout(self.g_bn_d5(self.d5), 0.5)
                 d5 = tf.concat([d5, e2], 3)
-                print 'Shape of d5:', d5.shape
 
                 self.d6, self.d6_w, self.d6_b = deconv2d(
                     tf.nn.relu(d5),
@@ -744,7 +727,6 @@ class advGAN():
                     with_w=True)
                 d6 = self.g_bn_d6(self.d6)
                 d6 = tf.concat([d6, e1], 3)
-                print 'Shape of d6:', d6.shape
 
                 self.d7, self.d7_w, self.d7_b = deconv2d(
                     tf.nn.relu(d6),
