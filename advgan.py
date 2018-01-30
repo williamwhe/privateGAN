@@ -1041,6 +1041,5 @@ class advGAN():
             d8 = deconv2d(d7, [self.batch_size, s, s, self.output_c_dim],
                           k_h=7, k_w=7, d_h=1, d_w=1, name="g_d8", with_w=False)
             print 'Shape of d8:', d8.shape
-            exit()
             return tf.clip_by_value(self.opts.c * tf.nn.tanh(d8) + image, -1.0, 1.0),\
                 tf.nn.tanh(d8)
