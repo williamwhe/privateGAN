@@ -434,7 +434,7 @@ class advGAN():
             self.d_vars = [var for var in t_vars if 'd_' in var.name and 'evagan' in var.name]
             self.g_vars = [var for var in t_vars if 'g_' in var.name and 'evagan' in var.name]
 
-            for var in g_vars:
+            for var in self.g_vars:
                 print var.name, var.shape
 
 
