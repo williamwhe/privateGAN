@@ -343,8 +343,6 @@ class advGAN():
                 tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.good_predictions,
                     labels=self.good_labels))
-            print 'Shape of good labels:', self.good_labels.shape
-            print 'SHape of good predictions:', self.good_predictions.shape
             self.good_confusion = tf.confusion_matrix(
                 tf.argmax(self.good_labels, axis=1),
                 tf.argmax(self.good_predictions, axis=1), num_classes=2)
@@ -359,8 +357,6 @@ class advGAN():
                 tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.evil_predictions,
                     labels=self.evil_labels))
-            print 'Shape of evil labels:', self.evil_labels.shape
-            print 'Shape of evil predictions:', self.evil_predictions
             self.evil_confusion = tf.confusion_matrix(
                 tf.argmax(self.evil_labels, axis=1),
                 tf.argmax(self.evil_predictions, axis=1), num_classes=2)
@@ -838,7 +834,6 @@ class advGAN():
             e7 = tf.nn.relu(instance_norm(
                 conv2d(e6, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e7_conv'),
                 name="g_e7_conv_bn"))
-            print 'Shape of the last layer of generator:', e7.shape
             #2x3
             # e8 = instance_norm(
             #     conv2d(e7, self.gf_dim*8, k_w=3, k_h=3, name='g_e8_conv'), "g_e8_conv_bn")
