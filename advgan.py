@@ -436,7 +436,7 @@ class advGAN():
 
             with open('vars.txt', 'w') as var_file:
                 for var in self.g_vars:
-                    var_file.write((var.name, var.shape))
+                    var_file.write((var.name, '\t', var.shape))
             exit()
 
 
