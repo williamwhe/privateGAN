@@ -917,30 +917,37 @@ class advGAN():
             e1 = tf.nn.relu(instance_norm(
                 conv2d(image, self.gf_dim, k_w=7, k_h=7, d_h=1, d_w=1, name='g_e1_conv'),
                 name="g_e1_conv_bn"))
+            print 'Shape of e1:', e1.shape
             # 80 x 80
             e2 = tf.nn.relu(instance_norm(
                 conv2d(e1, self.gf_dim *2, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e2_conv'),
                 name="g_e2_conv_bn"))
+            print 'shape of e2:', e2.shape
             # 40 x 40
             e3 = tf.nn.relu(instance_norm(
                 conv2d(e2, self.gf_dim *4, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e3_conv'),
                 name="g_e3_conv_bn"))
+            print 'Shape of e3:', e3.shape
             # 20 x 20
             e4 = tf.nn.relu(instance_norm(
                 conv2d(e3, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e4_conv'),
                 name="g_e4_conv_bn"))
+            print 'Shape of e4:', e4.shape
             # 10 x 10
             e5 = tf.nn.relu(instance_norm(
                 conv2d(e4, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e5_conv'),
                 name="g_e5_conv_bn"))
+            print 'Shape of e5:', e5.shape
             # 5 x 5
             e6 = tf.nn.relu(instance_norm(
                 conv2d(e5, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e6_conv'),
                 name="g_e6_conv_bn"))
+            print 'Shape of e6:', e6.shape
             # 2 x 2
             e7 = tf.nn.relu(instance_norm(
                 conv2d(e6, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e7_conv'),
                 name="g_e7_conv_bn"))
+            print 'Shape of e7:', e7.shape
             #2x3
             # e8 = instance_norm(
             #     conv2d(e7, self.gf_dim*8, k_w=3, k_h=3, name='g_e8_conv'), "g_e8_conv_bn")
@@ -950,6 +957,7 @@ class advGAN():
             r2 = residule_block(r1, self.gf_dim * 8, name="g_r2")
             r3 = residule_block(r2, self.gf_dim * 8, name="g_r3")
             r4 = residule_block(r3, self.gf_dim * 8, name="g_r4")
+            print 'Shape of r blocks:', r1.shape, r2.shape, r3.shape, r4.shape
 
             # r5 = residule_block(r4, self.gf_dim * 8, name = "g_r5")
             # r6 = residule_block(r5, self.gf_dim * 8, name = "g_r6")
@@ -965,32 +973,40 @@ class advGAN():
             d1 = deconv2d(r4, [self.batch_size, s64, s64, self.gf_dim*8],
                           k_h=3, k_w=3, name="g_d1", with_w=False)
             d1 = tf.nn.relu(instance_norm(d1, "g_d1_bn"))
+            print 'Shape of d1:', d1.shape
             # [d1, e7]
             d2 = deconv2d(d1, [self.batch_size, s32, s32, self.gf_dim * 8],
                           k_h=3, k_w=3, name="g_d2", with_w=False)
             d2 = tf.nn.relu(instance_norm(d2, "g_d2_bn"))
+            print 'Shape of d2:', d2.shape
 
             d3 = deconv2d(d2, [self.batch_size, s16, s16, self.gf_dim * 8],
                           k_h=3, k_w=3, name="g_d3", with_w=False)
             d3 = tf.nn.relu(instance_norm(d3, "g_d3_bn"))
+            print 'Shape of d3:', d3.shape
 
             d4 = deconv2d(d3, [self.batch_size, s8, s8, self.gf_dim * 8],
                           k_h=3, k_w=3, name="g_d4", with_w=False)
             d4 = tf.nn.relu(instance_norm(d4, "g_d4_bn"))
+            print 'Shape of d4:', d4.shape
 
             d5 = deconv2d(d4, [self.batch_size, s4, s4, self.gf_dim * 4],
                           k_h=3, k_w=3, name="g_d5", with_w=False)
             d5 = tf.nn.relu(instance_norm(d5, "g_d5_bn"))
+            print 'Shape of d5:', d5.shape
 
             d6 = deconv2d(d5, [self.batch_size, s2, s2, self.gf_dim * 2],
                           k_h=3, k_w=3, name="g_d6", with_w=False)
             d6 = tf.nn.relu(instance_norm(d6, "g_d6_bn"))
+            print 'Shape of d6:', d6.shape
 
             d7 = deconv2d(d6, [self.batch_size, s, s, self.gf_dim],
                           k_h=3, k_w=3, name="g_d7", with_w=False)
             d7 = tf.nn.relu(instance_norm(d7, "g_d7_bn"))
+            print 'Shape of d7:', d7.shape
 
             d8 = deconv2d(d7, [self.batch_size, s, s, self.output_c_dim],
                           k_h=7, k_w=7, d_h=1, d_w=1, name="g_d8", with_w=False)
+            print 'Shape of d8:', d8.shape
             return tf.clip_by_value(self.opts.c * tf.nn.tanh(d8) + image, -1.0, 1.0),\
                 tf.nn.tanh(d8)
