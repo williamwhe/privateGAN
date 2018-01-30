@@ -146,6 +146,11 @@ def parse_opt():
                         help='Path to LFW data.')
     parser.add_argument('--lfw_base_path', type=str, default='./models/lfw',
                         help='Path to LFW two models.')
+    parser.add_argument('--resnet_gen', dest='resnet_gen', action='store_true',
+                        help='Uses ResNet Generators.')
+    parser.add_argument('--no_resnet_gen', dest='resnet_gen', action='store_false',
+                        help='Does not use ResNet Generators.')
+    parser.set_defaults(resnet_gen=False)
 
     args = parser.parse_args()
 
