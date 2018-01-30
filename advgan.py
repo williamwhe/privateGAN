@@ -290,7 +290,6 @@ class advGAN():
                 print 'Regular Generators.'
                 self.fake_images, self.g_x = self.generator(self.images)
 
-            # We sample an image
             if self.resnet_gen:
                 print 'ResNet Generators.'
                 self.fake_images_sample, self.sample_noise = self.sampler_resnet(self.images)
@@ -434,6 +433,9 @@ class advGAN():
             t_vars = tf.trainable_variables()
             self.d_vars = [var for var in t_vars if 'd_' in var.name and 'evagan' in var.name]
             self.g_vars = [var for var in t_vars if 'g_' in var.name and 'evagan' in var.name]
+
+            for var in g_vars:
+                print var.name, var.shape
 
 
             # self.d_optim = tf.train.AdamOptimizer(self.lr).minimize(self.d_loss, self.d_vars)
