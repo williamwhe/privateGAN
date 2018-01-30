@@ -180,7 +180,7 @@ def train():
                     good_accuracy, evil_accuracy)
                 print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
                 print 'Good confusion matrix:'
-                print good_confusion
+                print total_good_confusion
 
                 fake_samples, fake_noise = sess.run(
                     [model.fake_images_output, model.fake_noise_output],
