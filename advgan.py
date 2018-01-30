@@ -791,6 +791,10 @@ class advGAN():
         print "\tUsing ResNet Generators."
 
         with tf.variable_scope("generator") as scope:
+            if reuse:
+                tf.get_variable_scope().reuse_variables()
+            else:
+                assert tf.get_variable_scope().reuse == False
 
             # image is 160 x 160 x input_c_dim
             s = self.opts.img_dim  # s = 160.
@@ -808,10 +812,6 @@ class advGAN():
                                   name+'_bn2')
                 # y = instance_norm(conv2d(y, dim, ks, s, padding='VALID', name=name+'_c2'), name+'_bn2')
                 return y + x
-            #################
-            # c0 = tf.pad(image, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
-
-            # e1 = tf.nn.relu( instance_norm( conv2d(c0, self.gf_dim,  k_w = 7, k_h = 7, d_h =1, d_w = 1, padding = "VALID", name='g_e1_conv'),name = "g_e1_conv_bn" ))
             ###############
             # 160 x 160
             # image = tf.image.resize_bilinear(image, [224,224])
@@ -900,6 +900,10 @@ class advGAN():
         print "resnet Generator."
 
         with tf.variable_scope("generator") as scope:
+            if reuse:
+                tf.get_variable_scope().reuse_variables()
+            else:
+                assert tf.get_variable_scope().reuse == False
 
             # image is 160 x 160 x input_c_dim
             s = self.opts.img_dim  # s = 160.
