@@ -982,7 +982,6 @@ class advGAN():
             e8 = instance_norm(
                 conv2d(e7, self.gf_dim*8, k_w=3, k_h=3, name='g_e8_conv'), "g_e8_conv_bn")
             print 'Shape of e8:', e8.shape
-            st()
             #7X7
             r1 = residule_block(e8, self.gf_dim * 8, name="g_r1")
             r2 = residule_block(r1, self.gf_dim * 8, name="g_r2")
@@ -1042,5 +1041,6 @@ class advGAN():
             d8 = deconv2d(d7, [self.batch_size, s, s, self.output_c_dim],
                           k_h=7, k_w=7, d_h=1, d_w=1, name="g_d8", with_w=False)
             print 'Shape of d8:', d8.shape
+            exit()
             return tf.clip_by_value(self.opts.c * tf.nn.tanh(d8) + image, -1.0, 1.0),\
                 tf.nn.tanh(d8)
