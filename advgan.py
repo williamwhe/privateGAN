@@ -434,9 +434,9 @@ class advGAN():
             self.d_vars = [var for var in t_vars if 'd_' in var.name and 'evagan' in var.name]
             self.g_vars = [var for var in t_vars if 'g_' in var.name and 'evagan' in var.name]
 
-            with open('vars.txt', 'w') as var_file:
-                for var in self.g_vars:
-                    var_file.write(str(var.name) + '\t' + str(var.shape) + '\n')
+            # with open('vars.txt', 'w') as var_file:
+            #     for var in self.g_vars:
+            #         var_file.write(str(var.name) + '\t' + str(var.shape) + '\n')
             # exit()
 
 
