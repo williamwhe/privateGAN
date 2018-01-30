@@ -434,8 +434,10 @@ class advGAN():
             self.d_vars = [var for var in t_vars if 'd_' in var.name and 'evagan' in var.name]
             self.g_vars = [var for var in t_vars if 'g_' in var.name and 'evagan' in var.name]
 
-            for var in self.g_vars:
-                print var.name, var.shape
+            with open('vars.txt', 'w') as var_file:
+                for var in self.g_vars:
+                    var_file.write((var.name, var.shape))
+            exit()
 
 
             # self.d_optim = tf.train.AdamOptimizer(self.lr).minimize(self.d_loss, self.d_vars)
