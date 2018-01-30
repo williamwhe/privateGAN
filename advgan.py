@@ -875,11 +875,11 @@ class advGAN():
             # r11 = residule_block(r10, self.gf_dim * 8, name = "g_r11")
             # r12 = residule_block(r11, self.gf_dim * 8, name = "g_r12")
             #####
-            d0 = deconv2d(r4, [self.batch_size, s128, s128, self.gf_dim*8],
-                          k_h=3, k_w=3, name="g_d0", with_w=False)
-            d0 = tf.nn.relu(instance_norm(d0, "g_d0_bn"))
-            print 'Shape of d0:', d0.shape
-            d1 = deconv2d(d0, [self.batch_size, s64, s64, self.gf_dim*8],
+            # d0 = deconv2d(r4, [self.batch_size, s128, s128, self.gf_dim*8],
+            #               k_h=3, k_w=3, name="g_d0", with_w=False)
+            # d0 = tf.nn.relu(instance_norm(d0, "g_d0_bn"))
+            # print 'Shape of d0:', d0.shape
+            d1 = deconv2d(r4, [self.batch_size, s64, s64, self.gf_dim*8],
                           k_h=3, k_w=3, name="g_d1", with_w=False)
             d1 = tf.nn.relu(instance_norm(d1, "g_d1_bn"))
             print 'Shape of d1:', d1.shape
@@ -999,11 +999,11 @@ class advGAN():
             # r11 = residule_block(r10, self.gf_dim * 8, name = "g_r11")
             # r12 = residule_block(r11, self.gf_dim * 8, name = "g_r12")
             #####
-            d0 = deconv2d(r4, [self.batch_size, s128, s128, self.gf_dim*8],
-                          k_h=3, k_w=3, name="g_d0", with_w=False)
-            d0 = tf.nn.relu(instance_norm(d0, "g_d0_bn"))
-            print 'Shape of d0:', d0.shape
-            d1 = deconv2d(d0, [self.batch_size, s64, s64, self.gf_dim*8],
+            # d0 = deconv2d(r4, [self.batch_size, s128, s128, self.gf_dim*8],
+            #               k_h=3, k_w=3, name="g_d0", with_w=False)
+            # d0 = tf.nn.relu(instance_norm(d0, "g_d0_bn"))
+            # print 'Shape of d0:', d0.shape
+            d1 = deconv2d(r4, [self.batch_size, s64, s64, self.gf_dim*8],
                           k_h=3, k_w=3, name="g_d1", with_w=False)
             d1 = tf.nn.relu(instance_norm(d1, "g_d1_bn"))
             print 'Shape of d1:', d1.shape
