@@ -982,7 +982,7 @@ class advGAN():
             e8 = instance_norm(
                 conv2d(e7, self.gf_dim*8, k_w=3, k_h=3, name='g_e8_conv'), "g_e8_conv_bn")
             print 'Shape of e8:', e8.shape
-            # st()
+            st()
             #7X7
             r1 = residule_block(e8, self.gf_dim * 8, name="g_r1")
             r2 = residule_block(r1, self.gf_dim * 8, name="g_r2")
