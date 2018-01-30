@@ -795,7 +795,7 @@ class advGAN():
             # image is 160 x 160 x input_c_dim
             s = self.opts.img_dim  # s = 160.
             # 80, 40, 20, 10, 5, 2
-            s2, s4, s8, s16, s32, s64 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 2
+            s2, s4, s8, s16, s32, s64 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3
 
             def residule_block(x, dim, ks=3, s=1, name='res'):
                 ##we can also try zero padding here.
@@ -900,7 +900,7 @@ class advGAN():
             # image is 160 x 160 x input_c_dim
             s = self.opts.img_dim  # s = 160.
             # 80, 40, 20, 10, 5, 2
-            s2, s4, s8, s16, s32, s64 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 2
+            s2, s4, s8, s16, s32, s64 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3
 
             def residule_block(x, dim, ks=3, s=1, name='res'):
                 p = int((ks - 1) / 2)
