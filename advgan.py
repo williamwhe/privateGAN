@@ -284,15 +284,19 @@ class advGAN():
 
             # Creating a Generator instance that creates fake images.
             if self.resnet_gen:
+                print 'ResNet Generators.'
                 self.fake_images, self.g_x = self.generator_resnet(self.images)
             else:
+                print 'Regular Generators.'
                 self.fake_images, self.g_x = self.generator(self.images)
 
             # We sample an image
             if self.resnet_gen:
+                print 'ResNet Generators.'
                 self.fake_images_sample, self.sample_noise = self.sampler_resnet(self.images)
             else:
                 # We use regular samplers.
+                print 'Regular Generators.'
                 self.fake_images_sample, self.sample_noise = self.sampler(self.images)
 
             # *** FOR LFW ***
@@ -837,6 +841,7 @@ class advGAN():
             e7 = tf.nn.relu(instance_norm(
                 conv2d(e6, self.gf_dim *8, k_w=3, k_h=3, d_h=2, d_w=2, name='g_e7_conv'),
                 name="g_e7_conv_bn"))
+            print 'Shape of e7:', e7.shape
             #2x3
             # e8 = instance_norm(
             #     conv2d(e7, self.gf_dim*8, k_w=3, k_h=3, name='g_e8_conv'), "g_e8_conv_bn")
@@ -846,6 +851,7 @@ class advGAN():
             r2 = residule_block(r1, self.gf_dim * 8, name="g_r2")
             r3 = residule_block(r2, self.gf_dim * 8, name="g_r3")
             r4 = residule_block(r3, self.gf_dim * 8, name="g_r4")
+            print 'Shape of r blocks:', r1.shape, r2.shape, r3.shape, r4.shape
 
             # r5 = residule_block(r4, self.gf_dim * 8, name = "g_r5")
             # r6 = residule_block(r5, self.gf_dim * 8, name = "g_r6")
@@ -861,6 +867,7 @@ class advGAN():
             d1 = deconv2d(r4, [self.batch_size, s64, s64, self.gf_dim*8],
                           k_h=3, k_w=3, name="g_d1", with_w=False)
             d1 = tf.nn.relu(instance_norm(d1, "g_d1_bn"))
+            print 'Shape of d1:', d1.shape
             # [d1, e7]
             d2 = deconv2d(d1, [self.batch_size, s32, s32, self.gf_dim * 8],
                           k_h=3, k_w=3, name="g_d2", with_w=False)
@@ -888,18 +895,19 @@ class advGAN():
 
             d8 = deconv2d(d7, [self.batch_size, s, s, self.output_c_dim],
                           k_h=7, k_w=7, d_h=1, d_w=1, name="g_d8", with_w=False)
+            print 'Shape of d8:', d8.shape
             return tf.clip_by_value(self.opts.c * tf.nn.tanh(d8) + image, -1.0, 1.0),\
                 tf.nn.tanh(d8)
 
     def sampler_resnet(self, image, y=None):
-        print "resnet Generator."
+        print "\tUsing ResNet Sampler."
 
         with tf.variable_scope("generator") as scope:
             tf.get_variable_scope().reuse_variables()
 
             # image is 160 x 160 x input_c_dim
             s = self.opts.img_dim  # s = 160.
-            # 80, 40, 20, 10, 5, 2
+            # 80, 40, 20, 10, 5, 3
             s2, s4, s8, s16, s32, s64 = int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3
 
             def residule_block(x, dim, ks=3, s=1, name='res'):
