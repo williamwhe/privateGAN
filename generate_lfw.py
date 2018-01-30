@@ -154,6 +154,7 @@ def train():
                 fake_samples = [[] for _ in range(test_loader._num_labels)]
                 fake_noise = [[] for _ in range(test_loader._num_labels)]
 
+                total_good_confusion = np.zeros((2, 2))
                 for _ in range(test_iter_num):
 
                     # Loading the next batch of test images
@@ -166,17 +167,20 @@ def train():
                         model.evil_labels: test_evil_labels,
                         model.good_labels: test_good_labels
                     }
-                    evil_accuracy, good_accuracy = sess.run(
-                        [model.evil_accuracy, model.good_accuracy], feed)
+                    evil_accuracy, good_accuracy, good_confusion = sess.run(
+                        [model.evil_accuracy, model.good_accuracy, model.good_confusion], feed)
                     # We divide the total accuracy by the number of test iterations.
                     total_good_accuracy += good_accuracy
                     total_evil_accuracy += evil_accuracy
+                    total_good_confusion += good_confusion
 
                 good_accuracy = total_good_accuracy / float(test_iter_num)
                 evil_accuracy = total_evil_accuracy / float(test_iter_num)
                 print '\tGood Accuracy: %.4f, Evil Accuracy: %.4f' % (
                     good_accuracy, evil_accuracy)
                 print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
+                print 'Good confusion matrix:'
+                print good_confusion
 
                 fake_samples, fake_noise = sess.run(
                     [model.fake_images_output, model.fake_noise_output],

@@ -343,6 +343,7 @@ class advGAN():
                 tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.good_predictions,
                     labels=self.good_labels))
+            self.good_confusion = tf.confusion_matrix(self.good_labels, self.good_predictions)
             # 2. The evil model.
             if self.mnist is True:
                 self.evil_predictions = self.evil_model.predict(self.fake_images)
@@ -354,6 +355,7 @@ class advGAN():
                 tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.evil_predictions,
                     labels=self.evil_labels))
+            self.evil_confusion = tf.confusion_matrix(self.evil_labels, self.evil_predictions)
 
             # adversarial loss = good_c * good_loss - evil_c * evil_loss.
             self.adv_loss = self.opts.good_loss_coeff * self.good_fn_loss - \
