@@ -1,5 +1,7 @@
 from __future__ import division
 
+import os
+
 from scipy.misc import imsave as scipy_imsave
 import numpy as np
 import tensorflow as tf
@@ -94,7 +96,12 @@ def train():
         model = advGAN(good_model, evil_model, opt, sess, mnist=False)
 
         iteration = 0
-        writer = tf.summary.FileWriter("logs", sess.graph)
+        summary_dir = "logs/g_%d_ld_%d_gl_%d_L2_%.2f/" % (
+            opt.G_lambda, opt.ld, opt.good_loss_coeff, opt.L2_lambda)
+        if os.path.isdir(summary_dir) is False:
+            os.mkdir(summary_dir)
+        exit()
+        writer = tf.summary.FileWriter(summary_dir, sess.graph)
         loader = Dataset2(train_data, train_label)
         print 'Training data loaded.'
 
