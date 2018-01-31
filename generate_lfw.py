@@ -56,6 +56,7 @@ def train():
     print '\tTest data: ' + str(test_data.shape)
     print '\tTest label: ' + str(test_label.shape)
     print '\tMax, Min Test: %.4f, %.4f' % (np.max(test_data), np.min(test_data))
+    exit()
 
     x_dim = train_data.shape[1]
     y_dim = train_label.shape[1]
