@@ -151,6 +151,13 @@ def parse_opt():
     parser.add_argument('--no_resnet_gen', dest='resnet_gen', action='store_false',
                         help='Does not use ResNet Generators.')
     parser.set_defaults(resnet_gen=False)
+    parser.add_argument('--balance_data', dest='balance_data', action='store_true',
+                        help='Balance dataset.')
+    parser.add_argument('--no_balance_data', dest='balance_data', action='store_false',
+                        help='Does not balance dataset.')
+    parser.set_defaults(balance_data=True)
+    parser.add_argument('--balance_ratio', type=float, default=2,
+                        help='Balancing ratio.')
 
     args = parser.parse_args()
 

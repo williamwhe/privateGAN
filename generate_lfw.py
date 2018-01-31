@@ -10,7 +10,7 @@ import opts
 from utils import merge
 from advgan import advGAN
 from Dataset2 import Dataset2
-from lfw import get_30_people_chunk, print_ready
+from lfw import get_30_people_chunk, balance_dataset
 from face_recognizer import FaceRecognizer
 
 def get_output_samples(imgs, lbls, id_gender, num_repr, num_samples_each):
@@ -42,6 +42,13 @@ def train():
         get_30_people_chunk(opt.image_path, 1, gender_meta=True, img_size=img_size)
     test_data, test_label = get_30_people_chunk(opt.image_path, 2, img_size=img_size)
 
+
+    if opt.balance_data:
+        ratio = opt.balance_ratio
+        print 'Balancing dataset with ratio %f' % ratio
+        train_data, train_label = balance_dataset(train_data, train_label)
+        test_data, test_label = balance_dataset(test_data, test_label)
+
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
     print '\tTraining label: ' + str(train_label.shape)
@@ -62,7 +69,6 @@ def train():
     batch_size = opt.batch_size
     print 'Batch size: %d' % batch_size
 
-
     NUM_REPR = 5
     NUM_SAMPLES_EACH = int(batch_size / NUM_REPR / 2)
     output_samples = get_output_samples(train_data, train_label, id_gender,
@@ -74,8 +80,6 @@ def train():
     tf_config.gpu_options.allow_growth = True
 
     with tf.Session(config=tf_config) as sess:
-        # Initialize the variables, and restore the variables form checkpoint if there is.
-        # and initialize the writer
 
         id_model_path = '%s_%d_id' % (opt.lfw_base_path, x_dim)
         print '\tRetrieving evil model from "%s"' % id_model_path

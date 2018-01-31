@@ -151,6 +151,30 @@ def split_dataset(data, lbls, indices):
                      valid=(Namespace(data=valid_data, lbl=valid_lbl)),
                      test=(Namespace(data=test_data, lbl=test_lbl)))
 
+def balance_dataset(data, label, ratio=2):
+    min_pic_person = int(np.min(np.sum(label, axis=0)))
+    print 'There are %d minimum pictures per person.' % min_pic_person
+    max_pic_person = int(ratio * min_pic_person)
+    print 'Max would be %d' % max_pic_person
+
+    class_indices = dict()
+    for index, cls in enumerate(np.argmax(label, axis=1)):
+        if class_indices.get(cls) is None:
+            class_indices[cls] = [index]
+        else:
+            class_indices[cls].append(index)
+
+    final_indices = []
+    for cls, indices in class_indices.items():
+        if len(indices) < max_pic_person:
+            final_indices.extend(indices)
+        else:
+            final_indices.extend(
+                np.random.choice(indices, max_pic_person, replace=False).tolist())
+
+    print '%d --> %d' % (data.shape[0], len(final_indices))
+    return data[final_indices, :], label[final_indices, :]
+
 def get_gender(names, gender_path='lfw_data/gender.csv'):
     if os.path.exists(gender_path) is False:
         raise ValueError('File %s does not exist.' % gender_path)
