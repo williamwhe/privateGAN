@@ -100,7 +100,7 @@ def train():
             opt.G_lambda, opt.ld, opt.good_loss_coeff, opt.L2_lambda)
         if os.path.isdir(summary_dir) is False:
             os.mkdir(summary_dir)
-        exit()
+
         writer = tf.summary.FileWriter(summary_dir, sess.graph)
         loader = Dataset2(train_data, train_label)
         print 'Training data loaded.'
