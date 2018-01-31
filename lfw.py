@@ -172,7 +172,6 @@ def balance_dataset(data, label, ratio=2):
             final_indices.extend(
                 np.random.choice(indices, max_pic_person, replace=False).tolist())
 
-    print '%d --> %d' % (data.shape[0], len(final_indices))
     return data[final_indices, :], label[final_indices, :]
 
 def get_gender(names, gender_path='lfw_data/gender.csv'):
