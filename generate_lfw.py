@@ -103,7 +103,11 @@ def train():
         summary_dir = "logs/g_%d_ld_%d_gl_%d_L2_%.2f_%s/" % (
             opt.G_lambda, opt.ld, opt.good_loss_coeff, opt.L2_lambda, generator_mode)
         if os.path.isdir(summary_dir) is False:
+            print 'Creating directory %s for logs.' % summary_dir
             os.mkdir(summary_dir)
+        else:
+            print 'Removing all files in %s' % (summary_dir + '*')
+            os.remove(summary_dir + '*')
 
         writer = tf.summary.FileWriter(summary_dir, sess.graph)
         loader = Dataset2(train_data, train_label)
