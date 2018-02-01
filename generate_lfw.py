@@ -96,8 +96,12 @@ def train():
         model = advGAN(good_model, evil_model, opt, sess, mnist=False)
 
         iteration = 0
-        summary_dir = "logs/g_%d_ld_%d_gl_%d_L2_%.2f/" % (
-            opt.G_lambda, opt.ld, opt.good_loss_coeff, opt.L2_lambda)
+        if opt.resnet_gen:
+            generator_mode = 'ResNet'
+        else:
+            generator_mode = 'Regular'
+        summary_dir = "logs/g_%d_ld_%d_gl_%d_L2_%.2f_%s/" % (
+            opt.G_lambda, opt.ld, opt.good_loss_coeff, opt.L2_lambda, generator_mode)
         if os.path.isdir(summary_dir) is False:
             os.mkdir(summary_dir)
 
