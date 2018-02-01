@@ -1,6 +1,7 @@
 from __future__ import division
 
 import os
+import shutil
 
 from scipy.misc import imsave as scipy_imsave
 import numpy as np
@@ -105,9 +106,9 @@ def train():
         if os.path.isdir(summary_dir) is False:
             print 'Creating directory %s for logs.' % summary_dir
             os.mkdir(summary_dir)
-        else:
-            print 'Removing all files in %s' % (summary_dir + '*')
-            os.remove(summary_dir + '*')
+        # else:
+        #     print 'Removing all files in %s' % (summary_dir + '*')
+        #     shutil.rmtree(summary_dir)
 
         writer = tf.summary.FileWriter(summary_dir, sess.graph)
         loader = Dataset2(train_data, train_label)
