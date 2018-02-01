@@ -163,7 +163,7 @@ def train():
                 test_loader = Dataset2(test_data, test_label)
 
                 test_num = test_loader._num_examples
-                test_iter_num = int((test_num - batch_size) / batch_size)
+                test_iter_num = int(np.ceil((test_num - batch_size) / batch_size))
                 total_evil_accuracy = 0.0
                 total_good_accuracy = 0.0
                 fake_samples = [[] for _ in range(test_loader._num_labels)]
