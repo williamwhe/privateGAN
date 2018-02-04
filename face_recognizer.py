@@ -102,24 +102,24 @@ def train(train_xy,
                   optimizer=SGD(lr=lr, decay=1e-6, momentum=0.9, nesterov=True),
                   metrics=['accuracy'])
 
-    # Model is trained.
-    if save_path:
-        # We train one final time to save the model.
-        model.fit(train_data, train_label,
-                  batch_size=batch_size,
-                  epochs=num_epochs,
-                  shuffle=True)
-        if gender:
-            model.save(save_path)
-        else:
-            model.save(save_path)
-    else:
+    # Training the model.
+    if test_xy:
         # Training with validation data.
         model.fit(train_data, train_label,
                   batch_size=batch_size,
                   validation_data=(test_data, test_label),
                   epochs=num_epochs,
                   shuffle=True)
+    else:
+        # We train one final time to save the model.
+        model.fit(train_data, train_label,
+                  batch_size=batch_size,
+                  epochs=num_epochs,
+                  shuffle=True)
+
+    if save_path:
+        model.save(save_path)
+    else:
         # We only return the validation accuracy.
         return model.evaluate(test_data,
                               test_label,
