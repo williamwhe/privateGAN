@@ -62,8 +62,10 @@ def train(train_xy,
           gender=False):
 
     train_data, train_label = train_xy
+    print 'Training data histogram:', np.sum(train_data, axis=0)
     if test_xy:
         test_data, test_label = test_xy
+        print 'Test data histogram:', np.sum(test_data, axis=0)
 
     num_classes = train_label.shape[1]
     vgg_notop = VGGFace(include_top=False, input_shape=input_shape)
@@ -108,9 +110,9 @@ def train(train_xy,
                   epochs=num_epochs,
                   shuffle=True)
         if gender:
-            model.save(save_path + '_%d_gender' % input_shape[0])
+            model.save(save_path)
         else:
-            model.save(save_path + '_%d_id' % input_shape[0])
+            model.save(save_path)
     else:
         # Training with validation data.
         model.fit(train_data, train_label,
@@ -195,7 +197,7 @@ def main():
 
         train((train_data, train_label),
               (test_data, test_label),
-              args.path,
+              args.path + '_%d_gender_%d' % (input_shape[0], args.slice_num),
               input_shape=input_shape,
               batch_size=args.batch_size,
               num_epochs=args.num_epochs,
@@ -221,10 +223,14 @@ def main():
                           gender=args.gender,
                           fixed_low_level=args.fixed_low_level)
             val_acc.append(score[1])
+            print '\nAccuracy: %.4f', val_acc[-1]
 
-        print 'Validation Accuracy: %.4f' % np.mean(val_acc)
+        print ''
+        print 'Accs:', val_acc
+        print 'CV Accuracy: %.4f' % np.mean(val_acc)
 
-        train((imgs, lbls), None, args.path,
+        train((imgs, lbls), None,
+              args.path + '_%d_id_%d' % (input_shape[0], args.slice_num),
               input_shape=input_shape,
               batch_size=args.batch_size,
               num_epochs=args.num_epochs,
