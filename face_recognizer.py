@@ -188,7 +188,7 @@ def main():
     print 'batch size:', args.batch_size
     print 'num_epochs:', args.num_epochs
 
-    for train_idx, test_idx in slice:
+    for train_idx, test_idx in slices:
         train_xy = (imgs[train_idx, :], lbls[train_idx, :])
         test_xy = (imgs[test_idx, :], lbls[test_idx, :])
         score = train(train_xy, test_xy,
