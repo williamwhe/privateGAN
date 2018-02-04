@@ -14,7 +14,7 @@ from keras_vggface.vggface import VGGFace
 from keras.engine import  Model
 from keras.layers import Flatten, Dense, Input
 from keras.optimizers import Adam, SGD
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 
 from lfw import get_people_names, read_data, split_dataset, split_indices, preprocess_images, abs_one_to_prediction
 from lfw import get_30_people_chunk
@@ -135,7 +135,7 @@ def main():
                         help='Size of input images.')
     parser.add_argument('--batch_size', type=int, default=32,
                         help='Batch size used for training.')
-    parser.add_argument('--num_epochs', type=int, default=100,
+    parser.add_argument('--num_epochs', type=int, default=25,
                         help='Number of training epochs.')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='Learning rate.')
@@ -155,83 +155,82 @@ def main():
 
     img_size = (args.image_size, args.image_size)
     input_shape = (args.image_size, args.image_size, 3)
-
-    imgs, lbls = get_30_people_chunk(args.image_path, args.slice_num, args.gender, img_size)
-    print 'Data is read.'
-
-    # names = get_people_names(args.image_path, args.min_num_pics)
-    # imgs, identity = read_data(args.image_path,
-    #                            names,
-    #                            img_size=img_size,
-    #                            gender_label=False)
-
-    # if args.gender:
-    #     _, gender = read_data(args.image_path,
-    #                           names,
-    #                           img_size=img_size,
-    #                           gender_label=True)
-    # if args.gender:
-    #     lbls = gender
-    # else:
-    #     lbls = identity
-    # imgs, lbls = read_data(args.image_path, names, img_size=img_size, gender_label=args.gender)
-    # numerical_lbls = np.argmax(lbls, axis=1)
-
-    # We calculate the categorical labels. This is used to create K-fold slices.
-    lbl_cat = np.argmax(lbls, axis=1)
-    skf = StratifiedKFold(n_splits=4)
-    slices = skf.split(imgs, lbl_cat)
-
-    print 'Shape of labels:', lbls.shape
     print 'Saving directory: %s' % args.path
     print 'input shape:', input_shape
     print 'batch size:', args.batch_size
     print 'num_epochs:', args.num_epochs
 
-    for train_idx, test_idx in slices:
-        train_xy = (imgs[train_idx, :], lbls[train_idx, :])
-        test_xy = (imgs[test_idx, :], lbls[test_idx, :])
-        score = train(train_xy, test_xy,
-                      input_shape=input_shape,
-                      batch_size=args.batch_size,
-                      num_epochs=args.num_epochs,
-                      lr=args.lr,
-                      gender=args.gender,
-                      fixed_low_level=args.fixed_low_level)
-        print score
-        np.savez_compressed('score', score=score)
-        print score[1]
-        break
+    imgs, lbls = get_30_people_chunk(args.image_path, args.slice_num, args.gender, img_size)
+    imgs = imgs * 255
+    print 'Data is read.'
+    print 'Shape of labels:', lbls.shape
 
-    # if args.gender:
-    #     # We take other images to train a gender identifier.
-    #     names = get_people_names(args.image_path, 30)
-    #     others = np.setdiff1d(get_people_names(args.image_path), names)
-    #     other_imgs, other_lbls = read_data(args.image_path, others,
-    #                                        img_size=img_size, gender_label=True)
-    #     split_data.train.data = np.concatenate((split_data.train.data, other_imgs))
-    #     split_data.train.lbl = np.concatenate((split_data.train.lbl, other_lbls))
+    if args.gender:
+        names = get_people_names(args.image_path, 30)
+        other_names = np.setdiff1d(get_people_names(args.image_path), names)
+        other_imgs, gender = read_data(
+            args.image_path,
+            other_names,
+            img_size=img_size,
+            gender_label=True)
 
+        slices = train_test_split(other_imgs, gender,
+                                  train_size=.5,
+                                  random_state=0,
+                                  stratify=np.argmax(gender, axis=1))
+        if args.slice_num == 0:
+            imgs = np.concatenate((imgs, slices[0]))
+            lbls = np.concatenate((lbls, slices[1]))
+        elif args.slice_num == 1:
+            imgs = np.concatenate((imgs, slices[2]))
+            lbls = np.concatenate((lbls, slices[3]))
+        else:
+            raise ValueError('slice number should be either 0 or 1 for gender classification. ' \
+                             '%d provided.' % args.slice_num)
 
-    # print split_data.train.data.shape
-    # print split_data.train.lbl.shape
+        imgs = preprocess_images(imgs, version=1)
 
-    # print split_data.valid.data.shape
-    # print split_data.valid.lbl.shape
+        train_data, train_label, test_data, test_label = train_test_split(
+            imgs, lbls, train_size=.8, random_state=0, stratify=np.argmax(lbls, axis=1))
 
-    # print split_data.test.data.shape
-    # print split_data.test.data.shape
+        train((train_data, train_label),
+              (test_data, test_label),
+              args.path,
+              input_shape=input_shape,
+              batch_size=args.batch_size,
+              num_epochs=args.num_epochs,
+              lr=args.lr,
+              gender=True,
+              fixed_low_level=args.fixed_low_level)
 
-    # print 'Preprocessing the images.'
-    # for data in [split_data.train.data, split_data.valid.data, split_data.test.data]:
-    #     data = preprocess_images(data)
+    else:  # args.gender is False.
+        lbl_cat = np.argmax(lbls, axis=1)
+        skf = StratifiedKFold(n_splits=4)
+        slices = skf.split(imgs, lbl_cat)
 
-    # train(split_data, args.path,
-    #       input_shape=input_shape,
-    #       batch_size=args.batch_size,
-    #       num_epochs=args.num_epochs,
-    #       lr=args.lr,
-    #       gender=args.gender)
+        val_acc = []
+        imgs = preprocess_images(imgs, version=1)
+        for train_idx, test_idx in slices:
+            train_xy = (imgs[train_idx, :], lbls[train_idx, :])
+            test_xy = (imgs[test_idx, :], lbls[test_idx, :])
+            score = train(train_xy, test_xy,
+                          input_shape=input_shape,
+                          batch_size=args.batch_size,
+                          num_epochs=args.num_epochs,
+                          lr=args.lr,
+                          gender=args.gender,
+                          fixed_low_level=args.fixed_low_level)
+            val_acc.append(score[1])
+
+        print 'Validation Accuracy: %.4f' % np.mean(val_acc)
+
+        train((imgs, lbls), None, args.path,
+              input_shape=input_shape,
+              batch_size=args.batch_size,
+              num_epochs=args.num_epochs,
+              lr=args.lr,
+              gender=args.gender,
+              fixed_low_level=args.fixed_low_level)
 
 if __name__ == '__main__':
     main()
