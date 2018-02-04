@@ -182,11 +182,11 @@ def main():
                                   random_state=0,
                                   stratify=np.argmax(gender, axis=1))
         if args.slice_num == 0:
-            imgs = np.concatenate((imgs, slices[0]))
-            lbls = np.concatenate((lbls, slices[1]))
+            imgs = np.concatenate((imgs, slices[0]))  # 0: train_data.
+            lbls = np.concatenate((lbls, slices[2]))  # 2: train_label.
         elif args.slice_num == 1:
-            imgs = np.concatenate((imgs, slices[2]))
-            lbls = np.concatenate((lbls, slices[3]))
+            imgs = np.concatenate((imgs, slices[1]))  # 1: test_data.
+            lbls = np.concatenate((lbls, slices[3]))  # 3: test_label.
         else:
             raise ValueError('slice number should be either 0 or 1 for gender classification. ' \
                              '%d provided.' % args.slice_num)
