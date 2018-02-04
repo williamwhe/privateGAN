@@ -86,7 +86,6 @@ def train(train_xy,
     if fixed_low_level:
         # We make low-level layers untrainable.
         for i in range(len(model.layers) - 3):
-            print model.layers[i]
             model.layers[i].trainable = False
 
     # A softmax loss is used for training of this network.
