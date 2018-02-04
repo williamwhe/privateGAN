@@ -161,6 +161,7 @@ def main():
     print 'input shape:', input_shape
     print 'batch size:', args.batch_size
     print 'num_epochs:', args.num_epochs
+    print 'Slice number:', args.slice_num
 
     imgs, lbls = get_30_people_chunk(args.image_path, args.slice_num, args.gender, img_size)
     imgs = imgs * 255
