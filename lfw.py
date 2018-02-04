@@ -186,7 +186,6 @@ def get_gender(names, gender_path='lfw_data/gender.csv'):
 def get_30_people_chunk(image_path,
                         chunk_number,
                         gender_label=False,
-                        preprocess=True,
                         img_size=(224, 224),
                         gender_meta=False):
 
