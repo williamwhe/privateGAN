@@ -62,10 +62,10 @@ def train(train_xy,
           gender=False):
 
     train_data, train_label = train_xy
-    print 'Training data histogram:', np.sum(train_data, axis=0)
+    print 'Training data histogram:', np.sum(train_label, axis=0)
     if test_xy:
         test_data, test_label = test_xy
-        print 'Test data histogram:', np.sum(test_data, axis=0)
+        print 'Test data histogram:', np.sum(test_label, axis=0)
 
     num_classes = train_label.shape[1]
     vgg_notop = VGGFace(include_top=False, input_shape=input_shape)
