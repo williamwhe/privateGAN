@@ -193,7 +193,7 @@ def main():
 
         imgs = preprocess_images(imgs, version=1)
 
-        train_data, train_label, test_data, test_label = train_test_split(
+        train_data, test_data, train_label, test_label = train_test_split(
             imgs, lbls, train_size=.8, random_state=0, stratify=np.argmax(lbls, axis=1))
 
         train((train_data, train_label),
