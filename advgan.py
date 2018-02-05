@@ -262,8 +262,8 @@ class advGAN():
 
     # Average number of correct predictions (Accuracy).
     def _metric(self, labels, predict_labels):
-        y_true_cls = tf.argmax(labels, dimension=1)
-        y_pred_cls = tf.argmax(predict_labels, dimension=1)
+        y_true_cls = tf.argmax(labels, axis=1)
+        y_pred_cls = tf.argmax(predict_labels, axis=1)
         correct_prediction = tf.equal(y_pred_cls, y_true_cls)
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         return accuracy
@@ -385,7 +385,7 @@ class advGAN():
 
             # self.fake_predict_labels = self.model.predict(self.fake_images)
             # self.out_predict_labels = tf.argmax(tf.nn.softmax(
-            #     self.model.predict(self.fake_images_sample)), dimension=1)
+            #     self.model.predict(self.fake_images_sample)), axis=1)
 
             # if self.opts.is_advGAN is True:
             #     self.adv_G_loss = self._adversarial_g_loss(

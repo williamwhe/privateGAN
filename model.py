@@ -209,15 +209,15 @@ class CNN():
 
         self.y_true = tf.placeholder(tf.float32, shape=[None, self.opts.label_dim], name='y_true')
 
-        y_true_cls = tf.argmax(self.y_true, dimension=1)
+        y_true_cls = tf.argmax(self.y_true, axis=1)
 
         _, self.loss = self.create_network(training=True)
         self.optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)  
         y_pred, _ = self.create_network(training=False)
-        y_pred_cls = tf.argmax(y_pred, dimension=1)
+        y_pred_cls = tf.argmax(y_pred, axis=1)
         self.y_pred_cls = y_pred_cls
         self.y_pred = y_pred
-        y_pred_cls = tf.argmax(y_pred, dimension=1)
+        y_pred_cls = tf.argmax(y_pred, axis=1)
         correct_prediction = tf.equal(y_pred_cls, y_true_cls)
         self.y_prediction = tf.not_equal(y_pred_cls, y_true_cls)
         self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
