@@ -356,7 +356,7 @@ class advGAN():
                     labels=self.good_labels))
             self.good_confusion = tf.confusion_matrix(
                 tf.argmax(self.good_labels, axis=1),
-                tf.argmax(self.good_predictions, axis=1), num_classes=2)
+                tf.argmax(self.good_predictions, axis=1), num_classes=self.opts.good_label_num)
             # 2. The evil model.
             if self.mnist is True:
                 self.evil_predictions = self.evil_model.predict(self.fake_images)
@@ -370,7 +370,7 @@ class advGAN():
                     labels=self.evil_labels))
             self.evil_confusion = tf.confusion_matrix(
                 tf.argmax(self.evil_labels, axis=1),
-                tf.argmax(self.evil_predictions, axis=1), num_classes=2)
+                tf.argmax(self.evil_predictions, axis=1), num_classes=self.opts.evil_label_num)
 
             # adversarial loss = good_c * good_loss - evil_c * evil_loss.
             self.adv_loss = self.opts.good_loss_coeff * self.good_fn_loss - \
