@@ -406,7 +406,6 @@ class advGAN():
             #     # hinge_lambda * hinge_loss + \
             #     # L1_lambda * L1_norm + \
             #     # L2_lambda * L2_norm
-
             self.good_loss_sum = tf.summary.scalar("Good loss", self.good_fn_loss)
             self.evil_loss_sum = tf.summary.scalar("Evil loss", self.evil_fn_loss)
             self.adv_loss_sum = tf.summary.scalar("Adversarial loss", self.adv_loss)
