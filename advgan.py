@@ -509,11 +509,18 @@ class advGAN():
             if self.mnist:
                 ### assume image input size is 32
                 s, s2, s4, s8, s16 = 28, 14, 7, 4, 2
-            else:
+            elif self.opts.img_dim == 160:
                 s = self.opts.img_dim
                 s2, s4, s8, s16, s32, s64, s128 = \
                     int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3, 2
                 print s2, s4, s8, s16, s32, s64, s128
+            elif self.opts.img_dim == 224:
+                s = self.opts.img_dim
+                s2, s4, s8, s16, s32, s64, s128 = \
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 4, 2
+                print s2, s4, s8, s16, s32, s64, s128
+            else:
+                raise ValueError('Image Dimension not one of (28/MNIST), (160/LFW) or (224/LFW)')
             # s = 32
             # # s2, s4, s8, s16, s32, s64, s128 = \
             # #   int(s/2), int(s/4), int(s/8), int(s/16), \
@@ -661,11 +668,18 @@ class advGAN():
             if self.mnist:
                 ### assume image input size is 32
                 s, s2, s4, s8, s16 = 28, 14, 7, 4, 2
-            else:
+            elif self.opts.img_dim == 160:
                 s = self.opts.img_dim
                 s2, s4, s8, s16, s32, s64, s128 = \
                     int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3, 2
                 print s2, s4, s8, s16, s32, s64, s128
+            elif self.opts.img_dim == 224:
+                s = self.opts.img_dim
+                s2, s4, s8, s16, s32, s64, s128 = \
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 4, 2
+                print s2, s4, s8, s16, s32, s64, s128
+            else:
+                raise ValueError('Image Dimension not one of (28/MNIST), (160/LFW) or (224/LFW)')
             #16, 8 ,4, 2,1 s:32
             # image is (32 x 32 x input_c_dim)
             e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
@@ -803,8 +817,14 @@ class advGAN():
             # image is 160 x 160 x input_c_dim
             s = self.opts.img_dim  # s = 160.
 
-            s2, s4, s8, s16, s32, s64, s128 = \
-                int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3, 2
+            if s == 160:
+                s2, s4, s8, s16, s32, s64, s128 = \
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3, 2
+            elif s == 224:
+                s2, s4, s8, s16, s32, s64, s128 = \
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 4, 2
+            else:
+                raise ValueError('Image size for ResNet generator, %d, not recognized' % s)
 
             def residule_block(x, dim, ks=3, s=1, name='res'):
                 p = int((ks - 1) / 2)
@@ -926,11 +946,15 @@ class advGAN():
         with tf.variable_scope("generator") as scope:
             tf.get_variable_scope().reuse_variables()
 
-            # image is 160 x 160 x input_c_dim
-            s = self.opts.img_dim  # s = 160.
-            # 80, 40, 20, 10, 5, 3
-            s2, s4, s8, s16, s32, s64, s128 = \
-                int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3, 2
+            s = self.opts.img_dim
+            if s == 160:
+                s2, s4, s8, s16, s32, s64, s128 = \
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 3, 2
+            elif s == 224:
+                s2, s4, s8, s16, s32, s64, s128 = \
+                    int(s/2), int(s/4), int(s/8), int(s/16), int(s/32), 4, 2
+            else:
+                raise ValueError('Image size for ResNet generator, %d, not recognized' % s)
 
             def residule_block(x, dim, ks=3, s=1, name='res'):
                 p = int((ks - 1) / 2)
