@@ -206,7 +206,7 @@ def train():
                 print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
                 print 'Good confusion matrix:'
                 print total_good_confusion
-                evil_misclass = total_evil_confusion(axis=0) - np.diag(total_evil_confusion)
+                evil_misclass = total_evil_confusion.sum(axis=0) - np.diag(total_evil_confusion)
                 evil_idxs = np.argsort(-evil_misclass)
                 print 'Evil misclassifications:'
                 print np.array(names)[evil_idxs]
