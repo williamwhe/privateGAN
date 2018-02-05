@@ -13,7 +13,7 @@ import opts
 from utils import merge
 from advgan import advGAN
 from Dataset2 import Dataset2
-from lfw import get_30_people_chunk, balance_dataset
+from lfw import get_30_people_chunk, balance_dataset, get_people_names
 from face_recognizer import FaceRecognizer
 
 def get_output_samples(imgs, lbls, id_gender, num_repr, num_samples_each):
@@ -44,6 +44,7 @@ def train():
     train_data, train_label, id_gender = \
         get_30_people_chunk(opt.image_path, 1, gender_meta=True, img_size=img_size)
     test_data, test_label = get_30_people_chunk(opt.image_path, 2, img_size=img_size)
+    names = get_people_names(opt.image_path, 30)
 
 
     if opt.balance_data:
@@ -205,8 +206,11 @@ def train():
                 print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
                 print 'Good confusion matrix:'
                 print total_good_confusion
-                print 'Evil confusion matrix:'
-                print total_evil_confusion
+                evil_misclass = total_evil_confusion(axis=0) - np.diag(total_evil_confusion)
+                evil_idxs = np.argsort(-evil_misclass)
+                print 'Evil misclassifications:'
+                print np.array(names)[evil_idxs]
+                print evil_misclass[evil_idxs]
 
                 fake_samples, fake_noise = sess.run(
                     [model.fake_images_output, model.fake_noise_output],
