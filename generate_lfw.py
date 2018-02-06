@@ -236,7 +236,7 @@ def train():
 
                 good_accuracy = accuracy_score(good_true, good_pred)
                 evil_accuracy = accuracy_score(evil_true, evil_pred)
-                total_good_confusion = confusion_matrix(good_true, good_pred, ['Female', 'Male'])
+                total_good_confusion = confusion_matrix(good_true, good_pred)
                 total_evil_confusion = confusion_matrix(evil_true, evil_pred)
                 # for _ in range(test_iter_num):
 
