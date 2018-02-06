@@ -229,19 +229,15 @@ def train():
                 new_test_data = np.concatenate(new_test_data)
                 new_pred_data = np.concatenate(new_pred_data)
 
-                good_predicts = np.argmax(model.good_model.model.predict(new_test_data), axis=1)
-                good_other_pred = np.argmax(model.good_model.model.predict(new_pred_data), axis=1)
-                evil_predicts = np.argmax(model.evil_model.model.predict(new_test_data), axis=1)
-                evil_other_pred = np.argmax(model.evil_model.model.predict(new_pred_data), axis=1)
-                evil_label_ct = np.argmax(test_label, axis=1)
-                good_label_ct = np.argmax(id_gender[evil_label_ct, :], axis=1)
+                good_pred = np.argmax(model.good_model.model.predict(new_pred_data), axis=1)
+                evil_pred = np.argmax(model.evil_model.model.predict(new_pred_data), axis=1)
+                evil_true = np.argmax(test_label, axis=1)
+                good_true = np.argmax(id_gender[evil_true, :], axis=1)
 
-                good_accuracy = accuracy_score(good_label_ct, good_predicts)
-                good_other_accuracy = accuracy_score(good_label_ct, good_other_pred)
-                evil_accuracy = accuracy_score(evil_label_ct, evil_predicts)
-                evil_other_accuracy = accuracy_score(evil_label_ct, evil_other_pred)
-                total_good_confusion = confusion_matrix(good_label_ct, good_predicts)
-                total_evil_confusion = confusion_matrix(evil_label_ct, evil_predicts)
+                good_accuracy = accuracy_score(good_true, good_pred)
+                evil_accuracy = accuracy_score(evil_true, evil_pred)
+                total_good_confusion = confusion_matrix(good_true, good_pred, ['Female', 'Male'])
+                total_evil_confusion = confusion_matrix(evil_true, evil_pred)
                 # for _ in range(test_iter_num):
 
                 #     # Loading the next batch of test images
@@ -268,8 +264,6 @@ def train():
                 print '\tGood Accuracy: %.4f, Evil Accuracy: %.4f' % (
                     good_accuracy, evil_accuracy)
                 print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
-                print '\tPrediction ready accuracy:'
-                print '\tGood: %.4f\tEvil: %.4f' % (good_other_accuracy, evil_other_accuracy)
                 print 'Good confusion matrix:'
                 print total_good_confusion
                 evil_misclass = total_evil_confusion.sum(axis=0) - np.diag(total_evil_confusion)
