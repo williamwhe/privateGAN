@@ -19,15 +19,16 @@ from face_recognizer import FaceRecognizer
 def get_output_samples(imgs, lbls, id_gender, num_repr, num_samples_each):
     id_gender_ct = np.argmax(id_gender, axis=1)
     lbls_ct = np.argmax(lbls, axis=1)
+    sum_lbl = lbls.sum(axis=0)
     print lbls_ct.shape
     print id_gender_ct
     samples = []
     for i in range(2):
-        indices = np.random.choice(np.where(id_gender_ct == i)[0],
+        indices = np.random.choice(np.where((id_gender_ct == i) and (sum_lbl != 0))[0],
                                    num_repr,
                                    replace=False)
         for idx in indices:
-            selection = np.random.choice(np.where(lbls_ct == idx)[0],
+            selection = np.random.choice(np.where((lbls_ct == idx))[0],
                                          num_samples_each,
                                          replace=False)
             samples.append(imgs[selection, :])
@@ -63,7 +64,7 @@ def train():
             selected_indices.append(np.random.choice(indices, 5, replace=False))
         selected_indices = np.concatenate(selected_indices)
 
-        id_gender = id_gender[selected_indices, :]
+        # id_gender = id_gender[selected_indices, :]
         # train_label = train_label[:, selected_indices]
         selected_imgs = train_label[:, selected_indices].sum(axis=1) != 0
         train_data = train_data[selected_imgs, :]
@@ -73,8 +74,6 @@ def train():
         selected_imgs = test_label[:, selected_indices].sum(axis=1) != 0
         test_data = test_data[selected_imgs, :]
         test_label = test_label[selected_imgs, :]
-
-        opt.evil_label_num = train_label.shape[1]
 
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
