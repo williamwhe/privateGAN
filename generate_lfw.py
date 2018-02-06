@@ -74,17 +74,6 @@ def train():
         test_data = test_data[selected_imgs, :]
         test_label = test_label[selected_imgs, :]
 
-        print train_data.shape, train_label.shape
-        print test_data.shape, test_label.shape
-
-        print id_gender
-        print train_label.sum(axis=0)
-        print test_label.sum(axis=0)
-
-        print train_label.sum(axis=0) / test_label.sum(axis=0)
-
-    exit()
-
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
     print '\tTraining label: ' + str(train_label.shape)
