@@ -53,6 +53,26 @@ def train():
         train_data, train_label = balance_dataset(train_data, train_label)
         test_data, test_label = balance_dataset(test_data, test_label)
 
+    if opt.balance_gender:
+        print 'Balancing genders'
+        selected_indices = []
+        for i in range(id_gender.shape[1]):
+            indices, = np.where(id_gender[:, i] == 1)
+            selected_indices.append(np.random.choice(indices, 5, replace=False))
+        selected_indices = np.concatenate(selected_indices)
+
+        train_data = train_data[selected_indices, :]
+        train_label = train_label[selected_indices, :]
+        test_data = test_data[selected_indices, :]
+        test_label = test_label[selected_indices, :]
+        id_gender = id_gender[selected_indices, :]
+
+        print id_gender
+        print train_label.sum(axis=0)
+        print test_label.sum(axis=0)
+
+    exit()
+
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
     print '\tTraining label: ' + str(train_label.shape)
@@ -208,9 +228,9 @@ def train():
                 print total_good_confusion
                 evil_misclass = total_evil_confusion.sum(axis=0) - np.diag(total_evil_confusion)
                 evil_idxs = np.argsort(-evil_misclass)
-                print 'Evil misclassifications:'
-                print np.array(names)[evil_idxs]
-                print evil_misclass[evil_idxs]
+                print 'Top 3 Misclassifications:'
+                print np.array(names)[evil_idxs][:3]
+                print evil_misclass[evil_idxs][:3]
 
                 fake_samples, fake_noise = sess.run(
                     [model.fake_images_output, model.fake_noise_output],
