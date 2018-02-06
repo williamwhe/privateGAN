@@ -158,6 +158,11 @@ def parse_opt():
     parser.set_defaults(balance_data=True)
     parser.add_argument('--balance_ratio', type=float, default=2,
                         help='Balancing ratio.')
+    parser.add_argument('--balance_gender', dest='balance_gender', action='store_true',
+                        help='Balance genders in the dataset.')
+    parser.add_argument('--no_balance_gender', dest='balance_gender', action='store_false',
+                        help='Does not balance genders in the dataset.')
+    parser.set_defaults(balance_gender=True)
 
     args = parser.parse_args()
 
