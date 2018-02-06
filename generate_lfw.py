@@ -81,6 +81,8 @@ def train():
         print train_label.sum(axis=0)
         print test_label.sum(axis=0)
 
+        print train_label.sum(axis=0) / test_label.sum(axis=0)
+
     exit()
 
     print 'Shape of data:'
