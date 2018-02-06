@@ -64,15 +64,17 @@ def train():
         selected_indices = np.concatenate(selected_indices)
 
         id_gender = id_gender[selected_indices, :]
-        train_label = train_label[:, selected_indices]
-        selected_imgs = train_label.sum(axis=1) != 0
+        # train_label = train_label[:, selected_indices]
+        selected_imgs = train_label[:, selected_indices].sum(axis=1) != 0
         train_data = train_data[selected_imgs, :]
         train_label = train_label[selected_imgs, :]
 
-        test_label = test_label[:, selected_indices]
-        selected_imgs = test_label.sum(axis=1) != 0
+        # test_label = test_label[:, selected_indices]
+        selected_imgs = test_label[:, selected_indices].sum(axis=1) != 0
         test_data = test_data[selected_imgs, :]
         test_label = test_label[selected_imgs, :]
+
+        opt.evil_label_num = train_label.shape[1]
 
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
