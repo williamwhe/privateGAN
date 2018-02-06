@@ -66,11 +66,13 @@ def train():
         id_gender = id_gender[selected_indices, :]
         train_label = train_label[:, selected_indices]
         selected_imgs = train_label.sum(axis=1) != 0
-
         train_data = train_data[selected_imgs, :]
         train_label = train_label[selected_imgs, :]
+
+        test_label = test_label[:, selected_indices]
+        selected_imgs = test_label.sum(axis=1) != 0
         test_data = test_data[selected_imgs, :]
-        test_label = test_label[selected_imgs, selected_indices]
+        test_label = test_label[selected_imgs, :]
 
         print train_data.shape, train_label.shape
         print test_data.shape, test_label.shape
