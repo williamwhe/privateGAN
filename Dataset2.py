@@ -129,11 +129,11 @@ class Dataset2:
 
         # We turn the gathered examples to numpy arrays.
         self._sort_data = [np.array(examples[i])
-                        for i in range(self._num_labels)]
+                           for i in range(self._num_labels)]
 
         # We find the number of examples for each class.
         self._sort_len = [self._sort_data[i].shape[0]
-                        for i in range(self._num_labels)]
+                          for i in range(self._num_labels)]
 
         if self._targeted is True:
             # We make data to be only instances of 'source_label'

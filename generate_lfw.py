@@ -139,6 +139,7 @@ def train():
         print 'Training data loaded.'
 
         print 'Maximum iterations: %d' % opt.max_iteration
+        max_acc_diff = -1.0
         while iteration < opt.max_iteration:
             # this function returns (data, label, np.array(target)).
             feed_data, evil_labels, real_data = loader.next_batch(
@@ -178,7 +179,6 @@ def train():
                 sess.run([model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
-            # if iteration != 0 and iteration % opt.losses_log_every == 0:
             if iteration % opt.losses_log_every == 0:
                 print "iteration: ", iteration
                 print '\tD: %.4f, G: %.4f\n\thinge(%.2f): %.4f, L1(%.2f): %.4f, L2(%.2f): %.4f' % (
@@ -254,52 +254,45 @@ def train():
 
                 scipy_imsave('snapshot_%d.png' % iteration, final_image)
 
+                if (good_accuracy - evil_accuracy) > max(0.5, max_acc_diff):
+                    print '\tSaving new training data at accuracy diff: %.4f' % (
+                        good_accuracy - evil_accuracy),
+                    loader = Dataset2(train_data, train_label)
+                    iter_num = int(loader._num_examples / batch_size)
+                    new_train_data = []
+                    new_train_label = []
+                    for _ in range(iter_num):
+                        batch_data, batch_label, _ = loader.next_batch(batch_size)
+                        new_data = sess.run(model.fake_images_output, {model.source: batch_data})
+                        new_train_data.append(new_data)
+                        new_train_label.append(batch_label)
+                    new_train_data = np.concatenate(new_train_data)
+                    new_train_label = np.concatenate(new_train_label)
+                    print '\tTraining data: [DONE]'
+                    loader = Dataset2(test_data, test_label)
+                    iter_num = int(loader._num_examples / batch_size)
+                    new_test_data = []
+                    new_test_label = []
+                    for _ in range(iter_num):
+                        batch_data, batch_label, _ = loader.next_batch(batch_size)
+                        new_data = sess.run(model.fake_images_output, {model.source: batch_data})
+                        new_test_data.append(new_data)
+                        new_test_label.append(batch_label)
+                    new_test_data = np.concatenate(new_test_data)
+                    new_test_label = np.concatenate(new_test_label)
+                    print '\tTest data: [DONE]'
+
+                    np.savez_compressed(opt.output_path,
+                                        train_data=new_train_data,
+                                        train_label=new_train_label,
+                                        test_data=new_test_data,
+                                        test_label=new_test_label)
+
             iteration += 1
 
         # We can transform the training and test data given in the beginning here.
         # This is only half the actual data.
         # Not making new dataset for now. First, do some successful training.
-        print 'Making new training data ...',
-        loader = Dataset2(train_data, train_label)
-        iter_num = int(loader._num_examples / batch_size)
-        new_train_data = []
-        new_train_label = []
-        for _ in range(iter_num):
-            batch_data, batch_label, _ = loader.next_batch(batch_size)
-            new_data = sess.run(model.fake_images_output, {model.source: batch_data})
-            new_train_data.append(new_data)
-            new_train_label.append(batch_label)
-        new_train_data = np.concatenate(new_train_data)
-        new_train_label = np.concatenate(new_train_label)
-        print '[DONE]'
-        print 'Making new test data ...',
-        loader = Dataset2(test_data, test_label)
-        iter_num = int(loader._num_examples / batch_size)
-        new_test_data = []
-        new_test_label = []
-        for _ in range(iter_num):
-            batch_data, batch_label, _ = loader.next_batch(batch_size)
-            new_data = sess.run(model.fake_images_output, {model.source: batch_data})
-            new_test_data.append(new_data)
-            new_test_label.append(batch_label)
-        new_test_data = np.concatenate(new_test_data)
-        new_test_label = np.concatenate(new_test_label)
-        print '[DONE]'
-
-        print 'Training:'
-        print new_train_data.shape
-        print new_train_label.shape
-        print 'Test:'
-        print new_test_data.shape
-        print new_test_label.shape
-
-        print 'Saving ...',
-        np.savez_compressed(opt.output_path,
-                            train_data=new_train_data,
-                            train_label=new_train_label,
-                            test_data=new_test_data,
-                            test_label=new_test_label)
-        print '[DONE]'
 
 if __name__ == "__main__":
     train()
