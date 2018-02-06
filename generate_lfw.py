@@ -214,7 +214,7 @@ def train():
                         head = test_data.shape[0] - batch_size
                         last_batch = True
                     cur_data, pred_data = sess.run(
-                        model.fake_images_output, model.prediction_ready,
+                        [model.fake_images_output, model.prediction_ready],
                         {model.source: test_data[head:tail, :]})
 
                     if last_batch:
