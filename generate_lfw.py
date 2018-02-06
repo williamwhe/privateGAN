@@ -203,6 +203,7 @@ def train():
                 total_evil_confusion = np.zeros((train_label.shape[1], train_label.shape[1]))
 
                 new_test_data = []
+                new_pred_data = []
                 head = 0
                 last_batch = False
                 while head < test_data.shape[0]:
@@ -212,26 +213,35 @@ def train():
                         tail = test_data.shape[0]
                         head = test_data.shape[0] - batch_size
                         last_batch = True
-                    cur_data = sess.run(
-                        model.fake_images_output,
+                    cur_data, pred_data = sess.run(
+                        model.fake_images_output, model.prediction_ready,
                         {model.source: test_data[head:tail, :]})
 
                     if last_batch:
                         new_test_data.append(
-                            cur_data[-(test_data.shape[0] % batch_size):, :])
+                            cur_data[-
+                        new_pred_data.append(
+                            pred_data[-(test_data.shape[0] % batch_size):, :])
                     else:
                         new_test_data.append(cur_data)
+                        new_pred_data.append(pred_data)
                     head += batch_size
                 new_test_data = np.concatenate(new_test_data)
+                new_pred_data = np.concatenate(new_pred_data)
 
                 good_predicts = np.argmax(model.good_model.model.predict(new_test_data), axis=1)
+                good_other_pred = np.argmax(model.good_model.model.predict(new_pred_data), axis=1)
                 evil_predicts = np.argmax(model.evil_model.model.predict(new_test_data), axis=1)
-                test_label_ct = np.argmax(test_label, axis=1)
+                evil_other_pred = np.argmax(model.evil_model.model.predict(new_pred_data), axis=1)
+                evil_label_ct = np.argmax(test_label, axis=1)
+                good_label_ct = np.argmax(id_gender[test_label_ct, :], axis=1)
 
-                good_accuracy = accuracy_score(test_label_ct, good_predicts)
-                evil_accuracy = accuracy_score(test_label_ct, evil_predicts)
-                total_good_confusion = confusion_matrix(test_label_ct, good_predicts)
-                total_evil_confusion = confusion_matrix(test_label_ct, evil_predicts)
+                good_accuracy = accuracy_score(good_label_ct, good_predicts)
+                good_other_accuracy = accuracy_score(good_label_ct, good_other_pred)
+                evil_accuracy = accuracy_score(evil_label_ct, evil_predicts)
+                evil_other_accuracy = accuracy_score(evil_label_ct, evil_other_pred)
+                total_good_confusion = confusion_matrix(good_label_ct, good_predicts)
+                total_evil_confusion = confusion_matrix(evil_label_ct, evil_predicts)
                 # for _ in range(test_iter_num):
 
                 #     # Loading the next batch of test images
@@ -258,6 +268,8 @@ def train():
                 print '\tGood Accuracy: %.4f, Evil Accuracy: %.4f' % (
                     good_accuracy, evil_accuracy)
                 print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
+                print '\tPrediction ready accuracy:'
+                print '\tGood: %.4f\tEvil: %.4f' % (good_other_accuracy, evil_other_accuracy)
                 print 'Good confusion matrix:'
                 print total_good_confusion
                 evil_misclass = total_evil_confusion.sum(axis=0) - np.diag(total_evil_confusion)
