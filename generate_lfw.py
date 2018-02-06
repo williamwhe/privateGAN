@@ -24,7 +24,7 @@ def get_output_samples(imgs, lbls, id_gender, num_repr, num_samples_each):
     print id_gender_ct
     samples = []
     for i in range(2):
-        indices = np.random.choice(np.where((id_gender_ct == i) and (sum_lbl != 0))[0],
+        indices = np.random.choice(np.where((id_gender_ct == i) & (sum_lbl != 0))[0],
                                    num_repr,
                                    replace=False)
         for idx in indices:
