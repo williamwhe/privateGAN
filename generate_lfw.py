@@ -219,7 +219,7 @@ def train():
 
                     if last_batch:
                         new_test_data.append(
-                            cur_data[-
+                            cur_data[-(test_data.shape[0] % batch_size):, :])
                         new_pred_data.append(
                             pred_data[-(test_data.shape[0] % batch_size):, :])
                     else:
@@ -234,7 +234,7 @@ def train():
                 evil_predicts = np.argmax(model.evil_model.model.predict(new_test_data), axis=1)
                 evil_other_pred = np.argmax(model.evil_model.model.predict(new_pred_data), axis=1)
                 evil_label_ct = np.argmax(test_label, axis=1)
-                good_label_ct = np.argmax(id_gender[test_label_ct, :], axis=1)
+                good_label_ct = np.argmax(id_gender[evil_label_ct, :], axis=1)
 
                 good_accuracy = accuracy_score(good_label_ct, good_predicts)
                 good_other_accuracy = accuracy_score(good_label_ct, good_other_pred)
