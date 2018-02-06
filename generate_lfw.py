@@ -54,6 +54,8 @@ def train():
         test_data, test_label = balance_dataset(test_data, test_label)
 
     if opt.balance_gender:
+        print train_data.shape, train_label.shape
+        print test_data.shape, test_label.shape
         print 'Balancing genders'
         selected_indices = []
         for i in range(id_gender.shape[1]):
@@ -61,11 +63,17 @@ def train():
             selected_indices.append(np.random.choice(indices, 5, replace=False))
         selected_indices = np.concatenate(selected_indices)
 
-        train_data = train_data[selected_indices, :]
-        train_label = train_label[selected_indices, :]
-        test_data = test_data[selected_indices, :]
-        test_label = test_label[selected_indices, :]
         id_gender = id_gender[selected_indices, :]
+        train_label = train_label[:, selected_indices]
+        selected_imgs = train_label.sum(axis=1) != 0
+
+        train_data = train_data[selected_imgs, :]
+        train_label = train_label[selected_imgs, :]
+        test_data = test_data[selected_imgs, :]
+        test_label = test_label[selected_imgs, selected_indices]
+
+        print train_data.shape, train_label.shape
+        print test_data.shape, test_label.shape
 
         print id_gender
         print train_label.sum(axis=0)
