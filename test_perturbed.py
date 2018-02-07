@@ -39,9 +39,12 @@ def main():
     num_good_labels = 2
     num_evil_labels = data['train_label'].shape[1]
 
-    print train_data.shape, train_id.shape
-    print test_data.shape, test_id.shape
-    print id_gender.shape
+    print train_data.shape
+    print org_train_data.shape
+    print test_data.shape
+    print org_test_data.shape
+
+    exit()
 
     good_used = FaceRecognizer('%s_%d_gender_0' % (args.model_path, args.image_size),
                                num_good_labels,
