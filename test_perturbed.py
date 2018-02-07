@@ -47,7 +47,7 @@ def main():
 
     print 'Preprocessing data:',
     for cur_data in [org_train_data, train_data, org_test_data, test_data]:
-        cur_data = preprocess_images(cur_data, version=1)
+        cur_data = preprocess_images(cur_data * 255.0, version=1)
     print '[DONE]'
 
     good_used = FaceRecognizer('%s_%d_gender_0' % (args.model_path, args.image_size),
