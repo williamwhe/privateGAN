@@ -21,8 +21,6 @@ def main():
                         help='Number of channels in input images.')
     parser.add_argument('--train_new', dest='train_new', action='store_true',
                         help='Train a new classifier.')
-    parser.add_argument('--no_train_new', dest='train_new', action='store_false',
-                        help='Do not train a new classifier.')
     parser.set_defaults(train_new=False)
     args = parser.parse_args()
     img_size = (args.image_size, args.image_size)

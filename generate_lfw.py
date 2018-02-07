@@ -295,6 +295,7 @@ def train():
                 if (good_accuracy - evil_accuracy) > max(0.5, max_acc_diff):
                     print '\tSaving new training data at accuracy diff: %.4f' % (
                         good_accuracy - evil_accuracy),
+                    max_acc_diff = good_accuracy - evil_accuracy
                     # loader = Dataset2(train_data, train_label)
                     # iter_num = int(loader._num_examples / batch_size)
                     # new_train_data = []
