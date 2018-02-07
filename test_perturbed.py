@@ -23,7 +23,6 @@ def main():
                         help='Train a new classifier.')
     parser.set_defaults(train_new=False)
     args = parser.parse_args()
-    img_size = (args.image_size, args.image_size)
     input_shape = (args.image_size, args.image_size, args.num_channels)
 
     data = np.load(args.image_path + 'perturbed.npz')
@@ -44,19 +43,19 @@ def main():
     print test_data.shape, test_id.shape
     print id_gender.shape
 
-    good_used = FaceRecognizer('%s_%d_gender_0' % (args.model_path, args.img_size),
+    good_used = FaceRecognizer('%s_%d_gender_0' % (args.model_path, args.image_size),
                                num_good_labels,
                                input_shape)
 
-    good_left = FaceRecognizer('%s_%d_gender_1' % (args.model_path, args.img_size),
+    good_left = FaceRecognizer('%s_%d_gender_1' % (args.model_path, args.image_size),
                                num_good_labels,
                                input_shape)
 
-    evil_used = FaceRecognizer('%s_%d_id_0' % (args.model_path, args.img_size),
+    evil_used = FaceRecognizer('%s_%d_id_0' % (args.model_path, args.image_size),
                                num_evil_labels,
                                input_shape)
 
-    evil_left = FaceRecognizer('%s_%d_id_1' % (args.model_path, args.img_size),
+    evil_left = FaceRecognizer('%s_%d_id_1' % (args.model_path, args.image_size),
                                num_evil_labels,
                                input_shape)
 
