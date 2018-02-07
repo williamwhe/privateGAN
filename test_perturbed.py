@@ -58,7 +58,7 @@ def main():
     evil_left = FaceRecognizer('%s_%d_id_1' % (args.model_path, args.image_size),
                                num_evil_labels,
                                input_shape)
-
+    exit()
     for model, label, name in zip([evil_used, good_used, evil_left, good_left],
                                   [test_id, test_gender, test_id, test_gender],
                                   ['Used Evil', 'Used Good', 'Left-out Evil', 'Left-out Good']):
