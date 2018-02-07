@@ -344,10 +344,13 @@ def train():
 
                     np.savez_compressed(opt.output_path,
                                         train_data=new_train_data,
+                                        org_train_data=train_data,
                                         train_label=train_label,
                                         test_data=new_test_data,
+                                        org_test_data=test_data,
                                         test_label=test_label,
                                         id_gender=id_gender)
+                    print '\t[DONE]'
 
             iteration += 1
 
