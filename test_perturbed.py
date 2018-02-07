@@ -38,7 +38,7 @@ def main():
     test_id = np.argmax(data['test_label'], axis=1)
     test_gender = np.argmax(id_gender[test_id, :], axis=1)
     num_good_labels = 2
-    num_evil_labels = train_id.shape[1]
+    num_evil_labels = data['train_label'].shape[1]
 
     print train_data.shape, train_id.shape
     print test_data.shape, test_id.shape
