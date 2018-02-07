@@ -14,7 +14,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_path', type=str, default="models/lfw",
                         help="Path to save trained model. e.g.: 'models/lfw'")
-    parser.add_argument('--image_path', type=str, default='./lfw_data/',
+    parser.add_argument('--image_path', type=str, default='./lfw_data/perturbed.npz',
                         help='Path to LFW data.')
     parser.add_argument('--image_size', type=int, default=224,
                         help='Size of input images.')
@@ -26,7 +26,7 @@ def main():
     args = parser.parse_args()
     input_shape = (args.image_size, args.image_size, args.num_channels)
 
-    data = np.load(args.image_path + 'perturbed.npz')
+    data = np.load(args.image_path)
     id_gender = data['id_gender']
 
     org_train_data = data['org_train_data']

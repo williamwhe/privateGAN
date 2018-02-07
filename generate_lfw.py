@@ -25,9 +25,7 @@ def get_output_samples(imgs, lbls, id_gender, num_repr, num_samples_each):
     print id_gender_ct
     samples = []
     for i in range(2):
-        indices = np.random.choice(np.where((id_gender_ct == i) & (sum_lbl != 0))[0],
-                                   num_repr,
-                                   replace=False)
+        indices = np.where((id_gender_ct == i) & (sum_lbl != 0))[0][:num_repr]
         for idx in indices:
             selection = np.random.choice(np.where((lbls_ct == idx))[0],
                                          num_samples_each,
@@ -48,7 +46,6 @@ def train():
     test_data, test_label = get_30_people_chunk(opt.image_path, 2, img_size=img_size)
     names = get_people_names(opt.image_path, 30)
 
-
     if opt.balance_data:
         ratio = opt.balance_ratio
         print 'Balancing dataset with ratio %f' % ratio
@@ -59,20 +56,17 @@ def train():
         print train_data.shape, train_label.shape
         print test_data.shape, test_label.shape
         print 'Balancing genders'
-        selected_indices = []
+        selected_people = []
         for i in range(id_gender.shape[1]):
             indices, = np.where(id_gender[:, i] == 1)
-            selected_indices.append(np.random.choice(indices, 5, replace=False))
-        selected_indices = np.concatenate(selected_indices)
+            selected_people.append(np.random.choice(indices, 5, replace=False))
+        selected_people = np.concatenate(selected_people)
 
-        # id_gender = id_gender[selected_indices, :]
-        # train_label = train_label[:, selected_indices]
-        selected_imgs = train_label[:, selected_indices].sum(axis=1) != 0
+        selected_imgs = train_label[:, selected_people].sum(axis=1) != 0
         train_data = train_data[selected_imgs, :]
         train_label = train_label[selected_imgs, :]
 
-        # test_label = test_label[:, selected_indices]
-        selected_imgs = test_label[:, selected_indices].sum(axis=1) != 0
+        selected_imgs = test_label[:, selected_people].sum(axis=1) != 0
         test_data = test_data[selected_imgs, :]
         test_label = test_label[selected_imgs, :]
 
