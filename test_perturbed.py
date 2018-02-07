@@ -7,6 +7,7 @@ import argparse
 import tensorflow as tf
 import numpy as np
 from face_recognizer import FaceRecognizer
+from lfw import preprocess_images
 from sklearn.metrics import accuracy_score
 
 def main():
@@ -43,6 +44,11 @@ def main():
     print org_train_data.shape
     print test_data.shape
     print org_test_data.shape
+
+    print 'Preprocessing data:',
+    for cur_data in [org_train_data, train_data, org_test_data, test_data]:
+        cur_data = preprocess_images(cur_data, version=1)
+    print '[DONE]'
 
     good_used = FaceRecognizer('%s_%d_gender_0' % (args.model_path, args.image_size),
                                num_good_labels,
