@@ -190,17 +190,17 @@ def train():
                 print '\tAdv: %.4f, Total: %.4f' % (adv_loss, total_loss)
 
                 # model.saver.save(sess, checkpoint_path, global_step=iteration)
-                test_loader = Dataset2(test_data, test_label)
+                # test_loader = Dataset2(test_data, test_label)
 
-                test_num = test_loader._num_examples
-                test_iter_num = int(np.ceil((test_num - batch_size) / batch_size))
-                total_evil_accuracy = 0.0
-                total_good_accuracy = 0.0
-                fake_samples = [[] for _ in range(test_loader._num_labels)]
-                fake_noise = [[] for _ in range(test_loader._num_labels)]
+                # test_num = test_loader._num_examples
+                # test_iter_num = int(np.ceil((test_num - batch_size) / batch_size))
+                # total_evil_accuracy = 0.0
+                # total_good_accuracy = 0.0
+                # fake_samples = [[] for _ in range(test_loader._num_labels)]
+                # fake_noise = [[] for _ in range(test_loader._num_labels)]
 
-                total_good_confusion = np.zeros((2, 2))
-                total_evil_confusion = np.zeros((train_label.shape[1], train_label.shape[1]))
+                # total_good_confusion = np.zeros((2, 2))
+                # total_evil_confusion = np.zeros((train_label.shape[1], train_label.shape[1]))
 
                 new_test_data = []
                 new_pred_data = []
@@ -346,7 +346,8 @@ def train():
                                         train_data=new_train_data,
                                         train_label=train_label,
                                         test_data=new_test_data,
-                                        test_label=test_label)
+                                        test_label=test_label,
+                                        id_gender=id_gender)
 
             iteration += 1
 
