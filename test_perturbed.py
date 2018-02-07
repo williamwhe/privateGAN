@@ -67,6 +67,7 @@ def main():
         org_pred = np.argmax(model.predict(org_test_data), axis=1)
         org_acc = accuracy_score(label, org_pred)
         print '\tOriginal Accuracy: %.4f' % org_acc
+        exit()
         dst_pred = np.argmax(model.predict(test_data), axis=1)
         dst_acc = accuracy_score(label, dst_pred)
         print '\tPerturbed Accuracy: %.4f' % dst_acc
