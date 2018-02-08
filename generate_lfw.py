@@ -14,7 +14,7 @@ import opts
 from utils import merge
 from advgan import advGAN
 from Dataset2 import Dataset2
-from lfw import get_30_people_chunk, balance_dataset, get_people_names
+from lfw import get_30_people_chunk, balance_dataset, get_people_names, preprocess_images
 from face_recognizer import FaceRecognizer
 from sklearn.metrics import accuracy_score, confusion_matrix
 
@@ -280,10 +280,6 @@ def train():
                 original = merge(output_samples, [2 * NUM_REPR, NUM_SAMPLES_EACH])
                 noise = merge(fake_noise, [2 * NUM_REPR, NUM_SAMPLES_EACH])
                 final_image = np.concatenate([fakes, noise, original], axis=1)
-                # np.savez_compressed('./samples_%d.npz' % iteration,
-                #                     fakes=fakes,
-                #                     original=original,
-                #                     noise=noise)
 
                 scipy_imsave('snapshot_%d.png' % iteration, final_image)
 
@@ -291,6 +287,26 @@ def train():
                     print '\tSaving new training data at accuracy diff: %.4f' % (
                         good_accuracy - evil_accuracy),
                     max_acc_diff = good_accuracy - evil_accuracy
+
+                    other_good = FaceRecognizer('%s_%d_gender_0' % (opt.lfw_base_path, x_dim),
+                                                2, input_shape, opt.input_c_dim)
+
+                    other_pred = np.argmax(other_good.model.predict(new_pred_data), axis=1)
+                    print 'Other Good accuracy: %.4f' % accuracy_score(good_true, other_pred)
+
+                    other_pred = np.argmax(other_good.model.predict(
+                        preprocess_images(new_test_data * 255.0)), axis=1)
+                    print '\tTest data processeced accuracy: %.4f' % \
+                        accuracy_score(good_true, other_pred)
+
+                    other_evil = FaceRecognizer('%s_%d_id_0' % (opt.lfw_base_path, x_dim),
+                                                34, input_shape, opt.input_c_dim)
+                    other_pred = np.argmax(other_evil.model.predict(new_pred_data), axis=1)
+                    print 'Other Evil accuracy: %.4f' % accuracy_score(evil_true, other_pred)
+                    other_pred = np.argmax(other_evil.model.predict(
+                        preprocess_images(new_test_data * 255.0)), axis=1)
+                    print '\tTest data processeced accuracy: %.4f' % \
+                        accuracy_score(evil_true, other_pred)
                     # loader = Dataset2(train_data, train_label)
                     # iter_num = int(loader._num_examples / batch_size)
                     # new_train_data = []

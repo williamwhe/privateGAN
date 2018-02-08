@@ -336,7 +336,7 @@ class advGAN():
             self.hinge_loss_sum = tf.summary.scalar("hinge_loss", self.hinge_loss)
 
             # Preparing data for LFW predictions
-            self.scaled_up = (self.fake_images_output + 1) * 127.5
+            self.scaled_up = (self.fake_images_sample + 1) * 127.5
             self.reversed_channels = self.scaled_up[..., ::-1]
             self.prediction_ready = self.reversed_channels - [93.5940, 104.7624, 129.1863]
 
