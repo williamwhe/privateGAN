@@ -1,12 +1,18 @@
 from __future__ import division
 
 import os
-import shutil
+from tensorflow.python.client import device_lib
+def get_available_gpus():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
+
+if len(get_available_gpus()) > 1:
+    print 'Set visibility to GPU 1 only.'
+    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 from scipy.misc import imsave as scipy_imsave
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.client import device_lib
 
 from ops import *
 import opts
@@ -18,14 +24,6 @@ from Dataset2 import Dataset2
 from lfw import get_30_people_chunk, balance_dataset, get_people_names, preprocess_images
 from face_recognizer import FaceRecognizer
 from sklearn.metrics import accuracy_score, confusion_matrix
-
-def get_available_gpus():
-    local_device_protos = device_lib.list_local_devices()
-    return [x.name for x in local_device_protos if x.device_type == 'GPU']
-
-if len(get_available_gpus()) > 1:
-    print 'Set visibility to GPU 1 only.'
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 def get_output_samples(imgs, lbls, id_gender, num_repr, num_samples_each):
     id_gender_ct = np.argmax(id_gender, axis=1)

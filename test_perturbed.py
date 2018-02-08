@@ -3,16 +3,7 @@
 from __future__ import division
 
 import os
-
-import argparse
-
-import tensorflow as tf
 from tensorflow.python.client import device_lib
-import numpy as np
-from face_recognizer import FaceRecognizer
-from lfw import preprocess_images
-from sklearn.metrics import accuracy_score
-
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
@@ -20,6 +11,15 @@ def get_available_gpus():
 if len(get_available_gpus()) > 1:
     print 'Set visibility to GPU 1 only.'
     os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+
+import argparse
+
+import tensorflow as tf
+import numpy as np
+from face_recognizer import FaceRecognizer
+from lfw import preprocess_images
+from sklearn.metrics import accuracy_score
+
 
 
 def main():
