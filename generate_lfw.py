@@ -249,8 +249,6 @@ def train():
                 print names[evil_idxs].tolist()
                 print evil_idxs
 
-                exit()
-
                 fake_samples, fake_noise = sess.run(
                     [model.fake_images_output, model.fake_noise_output],
                     {model.source: output_samples})
@@ -261,6 +259,8 @@ def train():
                 final_image = np.concatenate([fakes, noise, original], axis=1)
 
                 scipy_imsave('snapshot_%d.png' % iteration, final_image)
+
+                exit()
 
                 if (good_accuracy - evil_accuracy) > max(0.5, max_acc_diff):
                     print '\tSaving new training data at accuracy diff: %.4f' % (
