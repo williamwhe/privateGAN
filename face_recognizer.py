@@ -8,7 +8,7 @@ import argparse
 import cPickle as pickle
 import getpass
 if getpass.getuser() == 'aria':
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 import numpy as np
 import tensorflow as tf

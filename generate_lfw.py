@@ -4,7 +4,7 @@ import os
 import time
 import getpass
 if getpass.getuser() == 'aria':
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 from scipy.misc import imsave as scipy_imsave
 import numpy as np

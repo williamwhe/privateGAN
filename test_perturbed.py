@@ -6,7 +6,7 @@ import argparse
 import os
 import getpass
 if getpass.getuser() == 'aria':
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 import tensorflow as tf
 import numpy as np
