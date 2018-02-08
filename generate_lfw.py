@@ -246,6 +246,8 @@ def train():
 
                 print 'Selected people are:'
                 print names[evil_idxs].tolist()
+                print evil_tp
+                print total_evil_confusion
                 print evil_idxs
 
                 fake_samples, fake_noise = sess.run(
