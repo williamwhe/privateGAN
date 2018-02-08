@@ -261,50 +261,31 @@ def train():
                 final_image = np.concatenate([fakes, noise, original], axis=1)
 
                 scipy_imsave('snapshot_%d.png' % iteration, final_image)
-                other_good = FaceRecognizer('%s_%d_gender_0' % (opt.lfw_base_path, x_dim),
-                                            2, input_shape, opt.input_c_dim)
-
-                other_pred = np.argmax(other_good.model.predict(new_pred_data), axis=1)
-                print 'Other Good accuracy: %.4f' % accuracy_score(good_true, other_pred)
-
-                other_pred = np.argmax(other_good.model.predict(
-                    preprocess_images(new_test_data * 255.0)), axis=1)
-                print '\tTest data processeced accuracy: %.4f' % \
-                    accuracy_score(good_true, other_pred)
-
-                other_evil = FaceRecognizer('%s_%d_id_0' % (opt.lfw_base_path, x_dim),
-                                            34, input_shape, opt.input_c_dim)
-                other_pred = np.argmax(other_evil.model.predict(new_pred_data), axis=1)
-                print 'Other Evil accuracy: %.4f' % accuracy_score(evil_true, other_pred)
-                other_pred = np.argmax(other_evil.model.predict(
-                    preprocess_images(new_test_data * 255.0)), axis=1)
-                print '\tTest data processeced accuracy: %.4f' % \
-                    accuracy_score(evil_true, other_pred)
 
                 if (good_accuracy - evil_accuracy) > max(0.5, max_acc_diff):
                     print '\tSaving new training data at accuracy diff: %.4f' % (
                         good_accuracy - evil_accuracy),
                     max_acc_diff = good_accuracy - evil_accuracy
 
-                    other_good = FaceRecognizer('%s_%d_gender_0' % (opt.lfw_base_path, x_dim),
-                                                2, input_shape, opt.input_c_dim)
+                    # other_good = FaceRecognizer('%s_%d_gender_0' % (opt.lfw_base_path, x_dim),
+                    #                             2, input_shape, opt.input_c_dim)
 
-                    other_pred = np.argmax(other_good.model.predict(new_pred_data), axis=1)
-                    print 'Other Good accuracy: %.4f' % accuracy_score(good_true, other_pred)
+                    # other_pred = np.argmax(other_good.model.predict(new_pred_data), axis=1)
+                    # print 'Other Good accuracy: %.4f' % accuracy_score(good_true, other_pred)
 
-                    other_pred = np.argmax(other_good.model.predict(
-                        preprocess_images(new_test_data * 255.0)), axis=1)
-                    print '\tTest data processeced accuracy: %.4f' % \
-                        accuracy_score(good_true, other_pred)
+                    # other_pred = np.argmax(other_good.model.predict(
+                    #     preprocess_images(new_test_data * 255.0)), axis=1)
+                    # print '\tTest data processeced accuracy: %.4f' % \
+                    #     accuracy_score(good_true, other_pred)
 
-                    other_evil = FaceRecognizer('%s_%d_id_0' % (opt.lfw_base_path, x_dim),
-                                                34, input_shape, opt.input_c_dim)
-                    other_pred = np.argmax(other_evil.model.predict(new_pred_data), axis=1)
-                    print 'Other Evil accuracy: %.4f' % accuracy_score(evil_true, other_pred)
-                    other_pred = np.argmax(other_evil.model.predict(
-                        preprocess_images(new_test_data * 255.0)), axis=1)
-                    print '\tTest data processeced accuracy: %.4f' % \
-                        accuracy_score(evil_true, other_pred)
+                    # other_evil = FaceRecognizer('%s_%d_id_0' % (opt.lfw_base_path, x_dim),
+                    #                             34, input_shape, opt.input_c_dim)
+                    # other_pred = np.argmax(other_evil.model.predict(new_pred_data), axis=1)
+                    # print 'Other Evil accuracy: %.4f' % accuracy_score(evil_true, other_pred)
+                    # other_pred = np.argmax(other_evil.model.predict(
+                    #     preprocess_images(new_test_data * 255.0)), axis=1)
+                    # print '\tTest data processeced accuracy: %.4f' % \
+                    #     accuracy_score(evil_true, other_pred)
 
                     new_train_data = []
                     head = 0
