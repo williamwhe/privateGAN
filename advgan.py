@@ -346,7 +346,6 @@ class advGAN():
             if self.mnist is True:
                 self.good_predictions = self.good_model.predict(self.fake_images)
             else:
-                print '\tUsing prediction prepared images.'
                 self.good_predictions = self.good_model.predict(self.prediction_ready)
             self.good_accuracy = self._metric(
                 self.good_labels, tf.nn.softmax(self.good_predictions))
