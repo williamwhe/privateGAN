@@ -4,6 +4,7 @@ import os
 import time
 import getpass
 if getpass.getuser() == 'aria':
+    print 'FUCK YOU FUCK YOU FUCK YOU FUCK YOU!!!!'
     os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 from scipy.misc import imsave as scipy_imsave
