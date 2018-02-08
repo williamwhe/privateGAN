@@ -44,7 +44,7 @@ def read_data(img_path,
         genders = dict(zip(genders.name.tolist(), genders.gender.tolist()))
 
     id_gender = []
-    for name in os.listdir(img_path):
+    for name in sorted(os.listdir(img_path)):
         if (selected_names is not None) and (name in selected_names):
             names.append(name)
             # print '\r%d/%d read.' % (cnt + 1, len(selected_names)),
@@ -57,7 +57,7 @@ def read_data(img_path,
                     continue
                 is_male = genders[name]
             if os.path.isdir(folder):
-                for fn in os.listdir(folder):
+                for fn in sorted(os.listdir(folder)):
                     if gender_label:
                         lbls.append(is_male)
                     else:
