@@ -35,6 +35,9 @@ def read_data(img_path,
     lbls = []
     cnt = 0
 
+    selected_names = sorted(selected_names)
+    names = []
+
     if gender_label or gender_meta:
         # We create a dictionary of people's genders.
         genders = pd.read_csv('./lfw_data/gender.csv')
@@ -43,7 +46,7 @@ def read_data(img_path,
     id_gender = []
     for name in os.listdir(img_path):
         if (selected_names is not None) and (name in selected_names):
-            print name
+            names.append(name)
             # print '\r%d/%d read.' % (cnt + 1, len(selected_names)),
             folder = os.path.join(img_path, name)
             if gender_meta:
@@ -71,6 +74,8 @@ def read_data(img_path,
     if one_hot_encoding is True:
         lbls = to_categorical(lbls)
     imgs = np.concatenate(imgs)
+
+    print names[:10]
 
     if gender_meta:
         return imgs, lbls, id_gender
@@ -193,7 +198,7 @@ def get_30_people_chunk(image_path,
     if chunk_number < 0 or chunk_number >= 3:
         raise ValueError('chunk_number(%d) should be between 0 and 3' % chunk_number)
     names = get_people_names(image_path, 30)
-    print '\n'.join(names)
+    print names[:10]
     if gender_meta:
         imgs, lbls, id_gender = read_data(image_path, names, img_size=img_size,
                                           gender_label=gender_label, gender_meta=True)
