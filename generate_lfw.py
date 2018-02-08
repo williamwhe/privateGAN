@@ -274,6 +274,7 @@ def train():
                 print total_good_confusion
                 evil_misclass = total_evil_confusion.sum(axis=0) - np.diag(total_evil_confusion)
                 evil_idxs = np.argsort(-evil_misclass)
+                print total_evil_confusion
                 print 'Top 3 Misclassifications:'
                 print np.array(names)[evil_idxs][:3]
                 print evil_misclass[evil_idxs][:3]
