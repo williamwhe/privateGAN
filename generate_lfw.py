@@ -5,6 +5,8 @@ import time
 import getpass
 if getpass.getuser() == 'aria':
     os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+    for key, val in os.environ.items():
+        print key, val
 
 from scipy.misc import imsave as scipy_imsave
 import numpy as np
