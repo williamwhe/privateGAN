@@ -11,6 +11,7 @@ from tensorflow.python.client import device_lib
 from ops import *
 import opts
 
+import time
 from utils import merge
 from advgan import advGAN
 from Dataset2 import Dataset2
@@ -109,6 +110,7 @@ def train():
     tf_config.intra_op_parallelism_threads = NUM_THREADS
     tf_config.gpu_options.allow_growth = True
 
+    iteration_time = []
     with tf.Session(config=tf_config) as sess:
 
         id_model_path = '%s_%d_id_0' % (opt.lfw_base_path, x_dim)
@@ -145,8 +147,9 @@ def train():
         print 'Maximum iterations: %d' % opt.max_iteration
         max_acc_diff = -1.0
         while iteration < opt.max_iteration:
-            if iteration % 5:
-                print iteration
+            start_time = time.time()
+            if iteration % 5 == 1:
+                print 'Average iteration time:', np.mean(iteration_time)
             # this function returns (data, label, np.array(target)).
             feed_data, evil_labels, real_data = loader.next_batch(
                 batch_size, negative=False)
@@ -375,10 +378,7 @@ def train():
                     print '\t[DONE]'
 
             iteration += 1
-
-        # We can transform the training and test data given in the beginning here.
-        # This is only half the actual data.
-        # Not making new dataset for now. First, do some successful training.
+            iteration_time.append(time.time() - start_time)
 
 if __name__ == "__main__":
     train()
