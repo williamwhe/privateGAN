@@ -246,7 +246,7 @@ def train():
                 print evil_tp[evil_idxs][:3]
 
                 print 'Selected people are:'
-                print names
+                print names[evil_idxs].tolist()
                 print evil_idxs
 
                 exit()
