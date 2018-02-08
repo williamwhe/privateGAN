@@ -44,9 +44,13 @@ def main():
     num_evil_labels = data['train_label'].shape[1]
 
     print train_data.shape
+    print train_data.min(), train_data.max()
     print org_train_data.shape
+    print org_train_data.min(), org_train_data.max()
     print test_data.shape
+    print test_data.min(), test_data.max()
     print org_test_data.shape
+    print org_test_data.min(), org_test_data.max()
 
     print 'Preprocessing data:',
     for cur_data in [org_train_data, train_data, org_test_data, test_data]:

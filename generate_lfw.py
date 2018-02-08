@@ -1,6 +1,7 @@
 from __future__ import division
 
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 import shutil
 
 from scipy.misc import imsave as scipy_imsave
