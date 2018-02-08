@@ -137,6 +137,8 @@ def train():
         print 'Maximum iterations: %d' % opt.max_iteration
         max_acc_diff = -1.0
         while iteration < opt.max_iteration:
+            if iteration % 5:
+                print iteration
             # this function returns (data, label, np.array(target)).
             feed_data, evil_labels, real_data = loader.next_batch(
                 batch_size, negative=False)
