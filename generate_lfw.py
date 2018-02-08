@@ -245,11 +245,11 @@ def train():
                 print np.array(names)[evil_idxs][:3]
                 print evil_tp[evil_idxs][:3]
 
-                print 'Selected people are:'
-                print names[evil_idxs].tolist()
-                print evil_tp
-                print total_evil_confusion
-                print evil_idxs
+                # print 'Selected people are:'
+                # print names[evil_idxs].tolist()
+                # print evil_tp
+                # print total_evil_confusion
+                # print evil_idxs
 
                 fake_samples, fake_noise = sess.run(
                     [model.fake_images_output, model.fake_noise_output],
