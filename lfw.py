@@ -43,7 +43,7 @@ def read_data(img_path,
     id_gender = []
     for name in os.listdir(img_path):
         if (selected_names is not None) and (name in selected_names):
-            print selected_names
+            print name
             # print '\r%d/%d read.' % (cnt + 1, len(selected_names)),
             folder = os.path.join(img_path, name)
             if gender_meta:
