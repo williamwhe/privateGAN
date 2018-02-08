@@ -226,7 +226,8 @@ def train():
                 good_accuracy = accuracy_score(good_true, good_pred)
                 evil_accuracy = accuracy_score(evil_true, evil_pred)
                 total_good_confusion = confusion_matrix(good_true, good_pred)
-                total_evil_confusion = confusion_matrix(evil_true, evil_pred)
+                total_evil_confusion = confusion_matrix(evil_true, evil_pred,
+                                                        labels=range(opt.evil_label_num))
 
                 print '\tGood Accuracy: %.4f, Evil Accuracy: %.4f' % (
                     good_accuracy, evil_accuracy)
