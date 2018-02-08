@@ -143,15 +143,11 @@ def main():
                         help='Learning rate.')
     parser.add_argument('--gender', dest='gender', action='store_true',
                         help='Does gender identification.')
-    parser.add_argument('--no_gender', dest='gender', action='store_false',
-                        help='Does identity recognition.')
     parser.set_defaults(gender=False)
     parser.add_argument('--slice_num', type=int, default=0,
                         help='Which slice to use [0, 1 or 2]')
     parser.add_argument('--fixed_low_level', dest='fixed_low_level', action='store_true',
                         help='With fixed low level layers.')
-    parser.add_argument('--no_fixed_low_level', dest='fixed_low_level', action='store_false',
-                        help='Without fixed low level layers.')
     parser.set_defaults(fixed_low_level=False)
     args = parser.parse_args()
 
