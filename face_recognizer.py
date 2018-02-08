@@ -6,6 +6,7 @@ import time
 import os
 import argparse
 import cPickle as pickle
+import getpass
 
 import numpy as np
 import tensorflow as tf
@@ -20,6 +21,8 @@ from lfw import get_people_names, read_data, split_dataset, split_indices, prepr
 from lfw import get_30_people_chunk
 
 VGG_HIDDEN_DIM = 512
+if getpass.getuser() == 'aria':
+    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 class FaceRecognizer:
     """A face recognizing model based on VGG"""
@@ -220,7 +223,7 @@ def main():
                           gender=args.gender,
                           fixed_low_level=args.fixed_low_level)
             val_acc.append(score[1])
-            print '\nAccuracy: %.4f', val_acc[-1]
+            print '\nAccuracy: %.4f' % val_acc[-1]
 
         print ''
         print 'Accs:', val_acc
