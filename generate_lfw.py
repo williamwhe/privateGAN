@@ -262,8 +262,6 @@ def train():
 
                 scipy_imsave('snapshot_%d.png' % iteration, final_image)
 
-                exit()
-
                 if (good_accuracy - evil_accuracy) > max(0.5, max_acc_diff):
                     print '\tSaving new training data at accuracy diff: %.4f' % (
                         good_accuracy - evil_accuracy),
@@ -322,6 +320,8 @@ def train():
                     print '\t[DONE]'
 
             iteration += 1
+
+            exit()
 
 if __name__ == "__main__":
     train()
