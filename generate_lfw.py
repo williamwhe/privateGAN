@@ -50,8 +50,6 @@ def train():
     test_data, test_label = get_30_people_chunk(opt.image_path, 2, img_size=img_size)
     names = get_people_names(opt.image_path, 30)
 
-    exit()
-
     if opt.balance_data:
         ratio = opt.balance_ratio
         print 'Balancing dataset with ratio %f' % ratio
