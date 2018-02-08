@@ -66,6 +66,9 @@ def train():
             selected_people.append(np.random.choice(indices, 5, replace=False))
         selected_people = np.concatenate(selected_people)
 
+        print 'Selected people are:'
+        print np.array(names)[selected_people]
+
         selected_imgs = train_label[:, selected_people].sum(axis=1) != 0
         train_data = train_data[selected_imgs, :]
         train_label = train_label[selected_imgs, :]
@@ -188,19 +191,6 @@ def train():
                 print '\tGood: %.4f, Evil: %.4f' % (good_fn_loss, evil_fn_loss)
                 print '\tAdv: %.4f, Total: %.4f' % (adv_loss, total_loss)
 
-                # model.saver.save(sess, checkpoint_path, global_step=iteration)
-                # test_loader = Dataset2(test_data, test_label)
-
-                # test_num = test_loader._num_examples
-                # test_iter_num = int(np.ceil((test_num - batch_size) / batch_size))
-                # total_evil_accuracy = 0.0
-                # total_good_accuracy = 0.0
-                # fake_samples = [[] for _ in range(test_loader._num_labels)]
-                # fake_noise = [[] for _ in range(test_loader._num_labels)]
-
-                # total_good_confusion = np.zeros((2, 2))
-                # total_evil_confusion = np.zeros((train_label.shape[1], train_label.shape[1]))
-
                 new_test_data = []
                 new_pred_data = []
                 head = 0
@@ -237,29 +227,7 @@ def train():
                 evil_accuracy = accuracy_score(evil_true, evil_pred)
                 total_good_confusion = confusion_matrix(good_true, good_pred)
                 total_evil_confusion = confusion_matrix(evil_true, evil_pred)
-                # for _ in range(test_iter_num):
 
-                #     # Loading the next batch of test images
-                #     test_input_data, test_evil_labels, _ = \
-                #         test_loader.next_batch(batch_size)
-                #     evil_categorical_labels = np.argmax(test_evil_labels, axis=1)
-                #     test_good_labels = id_gender[evil_categorical_labels]
-                #     feed = {
-                #         model.source: test_input_data,
-                #         model.evil_labels: test_evil_labels,
-                #         model.good_labels: test_good_labels
-                #     }
-                #     evil_accuracy, good_accuracy, good_confusion, evil_confusion = sess.run(
-                #         [model.evil_accuracy, model.good_accuracy,
-                #          model.good_confusion, model.evil_confusion], feed)
-                #     # We divide the total accuracy by the number of test iterations.
-                #     total_good_accuracy += good_accuracy
-                #     total_evil_accuracy += evil_accuracy
-                #     total_good_confusion += good_confusion
-                #     total_evil_confusion += evil_confusion
-
-                # good_accuracy = total_good_accuracy / float(test_iter_num)
-                # evil_accuracy = total_evil_accuracy / float(test_iter_num)
                 print '\tGood Accuracy: %.4f, Evil Accuracy: %.4f' % (
                     good_accuracy, evil_accuracy)
                 print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
@@ -275,6 +243,12 @@ def train():
                 print 'Top 3 True classifications:'
                 print np.array(names)[evil_idxs][:3]
                 print evil_tp[evil_idxs][:3]
+
+                print 'Selected people are:'
+                print names
+                print evil_idxs
+
+                exit()
 
                 fake_samples, fake_noise = sess.run(
                     [model.fake_images_output, model.fake_noise_output],
@@ -311,30 +285,6 @@ def train():
                         preprocess_images(new_test_data * 255.0)), axis=1)
                     print '\tTest data processeced accuracy: %.4f' % \
                         accuracy_score(evil_true, other_pred)
-                    # loader = Dataset2(train_data, train_label)
-                    # iter_num = int(loader._num_examples / batch_size)
-                    # new_train_data = []
-                    # new_train_label = []
-                    # for _ in range(iter_num):
-                    #     batch_data, batch_label, _ = loader.next_batch(batch_size)
-                    #     new_data = sess.run(model.fake_images_output, {model.source: batch_data})
-                    #     new_train_data.append(new_data)
-                    #     new_train_label.append(batch_label)
-                    # new_train_data = np.concatenate(new_train_data)
-                    # new_train_label = np.concatenate(new_train_label)
-                    # print '\tTraining data: [DONE]'
-                    # loader = Dataset2(test_data, test_label)
-                    # iter_num = int(loader._num_examples / batch_size)
-                    # new_test_data = []
-                    # new_test_label = []
-                    # for _ in range(iter_num):
-                    #     batch_data, batch_label, _ = loader.next_batch(batch_size)
-                    #     new_data = sess.run(model.fake_images_output, {model.source: batch_data})
-                    #     new_test_data.append(new_data)
-                    #     new_test_label.append(batch_label)
-                    # new_test_data = np.concatenate(new_test_data)
-                    # new_test_label = np.concatenate(new_test_label)
-                    # print '\tTest data: [DONE]'
 
                     new_train_data = []
                     head = 0
