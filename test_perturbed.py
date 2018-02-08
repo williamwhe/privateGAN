@@ -2,17 +2,9 @@
 
 from __future__ import division
 
-import os
-from tensorflow.python.client import device_lib
-def get_available_gpus():
-    local_device_protos = device_lib.list_local_devices()
-    return [x.name for x in local_device_protos if x.device_type == 'GPU']
-
-if len(get_available_gpus()) > 1:
-    print 'Set visibility to GPU 1 only.'
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
-
 import argparse
+import os
+import getpass
 
 import tensorflow as tf
 import numpy as np
@@ -20,7 +12,8 @@ from face_recognizer import FaceRecognizer
 from lfw import preprocess_images
 from sklearn.metrics import accuracy_score
 
-
+if getpass.getuser() == 'aria':
+    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 def main():
     parser = argparse.ArgumentParser()

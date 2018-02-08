@@ -43,13 +43,14 @@ def read_data(img_path,
     id_gender = []
     for name in os.listdir(img_path):
         if (selected_names is not None) and (name in selected_names):
-            print '\r%d/%d read.' % (cnt + 1, len(selected_names)),
+            print selected_names
+            # print '\r%d/%d read.' % (cnt + 1, len(selected_names)),
             folder = os.path.join(img_path, name)
             if gender_meta:
                 id_gender.append(genders[name])
             if gender_label:
                 if genders.get(name) is None:
-                    print '\tNo gender label found for %s' % name
+                    # print '\tNo gender label found for %s' % name
                     continue
                 is_male = genders[name]
             if os.path.isdir(folder):
@@ -192,6 +193,7 @@ def get_30_people_chunk(image_path,
     if chunk_number < 0 or chunk_number >= 3:
         raise ValueError('chunk_number(%d) should be between 0 and 3' % chunk_number)
     names = get_people_names(image_path, 30)
+    print '\n'.join(names)
     if gender_meta:
         imgs, lbls, id_gender = read_data(image_path, names, img_size=img_size,
                                           gender_label=gender_label, gender_meta=True)

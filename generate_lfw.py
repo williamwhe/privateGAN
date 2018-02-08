@@ -1,14 +1,8 @@
 from __future__ import division
 
 import os
-from tensorflow.python.client import device_lib
-def get_available_gpus():
-    local_device_protos = device_lib.list_local_devices()
-    return [x.name for x in local_device_protos if x.device_type == 'GPU']
-
-if len(get_available_gpus()) > 1:
-    print 'Set visibility to GPU 1 only.'
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+import time
+import getpass
 
 from scipy.misc import imsave as scipy_imsave
 import numpy as np
@@ -17,13 +11,15 @@ import tensorflow as tf
 from ops import *
 import opts
 
-import time
 from utils import merge
 from advgan import advGAN
 from Dataset2 import Dataset2
 from lfw import get_30_people_chunk, balance_dataset, get_people_names, preprocess_images
 from face_recognizer import FaceRecognizer
 from sklearn.metrics import accuracy_score, confusion_matrix
+
+if getpass.getuser() == 'aria':
+    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 def get_output_samples(imgs, lbls, id_gender, num_repr, num_samples_each):
     id_gender_ct = np.argmax(id_gender, axis=1)
@@ -53,6 +49,8 @@ def train():
         get_30_people_chunk(opt.image_path, 1, gender_meta=True, img_size=img_size)
     test_data, test_label = get_30_people_chunk(opt.image_path, 2, img_size=img_size)
     names = get_people_names(opt.image_path, 30)
+
+    exit()
 
     if opt.balance_data:
         ratio = opt.balance_ratio
