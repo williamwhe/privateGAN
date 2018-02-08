@@ -5,6 +5,8 @@ from __future__ import division
 import argparse
 import os
 import getpass
+if getpass.getuser() == 'aria':
+    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 import tensorflow as tf
 import numpy as np
@@ -12,8 +14,6 @@ from face_recognizer import FaceRecognizer
 from lfw import preprocess_images
 from sklearn.metrics import accuracy_score
 
-if getpass.getuser() == 'aria':
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 def main():
     parser = argparse.ArgumentParser()

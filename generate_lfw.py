@@ -3,6 +3,8 @@ from __future__ import division
 import os
 import time
 import getpass
+if getpass.getuser() == 'aria':
+    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 from scipy.misc import imsave as scipy_imsave
 import numpy as np
@@ -18,8 +20,6 @@ from lfw import get_30_people_chunk, balance_dataset, get_people_names, preproce
 from face_recognizer import FaceRecognizer
 from sklearn.metrics import accuracy_score, confusion_matrix
 
-if getpass.getuser() == 'aria':
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
 
 def get_output_samples(imgs, lbls, id_gender, num_repr, num_samples_each):
     id_gender_ct = np.argmax(id_gender, axis=1)
@@ -141,9 +141,6 @@ def train():
         print 'Maximum iterations: %d' % opt.max_iteration
         max_acc_diff = -1.0
         while iteration < opt.max_iteration:
-            start_time = time.time()
-            if iteration % 5 == 1:
-                print 'Average iteration time:', np.mean(iteration_time)
             # this function returns (data, label, np.array(target)).
             feed_data, evil_labels, real_data = loader.next_batch(
                 batch_size, negative=False)
@@ -270,7 +267,6 @@ def train():
                 print total_good_confusion
                 evil_misclass = total_evil_confusion.sum(axis=0) - np.diag(total_evil_confusion)
                 evil_idxs = np.argsort(-evil_misclass)
-                print total_evil_confusion
                 print 'Top 3 Misclassifications:'
                 print np.array(names)[evil_idxs][:3]
                 print evil_misclass[evil_idxs][:3]
@@ -373,7 +369,6 @@ def train():
                     print '\t[DONE]'
 
             iteration += 1
-            iteration_time.append(time.time() - start_time)
 
 if __name__ == "__main__":
     train()
