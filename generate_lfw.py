@@ -121,6 +121,7 @@ def train():
         print '\tRetrieving good model from "%s"' % gender_model_path
         good_model = FaceRecognizer(gender_model_path, 2, input_shape, opt.input_c_dim)
         model = advGAN(good_model, evil_model, opt, sess, mnist=False)
+        exit()
 
         iteration = 0
         if opt.resnet_gen:

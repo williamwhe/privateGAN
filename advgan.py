@@ -88,7 +88,11 @@ class advGAN():
         self.d_bn1 = batch_norm(name='d_bn1')
         self.d_bn2 = batch_norm(name='d_bn2')
         self.d_bn3 = batch_norm(name='d_bn3')
+        self.d_bn4 = batch_norm(name='d_bn4')
         self.d_bn5 = batch_norm(name='d_bn5')
+        self.d_bn6 = batch_norm(name='d_bn6')
+        self.d_bn7 = batch_norm(name='d_bn7')
+        self.d_bn8 = batch_norm(name='d_bn8')
 
         self.g_bn_e2 = batch_norm(name='g_bn_e2')
         self.g_bn_e3 = batch_norm(name='g_bn_e3')
@@ -487,16 +491,34 @@ class advGAN():
             else:
                 assert tf.get_variable_scope().reuse == False
 
-            h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv'))  #3
+            h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv'))
+            print 'd_h0 shape:', h0.shape
             # h0 is (128 x 128 x self.df_dim) 16 x 16 x df_dim 14x14
             h1 = lrelu(self.d_bn1(conv2d(h0, self.df_dim*2, name='d_h1_conv')))
+            print 'd_h1 shape:', h1.shape
             # h1 is (64 x 64 x self.df_dim*2) 8 x 8 x df_dim*2 7x 7
             h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim*4, d_h=1, d_w=1, name='d_h2_conv')))
+            print 'd_h2 shape:', h2.shape
             # h2 is (32x 32 x self.df_dim*4)  4 x 4 x df_dim*4
             h3 = lrelu(self.d_bn3(conv2d(h2, self.df_dim*8, d_h=1, d_w=1, name='d_h3_conv')))
-            h4 = lrelu(self.d_bn5(conv2d(h3, 1, d_h=1, d_w=1, name='d_h5_conv')))
+            print 'd_h3 shape:', h3.shape
+            # h4 = lrelu(self.d_bn5(conv2d(h3, 1, d_h=1, d_w=1, name='d_h5_conv')))
 
-            return tf.nn.sigmoid(h4), h4
+            if self.mnist is False:
+                h4 = lrelu(self.d_bn4(conv2d(h3, self.df_dim*8, d_h=1, d_w=1, name='d_h4_conv')))
+                print 'd_h4 shape:', h4.shape
+                h5 = lrelu(self.d_bn5(conv2d(h4, self.df_dim*8, d_h=1, d_w=1, name='d_h5_conv')))
+                print 'd_h5 shape:', h5.shape
+                h6 = lrelu(self.d_bn6(conv2d(h5, self.df_dim*8, d_h=1, d_w=1, name='d_h6_conv')))
+                print 'd_h6 shape:', h6.shape
+                h7 = lrelu(self.d_bn7(conv2d(h6, self.df_dim*8, d_h=1, d_w=1, name='d_h7_conv')))
+                print 'd_h7 shape:', h7.shape
+                final_layer = lrelu(self.d_bn8(conv2d(h7, 1, d_h=1, d_w=1, name='d_h5_conv')))
+                print 'final_layer shape:', final_layer.shape
+            else:
+                final_layer = lrelu(self.d_bn4(conv2d(h3, 1, d_h=1, d_w=1, name='d_h5_conv')))
+
+            return tf.nn.sigmoid(final_layer), h4
 
     def generator(self, image, y=None, reuse=False):
         with tf.variable_scope("generator") as scope:
