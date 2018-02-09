@@ -518,7 +518,7 @@ class advGAN():
                 print 'd_h6 shape:', h6.shape
                 # h7 = lrelu(self.d_bn7(conv2d(h6, self.df_dim*8, d_h=1, d_w=1, name='d_h7_conv')))
                 # h7 = lrelu(self.d_bn7(conv2d(h6, self.df_dim*2, name='d_h7_conv')))
-                print 'd_h7 shape:', h7.shape
+                # print 'd_h7 shape:', h7.shape
                 # final_layer = lrelu(self.d_bn8(conv2d(h7, 1, d_h=1, d_w=1, name='d_h8_conv')))
                 final_layer = lrelu(self.d_bn8(conv2d(h6, self.df_dim*2, name='d_h8_conv')))
                 print 'final_layer shape:', final_layer.shape
