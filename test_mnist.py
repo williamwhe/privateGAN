@@ -81,6 +81,8 @@ def main():
         org_true, pert_true = label_pair
         print name + ':'
         org_pred = np.argmax(model.model.predict(orig_data), axis=1)
+        print org_pred.shape
+        print org_true.shape
         org_acc = accuracy_score(org_true, org_pred)
         print '\tOriginal Accuracy: %.4f' % org_acc
         dst_pred = np.argmax(model.model.predict(pert_data), axis=1)
