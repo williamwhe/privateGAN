@@ -50,7 +50,7 @@ def main():
 
     loaded = np.load(args.pert_data)
     pert_data = np.concatenate((loaded['train_data'], loaded['test_data']))
-    np.reshape(pert_data, (pert_data.shape[0], args.image_size, args.image_size, -1))
+    pert_data = pert_data.reshape(pert_data.shape[0], args.image_size, args.image_size, -1)
     evil_label = np.concatenate((loaded['train_label'], loaded['test_label']))
     good_label = odd_even_labels(evil_label)
 
@@ -60,7 +60,7 @@ def main():
 
     loaded = np.load(args.orig_data)
     orig_data = np.concatenate((loaded['train_data'], loaded['test_data']))
-    np.reshape(orig_data, (orig_data.shape[0], args.image_size, args.image_size, -1))
+    orig_data = orig_data.reshape(orig_data.shape[0], args.image_size, args.image_size, -1)
     print 'Original data shape:', orig_data.shape
 
     good_used = OddEvenMNIST(args.model_path + 'A_odd_even')
