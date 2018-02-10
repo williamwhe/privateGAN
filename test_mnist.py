@@ -51,19 +51,19 @@ def main():
     loaded = np.load(args.pert_data)
     pert_data = np.concatenate((loaded['train_data'], loaded['test_data']))
     pert_data = pert_data.reshape(pert_data.shape[0], args.image_size, args.image_size, -1)
-    pert_evil_label = np.concatenate((loaded['train_label'], loaded['test_label']))
-    pert_good_label = odd_even_labels(pert_evil_label)
+    pert_evil_label = np.concatenate((loaded['train_label'], loaded['test_label'])).\
+        argmax(axis=1)
+    pert_good_label = odd_even_labels(pert_evil_label).\
+        argmax(axis=1)
 
     loaded = np.load(args.orig_data)
     orig_data = np.concatenate((loaded['train_data'], loaded['test_data']))
     orig_data = orig_data.reshape(orig_data.shape[0], args.image_size, args.image_size, -1)
-    orig_evil_label = np.concatenate((loaded['train_label'], loaded['test_label']))
-    orig_good_label = odd_even_labels(orig_evil_label)
+    orig_evil_label = np.concatenate((loaded['train_label'], loaded['test_label'])).\
+        argmax(axis=1)
+    orig_good_label = odd_even_labels(orig_evil_label).\
+        argmax(axis=1)
     print 'Original data shape:', orig_data.shape
-
-    # We make the labels categorical integers.
-    for label in [pert_evil_label, pert_good_label, orig_evil_label, orig_good_label]:
-        label = np.argmax(label, axis=1)
 
     good_used = OddEvenMNIST(args.model_path + 'A_odd_even')
     good_left = OddEvenMNIST(args.model_path + 'C_odd_even')
