@@ -17,7 +17,7 @@ class advGAN():
     opts: advGAN parameters. See opts.py.
     sess: TensorFlow Session() object.
     """
-    def __init__(self, good_model, evil_model, opts, sess, mnist=True):
+    def __init__(self, good_model, evil_model, opts, sess, mnist=True, cgan_gen=False):
         """
         :param D: the discriminator object
         :param params: the dict used to train the generative neural networks

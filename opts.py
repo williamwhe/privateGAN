@@ -107,7 +107,7 @@ def parse_opt():
 
     # parser.add_argument('--log_path', type=str, default = 'log_path',
     #                 help='log_path')
-    parser.add_argument('--image_path', type=str, default='GAN/out',
+    parser.add_argument('--image_path', type=str, default='./lfw_data/',
                         help='image_path')
     parser.add_argument('--load_checkpoint_path', type=str, default='GAN/save',
                         help='directory to store checkpointed models')

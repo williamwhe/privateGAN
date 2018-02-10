@@ -17,16 +17,28 @@ from sklearn.metrics import accuracy_score
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_path', type=str, default="models/lfw",
-                        help="Path to save trained model. e.g.: 'models/lfw'")
-    parser.add_argument('--image_path', type=str, default='./lfw_data/perturbed.npz',
-                        help='Path to LFW data.')
-    parser.add_argument('--image_size', type=int, default=224,
-                        help='Size of input images.')
-    parser.add_argument('--num_channels', type=int, default=3,
-                        help='Number of channels in input images.')
-    parser.add_argument('--train_new', dest='train_new', action='store_true',
-                        help='Train a new classifier.')
+    parser.add_argument(
+        '--model_path',
+        type=str,
+        default="models/lfw",
+        help="Path to save trained model. e.g.: 'models/lfw'")
+    parser.add_argument(
+        '--image_path',
+        type=str,
+        default='./lfw_data/perturbed.npz',
+        help='Path to LFW data.')
+    parser.add_argument(
+        '--image_size', type=int, default=224, help='Size of input images.')
+    parser.add_argument(
+        '--num_channels',
+        type=int,
+        default=3,
+        help='Number of channels in input images.')
+    parser.add_argument(
+        '--train_new',
+        dest='train_new',
+        action='store_true',
+        help='Train a new classifier.')
     parser.set_defaults(train_new=False)
     args = parser.parse_args()
     input_shape = (args.image_size, args.image_size, args.num_channels)
@@ -59,25 +71,26 @@ def main():
         cur_data = preprocess_images(cur_data * 255.0, version=1)
     print '[DONE]'
 
-    good_used = FaceRecognizer('%s_%d_gender_0' % (args.model_path, args.image_size),
-                               num_good_labels,
-                               input_shape)
+    good_used = FaceRecognizer('%s_%d_gender_0' % (args.model_path,
+                                                   args.image_size),
+                               num_good_labels, input_shape)
 
-    good_left = FaceRecognizer('%s_%d_gender_1' % (args.model_path, args.image_size),
-                               num_good_labels,
-                               input_shape)
+    good_left = FaceRecognizer('%s_%d_gender_1' % (args.model_path,
+                                                   args.image_size),
+                               num_good_labels, input_shape)
 
-    evil_used = FaceRecognizer('%s_%d_id_0' % (args.model_path, args.image_size),
-                               num_evil_labels,
-                               input_shape)
+    evil_used = FaceRecognizer('%s_%d_id_0' % (args.model_path,
+                                               args.image_size),
+                               num_evil_labels, input_shape)
 
-    evil_left = FaceRecognizer('%s_%d_id_1' % (args.model_path, args.image_size),
-                               num_evil_labels,
-                               input_shape)
+    evil_left = FaceRecognizer('%s_%d_id_1' % (args.model_path,
+                                               args.image_size),
+                               num_evil_labels, input_shape)
 
-    for model, label, name in zip([evil_used, good_used, evil_left, good_left],
-                                  [test_id, test_gender, test_id, test_gender],
-                                  ['Used Evil', 'Used Good', 'Left-out Evil', 'Left-out Good']):
+    for model, label, name in zip(
+        [evil_used, good_used, evil_left, good_left],
+        [test_id, test_gender, test_id, test_gender],
+        ['Used Evil', 'Used Good', 'Left-out Evil', 'Left-out Good']):
         print name + ':'
         org_pred = np.argmax(model.model.predict(org_test_data), axis=1)
         org_acc = accuracy_score(label, org_pred)
@@ -88,7 +101,9 @@ def main():
 
     if args.train_new:
         # Train a new classifier with the new training data, test with original test data.
-        raise NotImplementedError('Training new classifier is not yet implemented.')
+        raise NotImplementedError(
+            'Training new classifier is not yet implemented.')
+
 
 if __name__ == '__main__':
     main()
