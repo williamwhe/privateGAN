@@ -141,7 +141,7 @@ def train():
                 gan_file.write('%d, %.4f, %.4f\n' % (iteration, G_loss, D_loss))
 
 
-            if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
+            # if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
                 # checkpoint_path = os.path.join(opt.checkpoint_path, 'checkpoint.ckpt')
                 # print 'Saving the model in "%s"' % checkpoint_path
 
