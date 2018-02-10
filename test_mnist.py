@@ -49,14 +49,19 @@ def main():
     args = parser.parse_args()
 
     loaded = np.load(args.pert_data)
-    pert_data = np.concatenate((loaded['train_data'], loaded['test_data'])).\
-        reshape(args.image_size, args.image_size, -1)
+    pert_data = np.concatenate((loaded['train_data'], loaded['test_data']))
+    np.reshape(pert_data, (pert_data.shape[0], args.image_size, args.image_size, -1))
     evil_label = np.concatenate((loaded['train_label'], loaded['test_label']))
     good_label = odd_even_labels(evil_label)
 
+    print 'Perturbed data shape:', pert_data.shape
+    print 'Evil label shape:', evil_label.shape
+    print 'Good label shape:', good_label.shape
+
     loaded = np.load(args.orig_data)
-    orig_data = np.concatenate((loaded['train_data'], loaded['test_data'])).\
-        reshape(args.image_size, args.image_size, -1)
+    orig_data = np.concatenate((loaded['train_data'], loaded['test_data']))
+    np.reshape(orig_data, (orig_data.shape[0], args.image_size, args.image_size, -1))
+    print 'Original data shape:', orig_data.shape
 
     good_used = OddEvenMNIST(args.model_path + 'A_odd_even')
     good_left = OddEvenMNIST(args.model_path + 'C_odd_even')
