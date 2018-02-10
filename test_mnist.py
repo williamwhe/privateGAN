@@ -51,16 +51,14 @@ def main():
     loaded = np.load(args.pert_data)
     pert_data = np.concatenate((loaded['train_data'], loaded['test_data']))
     pert_data = pert_data.reshape(pert_data.shape[0], args.image_size, args.image_size, -1)
-    evil_label = np.concatenate((loaded['train_label'], loaded['test_label']))
-    good_label = odd_even_labels(evil_label)
-
-    print 'Perturbed data shape:', pert_data.shape
-    print 'Evil label shape:', evil_label.shape
-    print 'Good label shape:', good_label.shape
+    pert_evil_label = np.concatenate((loaded['train_label'], loaded['test_label']))
+    pert_good_label = odd_even_labels(pert_evil_label)
 
     loaded = np.load(args.orig_data)
     orig_data = np.concatenate((loaded['train_data'], loaded['test_data']))
     orig_data = orig_data.reshape(orig_data.shape[0], args.image_size, args.image_size, -1)
+    orig_evil_label = np.concatenate((loaded['train_label'], loaded['test_label']))
+    orig_good_label = odd_even_labels(orig_evil_label)
     print 'Original data shape:', orig_data.shape
 
     good_used = OddEvenMNIST(args.model_path + 'A_odd_even')
@@ -68,16 +66,21 @@ def main():
     evil_used = MNISTModel(args.model_path + 'A_digits')
     evil_left = MNISTModel(args.model_path + 'C_digits')
 
-    for model, label, name in zip(
+    evil_pair = (orig_evil_label, pert_evil_label)
+    good_pair = (orig_good_label, pert_good_label)
+
+    for model, label_pair, name in zip(
             [evil_used, good_used, evil_left, good_left],
-            [evil_label, good_label, evil_label, good_label],
+            [evil_pair, good_pair, evil_pair, good_pair],
             ['Used Evil', 'Used Good', 'Left-out Evil', 'Left-out Good']):
+
+        org_true, pert_true = label_pair
         print name + ':'
         org_pred = np.argmax(model.model.predict(orig_data), axis=1)
-        org_acc = accuracy_score(label, org_pred)
+        org_acc = accuracy_score(org_true, org_pred)
         print '\tOriginal Accuracy: %.4f' % org_acc
         dst_pred = np.argmax(model.model.predict(pert_data), axis=1)
-        dst_acc = accuracy_score(label, dst_pred)
+        dst_acc = accuracy_score(pert_true, dst_pred)
         print '\tPerturbed Accuracy: %.4f' % dst_acc
 
     if args.train_new:
