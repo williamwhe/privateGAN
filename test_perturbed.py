@@ -14,7 +14,6 @@ from face_recognizer import FaceRecognizer
 from lfw import preprocess_images
 from sklearn.metrics import accuracy_score
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
