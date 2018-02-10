@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
@@ -72,7 +73,13 @@ def train():
         min_adv_accuracy = 10e10
         max_accuracy_diff = -np.inf
 
-        writer = tf.summary.FileWriter("logs", sess.graph)
+        summary_dir = "logs/MNIST/g_%d_ld_%d_gl_%d_L2_%.2f_lr_%.4f/" % (
+            opt.G_lambda, opt.ld, opt.good_loss_coeff,
+            opt.L2_lambda, opt.learning_rate)
+        if os.path.isdir(summary_dir) is False:
+            print 'Creating directory %s for logs.' % summary_dir
+            os.mkdir(summary_dir)
+        writer = tf.summary.FileWriter(summary_dir, sess.graph)
         loader = Dataset2(train_data, train_label)
         print 'Training data loaded.'
 

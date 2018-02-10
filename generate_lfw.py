@@ -127,7 +127,7 @@ def train():
             generator_mode = 'ResNet'
         else:
             generator_mode = 'Regular'
-        summary_dir = "logs/g_%d_ld_%d_gl_%d_L2_%.2f_lr_%.4f_%s/" % (
+        summary_dir = "logs/LFW/g_%d_ld_%d_gl_%d_L2_%.2f_lr_%.4f_%s/" % (
             opt.G_lambda, opt.ld, opt.good_loss_coeff,
             opt.L2_lambda, opt.learning_rate, generator_mode)
         if os.path.isdir(summary_dir) is False:
