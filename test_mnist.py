@@ -61,6 +61,10 @@ def main():
     orig_good_label = odd_even_labels(orig_evil_label)
     print 'Original data shape:', orig_data.shape
 
+    # We make the labels categorical integers.
+    for label in [pert_evil_label, pert_good_label, orig_evil_label, orig_good_label]:
+        label = np.argmax(label, axis=1)
+
     good_used = OddEvenMNIST(args.model_path + 'A_odd_even')
     good_left = OddEvenMNIST(args.model_path + 'C_odd_even')
     evil_used = MNISTModel(args.model_path + 'A_digits')
