@@ -34,7 +34,6 @@ def train():
 
     output_samples = output_sample(test_data, test_label)
     print output_samples.shape
-    exit()
 
     print 'Shape of data:'
     print '\tTraining data: ' + str(train_data.shape)
