@@ -126,10 +126,11 @@ def train():
             writer.add_summary(summary_str, iteration)
 
             # Training D.
-            summary_str, D_loss, _ = sess.run([model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
+            summary_str, D_loss, _ = sess.run(
+                [model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
-            if iteration != 0 and iteration % opt.losses_log_every == 0:
+            if iteration % opt.losses_log_every == 0:
                 print "iteration: ", iteration
                 print '\tD: %.4f, G: %.4f\n\thinge(%.1f): %.4f, L1(%.1f): %.4f, L2(%.1f): %.4f' % (
                     D_loss, G_loss, opt.H_lambda, hinge_loss,
@@ -140,7 +141,6 @@ def train():
                 loss_file.write('%d, %.4f, %.4f\n' % (iteration, good_fn_loss, evil_fn_loss))
                 gan_file.write('%d, %.4f, %.4f\n' % (iteration, G_loss, D_loss))
 
-
             # if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
                 # checkpoint_path = os.path.join(opt.checkpoint_path, 'checkpoint.ckpt')
                 # print 'Saving the model in "%s"' % checkpoint_path
@@ -150,13 +150,10 @@ def train():
 
                 test_num = test_loader._num_examples
                 test_iter_num = (test_num - batch_size) / batch_size
-                # test_iter_num = 1
+
                 total_evil_accuracy = 0.0
                 total_good_accuracy = 0.0
-                # show_samples = []
 
-                # save_samples = []
-                # input_samples = []
                 fake_samples = [[] for _ in range(test_loader._num_labels)]
                 fake_noise = [[] for _ in range(test_loader._num_labels)]
                 original_samples = [[] for _ in range(test_loader._num_labels)]
