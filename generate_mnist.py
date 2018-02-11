@@ -256,11 +256,9 @@ def train():
                 original = merge(output_samples[:100].reshape(-1, 28, 28, 1), [10, 10])
 
                 if opt.cgan_gen:
-                    print 'CGAN is true. We only save fake and real.'
                     scipy.misc.imsave(
                         'snapshot_%d.png' % iteration,
                         np.concatenate([fakes, original], axis=1))
-                    exit()
                 else:
                     noise = merge(fake_noise[:100], [10, 10])
                     scipy.misc.imsave(
