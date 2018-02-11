@@ -155,6 +155,10 @@ class advGAN():
             # Scale (0, 1) to (-1, 1)
             self.real_images = (self.target) * 2.0 - 1
 
+        if self.cgan_gen:
+            # This is added to the random noise in CGAN_GEN mode.
+            self.label_clue = tf.placeholder(
+                tf.float32, [None, img_dim, img_dim, evil_label_num])
 
         # labels for the evil classifier.
         self.evil_labels = tf.placeholder(
@@ -303,7 +307,7 @@ class advGAN():
                 print 'Building images from scratch.'
                 self.added_noise = tf.random_normal(
                     [self.batch_size, self.img_dim, self.img_dim, self.output_c_dim], stddev=0.2)
-                self.noisy_images = tf.concat((self.images, self.added_noise), axis=3)
+                self.noisy_images = tf.concat((self.added_noise, self.label_clue), axis=3)
                 if self.resnet_gen:
                     self.fake_images = self.generator_resnet(self.noisy_images)
                     self.fake_images_sample = self.sampler_resnet(self.noisy_images)

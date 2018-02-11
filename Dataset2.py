@@ -65,7 +65,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 #     # Return the kept data.
 #     return train_kept_data, train_kept_label, test_kept_data, test_kept_label
 
-def output_sample(data, labels):
+def output_sample(data, labels, cgan_gen=False):
     """
     creates a specific batch for image sampling.
     """
@@ -73,14 +73,22 @@ def output_sample(data, labels):
         raise ValueError("output_sample() works with flattened datasets. N rows and D columns.")
     num_labels = labels.shape[1]
     res = [[] for _ in range(num_labels)]
+    res_lbl = [[] for _ in range(num_labels)]
     for lbl in range(num_labels):
         idx = np.where(labels[:, lbl] == 1)[0]
         if lbl % 2 == 0:
             res[lbl // 2 + 5] = data[idx[:10], :]
+            res_lbl[lbl // 2 + 5] = labels[idx[:10]]
         else:
             res[lbl // 2] = data[idx[:10], :]
+            res_lbl[lbl // 2] = labels[idx[:10]]
     res.extend(res)
-    return np.array(res).reshape(num_labels * 2 * num_labels, -1)
+    res_lbl.extend(res_lbl)
+    res_lbl = np.concatenate(res_lbl)
+    if cgan_gen:
+        return np.array(res).reshape(num_labels * 2 * num_labels, -1), res_lbl
+    else:
+        return np.array(res).reshape(num_labels * 2 * num_labels, -1)
 
 
 def odd_even_labels(labels, one_hot=True):

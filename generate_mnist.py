@@ -33,7 +33,17 @@ def train():
         loaded['train_data'], loaded['train_label'], \
         loaded['test_data'], loaded['test_label']
 
-    output_samples = output_sample(test_data, test_label)
+    # We create the label clues here.
+    if opt.cgan_gen is True:
+        label_clue = np.zeros((
+            train_label.shape[1], opt.img_dim, opt.img_dim, train_label.shape[1]))
+        for lbl in range(train_label.shape[1]):
+            label_clue[lbl, :, :, lbl] = 1
+
+    if opt.cgan_gen:
+        output_samples, output_labels = output_sample(test_data, test_label, True)
+    else:
+        output_samples = output_sample(test_data, test_label)
     print output_samples.shape
 
     print 'Shape of data:'
@@ -104,6 +114,9 @@ def train():
                 model.evil_labels: evil_labels
             }
 
+            if opt.cgan_gen:
+                feed[model.label_clue] = label_clue[evil_labels.argmax(axis=1)]
+
             # Training G once.
             summary_str, G_loss, _ = sess.run(
                 [model.total_loss_merge_sum, model.g_loss, model.G_train_op], feed)
@@ -170,6 +183,10 @@ def train():
                         model.evil_labels: test_evil_labels,
                         model.good_labels: test_good_labels
                     }
+
+                    if opt.cgan_gen:
+                        feed[model.label_clue] = label_clue[test_evil_labels.argmax(axis=1)]
+
                     evil_accuracy, good_accuracy = sess.run(
                         [model.evil_accuracy, model.good_accuracy], feed)
                     # We divide the total accuracy by the number of test iterations.
@@ -228,7 +245,8 @@ def train():
                 if opt.cgan_gen:
                     fake_samples = sess.run(
                         model.fake_images_sample,
-                        {model.source: output_samples})
+                        {model.source: output_samples,
+                         model.label_clue: label_clue[output_labels.argmax(axis=1)]})
                 else:
                     fake_samples, fake_noise = sess.run(
                         [model.fake_images_sample, model.sample_noise],
@@ -288,6 +306,8 @@ def train():
         # We can transform the training and test data given in the beginning here.
         # This is only half the actual data.
         if opt.save_data:
+            if opt.cgan_gen:
+                raise NotImplementedError('Saving data for CGAN_GEN is not yet implemented.')
             print 'Making new training data ...',
             loader = Dataset2(train_data, train_label)
             iter_num = (loader._num_examples - batch_size) / batch_size
