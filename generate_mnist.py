@@ -225,9 +225,14 @@ def train():
                 acc_file.write('%d, %.4f, %.4f\n' % (
                     iteration, good_accuracy, evil_accuracy))
 
-                fake_samples, fake_noise = sess.run(
-                    [model.fake_images_sample, model.sample_noise],
-                    {model.source: output_samples})
+                if opt.cgan_gen:
+                    fake_samples = sess.run(
+                        model.fake_images_sample,
+                        {model.source: output_samples})
+                else:
+                    fake_samples, fake_noise = sess.run(
+                        [model.fake_images_sample, model.sample_noise],
+                        {model.source: output_samples})
                 # Resizing the samples to save them later on.
                 # fake_samples = np.reshape(np.array(fake_samples), [100, -1])
                 # original_samples = np.reshape(np.array(original_samples), [100, -1])
@@ -249,9 +254,16 @@ def train():
                 # order = np.concatenate((odds, evens))
                 fakes = merge(fake_samples[:100, :], [10, 10])
                 original = merge(output_samples[:100].reshape(-1, 28, 28, 1), [10, 10])
-                noise = merge(fake_noise[:100], [10, 10])
-                scipy.misc.imsave('snapshot_%d.png' % iteration,
-                                  np.concatenate([fakes, noise, original], axis=1))
+
+                if opt.cgan_gen:
+                    scipy.misc.imsave(
+                        'snapshot_%d.png' % iteration,
+                        np.concatenate([fakes, original], axis=1))
+                else:
+                    noise = merge(fake_noise[:100], [10, 10])
+                    scipy.misc.imsave(
+                        'snapshot_%d.png' % iteration,
+                        np.concatenate([fakes, noise, original], axis=1))
                 # save_images(fake_samples[order], [10, 10], 'best_images.png')
                 # save_images(fake_noise[order], [10, 10], 'best_noise.png')
                 # save_images(original_samples[order], [10, 10], 'best_original.png')

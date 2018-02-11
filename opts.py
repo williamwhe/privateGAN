@@ -40,6 +40,9 @@ def parse_opt():
     parser.add_argument('--ensemble', type=int, default=0, help="ensemble or not")
     parser.add_argument('--cgan_flag', type=int, default=1, help="cgan_flag")
     parser.add_argument('--patch_flag', type=int, default=1, help="patch_flag")
+    parser.add_argument('--cgan_gen', dest='cgan_gen', action='store_true',
+                        help='Using a CGAN generator creating images from scratch.')
+    parser.set_defaults(cgan_gen=False)
 
     parser.add_argument('--hinge_flag', type=int, default=0, help="hinge_flag")
 

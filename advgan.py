@@ -17,7 +17,7 @@ class advGAN():
     opts: advGAN parameters. See opts.py.
     sess: TensorFlow Session() object.
     """
-    def __init__(self, good_model, evil_model, opts, sess, mnist=True, cgan_gen=False):
+    def __init__(self, good_model, evil_model, opts, sess, mnist=True):
         """
         :param D: the discriminator object
         :param params: the dict used to train the generative neural networks
@@ -28,6 +28,7 @@ class advGAN():
         self.sess = sess
         self.mnist = mnist  # Boolean showing whether or not this is for MNIST.
         self.resnet_gen = opts.resnet_gen
+        self.cgan_gen = opts.cgan_gen
         # self.model_restore = restore
 
         ####  test flags  ####
@@ -287,20 +288,25 @@ class advGAN():
             self._create_placeholder()
 
             # Creating a Generator instance that creates fake images.
-            if self.resnet_gen:
-                print 'ResNet Generators.'
-                self.fake_images, self.g_x = self.generator_resnet(self.images)
-            else:
-                print 'Regular Generators.'
-                self.fake_images, self.g_x = self.generator(self.images)
-
-            if self.resnet_gen:
-                print 'ResNet Generators.'
-                self.fake_images_sample, self.sample_noise = self.sampler_resnet(self.images)
-            else:
-                # We use regular samplers.
-                print 'Regular Generators.'
-                self.fake_images_sample, self.sample_noise = self.sampler(self.images)
+            if self.cgan_gen is False:
+                if self.resnet_gen:
+                    print 'ResNet Generators.'
+                    self.fake_images, self.g_x = self.generator_resnet(self.images)
+                    self.fake_images_sample, self.sample_noise = self.sampler_resnet(self.images)
+                else:
+                    print 'Regular Generators.'
+                    self.fake_images, self.g_x = self.generator(self.images)
+                    self.fake_images_sample, self.sample_noise = self.sampler(self.images)
+            else:  # self.cgan_gen is True.
+                print 'Building images from scratch.'
+                self.added_noise = tf.random_normal(self.images.shape, stddev=0.2)
+                self.noisy_images = tf.concat((self.images, self.added_noise), axis=3)
+                if self.resnet_gen:
+                    self.fake_images = self.generator_resnet(self.noisy_images)
+                    self.fake_images_sample = self.sampler_resnet(self.noisy_images)
+                else:
+                    self.fake_images = self.generator(self.noisy_images)
+                    self.fake_images_sample = self.sampler(self.noisy_images)
 
             # *** FOR LFW ***
             # We scale the fake images and the noise from (-1, 1) to (0, 1) for output.
@@ -678,9 +684,14 @@ class advGAN():
                     with_w=True)
                 last_layer = self.d5
 
-            return tf.clip_by_value(
-                self.opts.c * tf.nn.tanh(last_layer) + image, -1.0, 1.0), \
-                tf.nn.tanh(last_layer)
+            if self.cgan_gen:
+                # We return images created from scratch.
+                return tf.clip_by_value(
+                    self.opts.c * tf.nn.tanh(last_layer), -1.0, 1.0)
+            else:
+                return tf.clip_by_value(
+                    self.opts.c * tf.nn.tanh(last_layer) + image, -1.0, 1.0), \
+                    tf.nn.tanh(last_layer)
 
     def sampler(self, image, y=None):
         """
@@ -832,9 +843,14 @@ class advGAN():
                     with_w=True)
                 last_layer = self.d5
 
-            return tf.clip_by_value(
-                self.opts.c * tf.nn.tanh(last_layer) + image, -1.0, 1.0), \
-                tf.nn.tanh(last_layer)
+            if self.cgan_gen:
+                # We return images created from scratch.
+                return tf.clip_by_value(
+                    self.opts.c * tf.nn.tanh(last_layer), -1.0, 1.0)
+            else:
+                return tf.clip_by_value(
+                    self.opts.c * tf.nn.tanh(last_layer) + image, -1.0, 1.0), \
+                    tf.nn.tanh(last_layer)
 
     def generator_resnet(self, image, y=None):
         print "\tUsing ResNet Generators."
