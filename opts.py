@@ -10,6 +10,10 @@ def parse_opt():
     """
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('--save_data', dest='save_data', action='store_true',
+                        help='Save the resulting data.')
+    parser.set_defaults(save_data=False)
+
     parser.add_argument('--output_path', type=str, default='MNIST_data/perturbed',
                         help='Path for the output perturbed data.')
 
