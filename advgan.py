@@ -298,6 +298,7 @@ class advGAN():
                     print 'Regular Generators.'
                     self.fake_images, self.g_x = self.generator(self.images)
                     self.fake_images_sample, self.sample_noise = self.sampler(self.images)
+                self.fake_noise_output = (self.sample_noise + 1) / 2.0
             else:  # self.cgan_gen is True.
                 print 'Building images from scratch.'
                 self.added_noise = tf.random_normal(
@@ -313,7 +314,6 @@ class advGAN():
             # *** FOR LFW ***
             # We scale the fake images and the noise from (-1, 1) to (0, 1) for output.
             self.fake_images_output = (self.fake_images_sample + 1) / 2.0
-            self.fake_noise_output = (self.sample_noise + 1) / 2.0
 
             # self.fake_images_sample_flatten = \
             #     tf.reshape(self.fake_images_sample, [-1, 28 * 28])
