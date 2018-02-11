@@ -300,9 +300,6 @@ class advGAN():
                     self.fake_images_sample, self.sample_noise = self.sampler(self.images)
             else:  # self.cgan_gen is True.
                 print 'Building images from scratch.'
-        # self.img_dim = self.opts.img_dim
-        # self.output_c_dim = self.opts.output_c_dim
-        # self.batch_size = self.opts.batch_size
                 self.added_noise = tf.random_normal(
                     [self.batch_size, self.img_dim, self.img_dim, self.output_c_dim], stddev=0.2)
                 self.noisy_images = tf.concat((self.images, self.added_noise), axis=3)
