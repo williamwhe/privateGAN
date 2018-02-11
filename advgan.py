@@ -179,7 +179,7 @@ class advGAN():
         self.metric_sum = tf.summary.merge(
             [self.acc_sum, self.adv_acc_sum, self.magnitude_sum, self.dis_sum])
 
-    def _GAN_model(self, images, fake_images, real_images, g_x):
+    def _GAN_model(self, images, fake_images, real_images):
         cgan_flag = self.opts.cgan_flag
         patch_flag = self.opts.patch_flag
         hinge_flag = self.opts.hinge_flag
@@ -325,7 +325,7 @@ class advGAN():
 
             # Creating a GAN model.
             G_loss, D_loss, L1_norm, L2_norm, hinge_loss = self._GAN_model(
-                self.images, self.fake_images, self.real_images, self.g_x)
+                self.images, self.fake_images, self.real_images)
             # G loss and D loss.
             self.l1_loss = L1_norm
             self.l2_loss = L2_norm
