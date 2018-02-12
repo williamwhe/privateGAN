@@ -666,7 +666,8 @@ class advGAN():
                     name='g_d1',
                     with_w=True)
                 d1 = tf.nn.dropout(self.g_bn_d1(self.d1), 0.5)
-                d1 = tf.concat([d1, e4], 3)
+                if self.cgan_gen is False:
+                    d1 = tf.concat([d1, e4], 3)
                 # d1 is ( 2 x 2 x self.gf_dim*8*2)
 
                 self.d2, self.d2_w, self.d2_b = deconv2d(
@@ -675,7 +676,8 @@ class advGAN():
                     name='g_d2',
                     with_w=True)
                 d2 = tf.nn.dropout(self.g_bn_d2(self.d2), 0.5)
-                d2 = tf.concat([d2, e3], 3)
+                if self.cgan_gen is False:
+                    d2 = tf.concat([d2, e3], 3)
                 # d2 is (4 x 4 x self.gf_dim*4*2)
 
                 self.d3, self.d3_w, self.d3_b = deconv2d(
@@ -684,7 +686,8 @@ class advGAN():
                     name='g_d3',
                     with_w=True)
                 d3 = tf.nn.dropout(self.g_bn_d3(self.d3), 0.5)
-                d3 = tf.concat([d3, e2], 3)
+                if self.cgan_gen is False:
+                    d3 = tf.concat([d3, e2], 3)
                 # d3 is (8 x 8 x self.gf_dim*2*2)
 
                 self.d4, self.d4_w, self.d4_b = deconv2d(
@@ -693,7 +696,8 @@ class advGAN():
                     name='g_d4',
                     with_w=True)
                 d4 = self.g_bn_d4(self.d4)
-                d4 = tf.concat([d4, e1], 3)
+                if self.cgan_gen is False:
+                    d4 = tf.concat([d4, e1], 3)
                 # d4 is (16 x 16 x self.gf_dim*8*2)
 
                 self.d5, self.d5_w, self.d5_b = deconv2d(
@@ -828,7 +832,8 @@ class advGAN():
                     name='g_d1',
                     with_w=True)
                 d1 = tf.nn.dropout(self.g_bn_d1(self.d1), 0.5)
-                d1 = tf.concat([d1, e4], 3)
+                if self.cgan_gen is False:
+                    d1 = tf.concat([d1, e4], 3)
                 # d1 is ( 2 x 2 x self.gf_dim*8*2)
 
                 self.d2, self.d2_w, self.d2_b = deconv2d(
@@ -837,7 +842,8 @@ class advGAN():
                     name='g_d2',
                     with_w=True)
                 d2 = tf.nn.dropout(self.g_bn_d2(self.d2), 0.5)
-                d2 = tf.concat([d2, e3], 3)
+                if self.cgan_gen is False:
+                    d2 = tf.concat([d2, e3], 3)
                 # d2 is (4 x 4 x self.gf_dim*4*2)
 
                 self.d3, self.d3_w, self.d3_b = deconv2d(
@@ -846,7 +852,8 @@ class advGAN():
                     name='g_d3',
                     with_w=True)
                 d3 = tf.nn.dropout(self.g_bn_d3(self.d3), 0.5)
-                d3 = tf.concat([d3, e2], 3)
+                if self.cgan_gen is False:
+                    d3 = tf.concat([d3, e2], 3)
                 # d3 is (8 x 8 x self.gf_dim*2*2)
 
                 self.d4, self.d4_w, self.d4_b = deconv2d(
@@ -855,7 +862,8 @@ class advGAN():
                     name='g_d4',
                     with_w=True)
                 d4 = self.g_bn_d4(self.d4)
-                d4 = tf.concat([d4, e1], 3)
+                if self.cgan_gen is False:
+                    d4 = tf.concat([d4, e1], 3)
                 # d4 is (16 x 16 x self.gf_dim*8*2)
 
                 self.d5, self.d5_w, self.d5_b = deconv2d(
