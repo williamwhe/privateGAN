@@ -270,12 +270,13 @@ def train():
                 # evens = np.where((all_idx / 10) % 2 == 0)[0]
                 # order = np.concatenate((odds, evens))
                 fakes = merge(fake_samples[:100, :], [10, 10])
+                separator = np.ones((280, 5))
                 original = merge(output_samples[:100].reshape(-1, 28, 28, 1), [10, 10])
 
                 if opt.cgan_gen:
                     scipy.misc.imsave(
                         'snapshot_%d.png' % iteration,
-                        np.concatenate([fakes, original], axis=1))
+                        np.concatenate([fakes, separator, original], axis=1))
                 else:
                     noise = merge(fake_noise[:100], [10, 10])
                     scipy.misc.imsave(
