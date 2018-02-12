@@ -118,9 +118,9 @@ def train():
             #     feed[model.label_clue] = label_clue[evil_labels.argmax(axis=1)]
 
             # Training G once.
-            summary_str, G_loss, _ = sess.run(
-                [model.total_loss_merge_sum, model.g_loss, model.G_train_op], feed)
-            writer.add_summary(summary_str, iteration)
+            # summary_str, G_loss, _ = sess.run(
+            #     [model.total_loss_merge_sum, model.g_loss, model.G_train_op], feed)
+            # writer.add_summary(summary_str, iteration)
 
             # Training G twice.
             summary_str, G_loss, gan_loss, hinge_loss, l1_loss, l2_loss, \
@@ -138,14 +138,6 @@ def train():
                     model.G_train_op], feed)
             writer.add_summary(summary_str, iteration)
 
-            # Training D.
-            summary_str, D_loss, _ = sess.run(
-                [model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
-            writer.add_summary(summary_str, iteration)
-            # Training D.
-            summary_str, D_loss, _ = sess.run(
-                [model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
-            writer.add_summary(summary_str, iteration)
             # Training D.
             summary_str, D_loss, _ = sess.run(
                 [model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
