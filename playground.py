@@ -47,7 +47,7 @@ def main():
     with tf.Session() as sess:
         model_store = opt.model_restore
         print 'MNIST model is stored at %s' % model_store
-        whitebox_model = MNISTModel(model_store, sess)
+        whitebox_model = MNISTModel(model_store)
         #initial ADVGAN
         model = advGAN(whitebox_model, model_store, opt, sess )
 
