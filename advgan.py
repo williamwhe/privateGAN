@@ -578,7 +578,7 @@ class advGAN():
             # image is (32 x 32 x input_c_dim)
             if self.cgan_gen:
                 cat = tf.concat((image, y), axis=3)
-                e1 = conv2d(cat, self.gf_dim * 8, name='g_e1_conv')
+                e5 = conv2d(cat, self.gf_dim * 8, name='g_e1_conv')
             else:
                 e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
                 # e1 is (16 x 16 x self.gf_dim) 14x14
@@ -740,7 +740,7 @@ class advGAN():
             
             if self.cgan_gen:
                 cat = tf.concat((image, y), axis=3)
-                e1 = conv2d(cat, self.gf_dim * 8, name='g_e1_conv')
+                e5 = conv2d(cat, self.gf_dim * 8, name='g_e1_conv')
             else:
                 e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
                 # e1 is (16 x 16 x self.gf_dim) 14x14
