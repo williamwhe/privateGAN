@@ -114,8 +114,8 @@ def train():
                 model.evil_labels: evil_labels
             }
 
-            if opt.cgan_gen:
-                feed[model.label_clue] = label_clue[evil_labels.argmax(axis=1)]
+            # if opt.cgan_gen:
+            #     feed[model.label_clue] = label_clue[evil_labels.argmax(axis=1)]
 
             # Training G once.
             summary_str, G_loss, _ = sess.run(
@@ -184,8 +184,8 @@ def train():
                         model.good_labels: test_good_labels
                     }
 
-                    if opt.cgan_gen:
-                        feed[model.label_clue] = label_clue[test_evil_labels.argmax(axis=1)]
+                    # if opt.cgan_gen:
+                    #     feed[model.label_clue] = label_clue[test_evil_labels.argmax(axis=1)]
 
                     evil_accuracy, good_accuracy = sess.run(
                         [model.evil_accuracy, model.good_accuracy], feed)
@@ -245,8 +245,7 @@ def train():
                 if opt.cgan_gen:
                     fake_samples = sess.run(
                         model.fake_images_sample,
-                        {model.source: output_samples,
-                         model.label_clue: label_clue[output_labels.argmax(axis=1)]})
+                        {model.evil_labels: output_labels})
                 else:
                     fake_samples, fake_noise = sess.run(
                         [model.fake_images_sample, model.sample_noise],

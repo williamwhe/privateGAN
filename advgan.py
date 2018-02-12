@@ -155,10 +155,10 @@ class advGAN():
             # Scale (0, 1) to (-1, 1)
             self.real_images = (self.target) * 2.0 - 1
 
-        if self.cgan_gen:
-            # This is added to the random noise in CGAN_GEN mode.
-            self.label_clue = tf.placeholder(
-                tf.float32, [None, img_dim, img_dim, evil_label_num])
+        # if self.cgan_gen:
+        #     # This is added to the random noise in CGAN_GEN mode.
+        #     self.label_clue = tf.placeholder(
+        #         tf.float32, [None, img_dim, img_dim, evil_label_num])
 
         # labels for the evil classifier.
         self.evil_labels = tf.placeholder(
@@ -305,15 +305,24 @@ class advGAN():
                 self.fake_noise_output = (self.sample_noise + 1) / 2.0
             else:  # self.cgan_gen is True.
                 print 'Building images from scratch.'
+                # self.added_noise = tf.random_normal(
+                #     [self.batch_size, self.img_dim, self.img_dim, self.output_c_dim], stddev=0.2)
                 self.added_noise = tf.random_normal(
-                    [self.batch_size, self.img_dim, self.img_dim, self.output_c_dim], stddev=0.2)
-                self.noisy_images = tf.concat((self.added_noise, self.label_clue), axis=3)
+                    [self.batch_size, 1, 1, self.opts.evil_label_num], stddev=0.2)
+                self.label_clue = tf.reshape(
+                    self.evil_labels,
+                    [self.batch_size, 1, 1, self.opts.evil_label_num])
+                # self.noisy_images = tf.concat((self.added_noise, self.label_clue), axis=3)
                 if self.resnet_gen:
-                    self.fake_images = self.generator_resnet(self.noisy_images)
-                    self.fake_images_sample = self.sampler_resnet(self.noisy_images)
+                    self.fake_images = self.generator_resnet(
+                        self.added_noise, y=self.label_clue)
+                    self.fake_images_sample = self.sampler_resnet(
+                        self.added_noise, y=self.label_clue)
                 else:
-                    self.fake_images = self.generator(self.noisy_images)
-                    self.fake_images_sample = self.sampler(self.noisy_images)
+                    self.fake_images = self.generator(
+                        self.added_noise, y=self.label_clue)
+                    self.fake_images_sample = self.sampler(
+                        self.added_noise, y=self.label_clue)
 
             # *** FOR LFW ***
             # We scale the fake images and the noise from (-1, 1) to (0, 1) for output.
@@ -567,16 +576,20 @@ class advGAN():
             # s2, s4, s8, s16 = int(s/2), int(s/4), int(s/8), int(s/16)
             # 16, 8 ,4, 2,1 s:32
             # image is (32 x 32 x input_c_dim)
-            e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
-            # e1 is (16 x 16 x self.gf_dim) 14x14
-            e2 = self.g_bn_e2(conv2d(lrelu(e1), self.gf_dim * 2, name='g_e2_conv'))
-            # e2 is (8 x 8 x self.gf_dim*2) 7x 7
-            e3 = self.g_bn_e3(conv2d(lrelu(e2), self.gf_dim * 4, name='g_e3_conv'))
-            # # e3 is (4 x 4 x self.gf_dim*4)
-            e4 = self.g_bn_e4(conv2d(lrelu(e3), self.gf_dim * 8, name='g_e4_conv'))
-            # # e4 is (2 x 2 x self.gf_dim*8)
-            e5 = self.g_bn_e5(conv2d(lrelu(e4), self.gf_dim * 8, name='g_e5_conv'))
-            # # e5 is (1 x 1 x self.gf_dim*8)
+            if self.cgan_gen:
+                cat = tf.concat((image, y), axis=3)
+                e1 = conv2d(cat, self.gf_dim * 8, name='g_e1_conv')
+            else:
+                e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
+                # e1 is (16 x 16 x self.gf_dim) 14x14
+                e2 = self.g_bn_e2(conv2d(lrelu(e1), self.gf_dim * 2, name='g_e2_conv'))
+                # e2 is (8 x 8 x self.gf_dim*2) 7x 7
+                e3 = self.g_bn_e3(conv2d(lrelu(e2), self.gf_dim * 4, name='g_e3_conv'))
+                # # e3 is (4 x 4 x self.gf_dim*4)
+                e4 = self.g_bn_e4(conv2d(lrelu(e3), self.gf_dim * 8, name='g_e4_conv'))
+                # # e4 is (2 x 2 x self.gf_dim*8)
+                e5 = self.g_bn_e5(conv2d(lrelu(e4), self.gf_dim * 8, name='g_e5_conv'))
+                # # e5 is (1 x 1 x self.gf_dim*8)
 
             if self.mnist is False:
                 e6 = self.g_bn_e6(conv2d(lrelu(e5), self.gf_dim*8, name='g_e6_conv'))
@@ -724,18 +737,21 @@ class advGAN():
                 print s2, s4, s8, s16, s32, s64, s128
             else:
                 raise ValueError('Image Dimension not one of (28/MNIST), (160/LFW) or (224/LFW)')
-            #16, 8 ,4, 2,1 s:32
-            # image is (32 x 32 x input_c_dim)
-            e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
-            # e1 is (16 x 16 x self.gf_dim) 14x14
-            e2 = self.g_bn_e2(conv2d(lrelu(e1), self.gf_dim*2, name='g_e2_conv'))
-            # e2 is (8 x 8 x self.gf_dim*2) 7x 7
-            e3 = self.g_bn_e3(conv2d(lrelu(e2), self.gf_dim*4, name='g_e3_conv'))
-            # # e3 is (4 x 4 x self.gf_dim*4)
-            e4 = self.g_bn_e4(conv2d(lrelu(e3), self.gf_dim*8, name='g_e4_conv'))
-            # # e4 is (2 x 2 x self.gf_dim*8)
-            e5 = self.g_bn_e5(conv2d(lrelu(e4), self.gf_dim*8, name='g_e5_conv'))
-            # # e5 is (1 x 1 x self.gf_dim*8)
+            
+            if self.cgan_gen:
+                cat = tf.concat((image, y), axis=3)
+                e1 = conv2d(cat, self.gf_dim * 8, name='g_e1_conv')
+            else:
+                e1 = conv2d(image, self.gf_dim, name='g_e1_conv')
+                # e1 is (16 x 16 x self.gf_dim) 14x14
+                e2 = self.g_bn_e2(conv2d(lrelu(e1), self.gf_dim * 2, name='g_e2_conv'))
+                # e2 is (8 x 8 x self.gf_dim*2) 7x 7
+                e3 = self.g_bn_e3(conv2d(lrelu(e2), self.gf_dim * 4, name='g_e3_conv'))
+                # # e3 is (4 x 4 x self.gf_dim*4)
+                e4 = self.g_bn_e4(conv2d(lrelu(e3), self.gf_dim * 8, name='g_e4_conv'))
+                # # e4 is (2 x 2 x self.gf_dim*8)
+                e5 = self.g_bn_e5(conv2d(lrelu(e4), self.gf_dim * 8, name='g_e5_conv'))
+                # # e5 is (1 x 1 x self.gf_dim*8)
 
             if self.mnist is False:
                 e6 = self.g_bn_e6(conv2d(lrelu(e5), self.gf_dim*8, name='g_e6_conv'))
