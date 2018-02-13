@@ -142,6 +142,9 @@ def train():
             summary_str, D_loss, _ = sess.run(
                 [model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
             writer.add_summary(summary_str, iteration)
+            summary_str, D_loss, _ = sess.run(
+                [model.total_loss_merge_sum, model.d_loss, model.D_pre_train_op], feed)
+            writer.add_summary(summary_str, iteration)
 
             if iteration % opt.losses_log_every == 0:
                 print "iteration: ", iteration
