@@ -205,8 +205,6 @@ def train():
                 print 'Evil confusion matrix:'
                 print total_evil_confusion
 
-                exit()
-
             # if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
                 # checkpoint_path = os.path.join(opt.checkpoint_path, 'checkpoint.ckpt')
                 # print 'Saving the model in "%s"' % checkpoint_path
