@@ -171,7 +171,7 @@ def train():
                     if opt.cgan_gen:
                         cur_data = sess.run(
                             model.fake_images_sample,
-                            {model.source: test_label[head:tail, :]})
+                            {model.evil_labels: test_label[head:tail, :]})
                     else:
                         cur_data = sess.run(
                             model.fake_images_sample,
