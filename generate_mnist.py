@@ -12,6 +12,7 @@ from Dataset2 import Dataset2, odd_even_labels, output_sample
 # from sklearn import model_selection
 from setup_mnist import MNIST, MNISTModel, MNISTModel2, MNISTModel3, OddEvenMNIST
 from setup_cifar import CIFARModel, CIFARModel2, CIFARModel3
+from sklearn.metrics import accuracy_score, confusion_matrix
 
 tag_num = 0
 
@@ -154,93 +155,142 @@ def train():
                 loss_file.write('%d, %.4f, %.4f\n' % (iteration, good_fn_loss, evil_fn_loss))
                 gan_file.write('%d, %.4f, %.4f\n' % (iteration, G_loss, D_loss))
 
+                new_pred_data = []
+                head = 0
+                last_batch = False
+                while head < test_data.shape[0]:
+                    if head + batch_size <= test_data.shape[0]:
+                        tail = head + batch_size
+                    else:
+                        tail = test_data.shape[0]
+                        head = test_data.shape[0] - batch_size
+                        last_batch = True
+                    if opt.cgan_gen:
+                        cur_data = sess.run(
+                            model.fake_images_sample,
+                            {model.source: test_label[head:tail, :]})
+                    else:
+                        cur_data = sess.run(
+                            model.fake_images_sample,
+                            {model.source: test_data[head:tail, :]}
+                        )
+
+                    if last_batch:
+                        new_pred_data.append(
+                            cur_data[-(test_data.shape[0] % batch_size):, :])
+                    else:
+                        new_pred_data.append(cur_data)
+                    head += batch_size
+                new_pred_data = np.concatenate(new_pred_data)
+
+                good_pred = np.argmax(model.good_model.model.predict(new_pred_data), axis=1)
+                evil_pred = np.argmax(model.evil_model.model.predict(new_pred_data), axis=1)
+                evil_true = np.argmax(test_label, axis=1)
+                good_true = np.argmax(odd_even_labels(test_label), axis=1)
+
+                good_accuracy = accuracy_score(good_true, good_pred)
+                evil_accuracy = accuracy_score(evil_true, evil_pred)
+                total_good_confusion = confusion_matrix(good_true, good_pred)
+                total_evil_confusion = confusion_matrix(evil_true, evil_pred,
+                                                        labels=range(opt.evil_label_num))
+
+                print '\tGood Accuracy: %.4f, Evil Accuracy: %.4f' % (
+                    good_accuracy, evil_accuracy)
+                print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
+                print 'Good confusion matrix:'
+                print total_good_confusion
+                print 'Evil confusion matrix:'
+                print total_evil_confusion
+
+                exit()
+
             # if iteration != 0 and iteration % opt.save_checkpoint_every == 0:
                 # checkpoint_path = os.path.join(opt.checkpoint_path, 'checkpoint.ckpt')
                 # print 'Saving the model in "%s"' % checkpoint_path
 
                 # model.saver.save(sess, checkpoint_path, global_step=iteration)
-                test_loader = Dataset2(test_data, test_label)
+                # test_loader = Dataset2(test_data, test_label)
 
-                test_num = test_loader._num_examples
-                test_iter_num = (test_num - batch_size) / batch_size
+                # test_num = test_loader._num_examples
+                # test_iter_num = (test_num - batch_size) / batch_size
 
-                total_evil_accuracy = 0.0
-                total_good_accuracy = 0.0
+                # total_evil_accuracy = 0.0
+                # total_good_accuracy = 0.0
 
-                fake_samples = [[] for _ in range(test_loader._num_labels)]
-                fake_noise = [[] for _ in range(test_loader._num_labels)]
-                original_samples = [[] for _ in range(test_loader._num_labels)]
+                # fake_samples = [[] for _ in range(test_loader._num_labels)]
+                # fake_noise = [[] for _ in range(test_loader._num_labels)]
+                # original_samples = [[] for _ in range(test_loader._num_labels)]
 
-                for _ in range(test_iter_num):
+                # for _ in range(test_iter_num):
 
-                    # Loading the next batch of test images
-                    test_input_data, test_evil_labels, _ = \
-                        test_loader.next_batch(batch_size)
-                    evil_categorical_labels = np.argmax(test_evil_labels, axis=1)
-                    test_good_labels = odd_even_labels(test_evil_labels)
-                    feed = {
-                        model.source: test_input_data,
-                        model.evil_labels: test_evil_labels,
-                        model.good_labels: test_good_labels
-                    }
+                #     # Loading the next batch of test images
+                #     test_input_data, test_evil_labels, _ = \
+                #         test_loader.next_batch(batch_size)
+                #     evil_categorical_labels = np.argmax(test_evil_labels, axis=1)
+                #     test_good_labels = odd_even_labels(test_evil_labels)
+                #     feed = {
+                #         model.source: test_input_data,
+                #         model.evil_labels: test_evil_labels,
+                #         model.good_labels: test_good_labels
+                #     }
 
-                    # if opt.cgan_gen:
-                    #     feed[model.label_clue] = label_clue[test_evil_labels.argmax(axis=1)]
+                #     # if opt.cgan_gen:
+                #     #     feed[model.label_clue] = label_clue[test_evil_labels.argmax(axis=1)]
 
-                    evil_accuracy, good_accuracy = sess.run(
-                        [model.evil_accuracy, model.good_accuracy], feed)
-                    # We divide the total accuracy by the number of test iterations.
-                    total_good_accuracy += good_accuracy
-                    total_evil_accuracy += evil_accuracy
-                    # print 'Evil accuracy: %.6f\tGood accuracy: %.6f' % (
-                    #     evil_accuracy, good_accuracy)
-                    # test_accuracy, test_adv_accuracy = sess.run(
-                    #     [model.accuracy, model.adv_accuracy], feed)
-                    # test_acc += test_accuracy
-                    # test_adv_acc += test_adv_accuracy
+                #     evil_accuracy, good_accuracy = sess.run(
+                #         [model.evil_accuracy, model.good_accuracy], feed)
+                #     # We divide the total accuracy by the number of test iterations.
+                #     total_good_accuracy += good_accuracy
+                #     total_evil_accuracy += evil_accuracy
+                #     # print 'Evil accuracy: %.6f\tGood accuracy: %.6f' % (
+                #     #     evil_accuracy, good_accuracy)
+                #     # test_accuracy, test_adv_accuracy = sess.run(
+                #     #     [model.accuracy, model.adv_accuracy], feed)
+                #     # test_acc += test_accuracy
+                #     # test_adv_acc += test_adv_accuracy
 
-                    # fake_images, g_x = sess.run(
-                    #     [model.fake_images_sample, model.sample_noise],
-                    #     {model.source: test_input_data})
+                #     # fake_images, g_x = sess.run(
+                #     #     [model.fake_images_sample, model.sample_noise],
+                #     #     {model.source: test_input_data})
 
-                    # for lbl in range(test_loader._num_labels):
-                    #     if len(fake_samples[lbl]) < 10:
-                    #         idx = np.where(evil_categorical_labels == lbl)[0]
-                    #         if idx.shape[0] >= 10:
-                    #             fake_samples[lbl] = fake_images[idx[:10]]
-                    #             fake_noise[lbl] = g_x[idx[:10]]
-                    #             original_samples[lbl] = test_input_data[idx[:10]]
+                #     # for lbl in range(test_loader._num_labels):
+                #     #     if len(fake_samples[lbl]) < 10:
+                #     #         idx = np.where(evil_categorical_labels == lbl)[0]
+                #     #         if idx.shape[0] >= 10:
+                #     #             fake_samples[lbl] = fake_images[idx[:10]]
+                #     #             fake_noise[lbl] = g_x[idx[:10]]
+                #     #             original_samples[lbl] = test_input_data[idx[:10]]
 
 
-                    # for lbl, sample, noise in zip(test_evil_labels, fake_images, fake_noise):
-                    #     if len(fake_samples[lbl]) > 10:
-                    #         continue
-                    #     fake_samples[lbl].append(sample)
-                    #     fake_noise[lbl].append(noise)
+                #     # for lbl, sample, noise in zip(test_evil_labels, fake_images, fake_noise):
+                #     #     if len(fake_samples[lbl]) > 10:
+                #     #         continue
+                #     #     fake_samples[lbl].append(sample)
+                #     #     fake_noise[lbl].append(noise)
 
-                    # pdb.set_trace()
-                    # print fake_images.shape
+                #     # pdb.set_trace()
+                #     # print fake_images.shape
 
-                    # Finding those predicted labels that are equal to the target label
-                    # idxs = np.where(out_predict_labels == target_label)[0]
-                    # save_images(samples[:100], [10, 10], 'CIFAR10/result2/test_' + str(source_idx) + str(target_idx)+  '_.png')
-                    # pdb.set_trace()
-                    # show_samples.append(samples)
-                    # input_samples.append(s_imgs)
-                    # save_samples.append(samples)
-                    # if opt.is_advGAN:
-                    #     save_samples.append(samples[idxs])
-                    # else:
-                        # We add all samples.
-                # show_samples = np.concatenate(show_samples, axis=0)
-                # save_samples = np.concatenate(save_samples, axis=0)
-                good_accuracy = total_good_accuracy / float(test_iter_num)
-                evil_accuracy = total_evil_accuracy / float(test_iter_num)
-                print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
-                print '\tGood accuracy %f, Evil accuracy %f' % (
-                    good_accuracy, evil_accuracy)
-                acc_file.write('%d, %.4f, %.4f\n' % (
-                    iteration, good_accuracy, evil_accuracy))
+                #     # Finding those predicted labels that are equal to the target label
+                #     # idxs = np.where(out_predict_labels == target_label)[0]
+                #     # save_images(samples[:100], [10, 10], 'CIFAR10/result2/test_' + str(source_idx) + str(target_idx)+  '_.png')
+                #     # pdb.set_trace()
+                #     # show_samples.append(samples)
+                #     # input_samples.append(s_imgs)
+                #     # save_samples.append(samples)
+                #     # if opt.is_advGAN:
+                #     #     save_samples.append(samples[idxs])
+                #     # else:
+                #         # We add all samples.
+                # # show_samples = np.concatenate(show_samples, axis=0)
+                # # save_samples = np.concatenate(save_samples, axis=0)
+                # good_accuracy = total_good_accuracy / float(test_iter_num)
+                # evil_accuracy = total_evil_accuracy / float(test_iter_num)
+                # print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
+                # print '\tGood accuracy %f, Evil accuracy %f' % (
+                #     good_accuracy, evil_accuracy)
+                # acc_file.write('%d, %.4f, %.4f\n' % (
+                #     iteration, good_accuracy, evil_accuracy))
 
                 if opt.cgan_gen:
                     fake_samples = sess.run(
@@ -270,7 +320,7 @@ def train():
                 # evens = np.where((all_idx / 10) % 2 == 0)[0]
                 # order = np.concatenate((odds, evens))
                 fakes = merge(fake_samples[:100, :], [10, 10])
-                separator = np.ones((280, 5))
+                separator = np.ones((280, 2))
                 original = merge(output_samples[:100].reshape(-1, 28, 28, 1), [10, 10])
 
                 if opt.cgan_gen:
