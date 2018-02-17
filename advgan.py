@@ -318,7 +318,7 @@ class advGAN():
                 # self.added_noise = tf.random_normal(
                 #     [self.batch_size, self.img_dim, self.img_dim, self.output_c_dim], stddev=0.2)
                 self.added_noise = tf.random_normal(
-                    [self.batch_size, 1, 1, self.opts.evil_label_num], stddev=0.2)
+                    [self.batch_size, 1, 1, self.opts.evil_label_num], stddev=0.01)
                 self.label_clue = tf.reshape(
                     self.evil_labels,
                     [self.batch_size, 1, 1, self.opts.evil_label_num])
