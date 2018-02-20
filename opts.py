@@ -49,7 +49,7 @@ def parse_opt():
     parser.set_defaults(cgan_gen=False)
 
     parser.add_argument('--hinge_flag', type=int, default=0, help="hinge_flag")
-    parser.add_argument('--d_train_num', type=int, default=5, help='Number of D training.')
+    parser.add_argument('--d_train_num', type=int, default=3, help='Number of D training.')
     parser.add_argument('--g_train_num', type=int, default=1, help='Number of G training.')
 
     parser.add_argument('--prefix', type=str, default="")
