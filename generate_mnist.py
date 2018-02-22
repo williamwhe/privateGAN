@@ -84,16 +84,16 @@ def train():
         min_adv_accuracy = 10e10
         max_accuracy_diff = -np.inf
 
-        summary_dir = "logs/MNIST/g_%d_ld_%d_gl_%d_L2_%.2f_dn_%d/" % (
+        summary_dir = "logs/MNIST/g_%d_ld_%d_gl_%d_L2_%.2f_dn_%d" % (
             opt.G_lambda, opt.ld, opt.good_loss_coeff,
             opt.L2_lambda, opt.d_train_num)
 
         duplicate_num = 0
-        while os.path.isdir(summary_dir + '_' + str(duplicate_num)):
+        while os.path.isdir(summary_dir + '_' + str(duplicate_num) + '/'):
             duplicate_num += 1
-        print 'Creating directory %s for logs.' % \
-            (summary_dir + '_' + str(duplicate_num))
-        os.mkdir(summary_dir + '_' + str(duplicate_num))
+        summary_dir += '_' + str(duplicate_num) + '/'
+        print 'Creating directory %s for logs.' % summary_dir
+        os.mkdir(summary_dir)
 
         writer = tf.summary.FileWriter(summary_dir, sess.graph)
         loader = Dataset2(train_data, train_label)
