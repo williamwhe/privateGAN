@@ -84,21 +84,20 @@ def train():
         min_adv_accuracy = 10e10
         max_accuracy_diff = -np.inf
 
-        summary_dir = "logs/MNIST/g_%d_ld_%d_gl_%d_L2_%.2f_lr_%.4f/" % (
+        summary_dir = "logs/MNIST/g_%d_ld_%d_gl_%d_L2_%.2f_dn_%d/" % (
             opt.G_lambda, opt.ld, opt.good_loss_coeff,
-            opt.L2_lambda, opt.learning_rate)
-        if os.path.isdir(summary_dir) is False:
-            print 'Creating directory %s for logs.' % summary_dir
-            os.mkdir(summary_dir)
+            opt.L2_lambda, opt.d_train_num)
+
+        duplicate_num = 0
+        while os.path.isdir(summary_dir + '_' + str(duplicate_num)):
+            duplicate_num += 1
+        print 'Creating directory %s for logs.' % \
+            (summary_dir + '_' + str(duplicate_num))
+        os.mkdir(summary_dir + '_' + str(duplicate_num))
+
         writer = tf.summary.FileWriter(summary_dir, sess.graph)
         loader = Dataset2(train_data, train_label)
         print 'Training data loaded.'
-
-        acc_file = open('acc.txt', 'w')
-        loss_file = open('loss.txt', 'w')
-        gan_file = open('gan.txt', 'w')
-
-        save_anything = False
 
         print 'Maximum iterations: %d' % opt.max_iteration
         while iteration < opt.max_iteration:
@@ -153,8 +152,6 @@ def train():
                 print '\t\tGAN total loss: %.4f' % gan_loss
                 print '\tGood: %.4f, Evil: %.4f' % (good_fn_loss, evil_fn_loss)
                 print '\tAdv: %.4f, Total: %.4f' % (adv_loss, total_loss)
-                loss_file.write('%d, %.4f, %.4f\n' % (iteration, good_fn_loss, evil_fn_loss))
-                gan_file.write('%d, %.4f, %.4f\n' % (iteration, G_loss, D_loss))
 
                 new_pred_data = []
                 head = 0
@@ -288,8 +285,6 @@ def train():
                 # print '\tAccuracy diff: %f' % (good_accuracy - evil_accuracy)
                 # print '\tGood accuracy %f, Evil accuracy %f' % (
                 #     good_accuracy, evil_accuracy)
-                # acc_file.write('%d, %.4f, %.4f\n' % (
-                #     iteration, good_accuracy, evil_accuracy))
 
                 if opt.cgan_gen:
                     fake_samples = sess.run(
@@ -348,9 +343,6 @@ def train():
                 #     save_anything = True
 
             iteration += 1
-        acc_file.close()
-        loss_file.close()
-        gan_file.close()
 
         # We can transform the training and test data given in the beginning here.
         # This is only half the actual data.

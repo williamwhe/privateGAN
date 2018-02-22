@@ -187,25 +187,28 @@ class advGAN():
         cgan_flag = self.opts.cgan_flag
         patch_flag = self.opts.patch_flag
         hinge_flag = self.opts.hinge_flag
+        cgan_gen = self.cgan_gen
 
         if patch_flag:
         # This is by default True.
             if cgan_flag:
             # This is by default True.
-                y = tf.reshape(self.evil_labels, [self.batch_size, 1, 1, -1])
-                y_fill = y * tf.ones([
-                    self.batch_size,
-                    self.img_dim,
-                    self.img_dim,
-                    self.opts.evil_label_num])
-                D_fake_loss, D_fake_logit = self.patch_discriminator(
-                    tf.concat([fake_images, y_fill], axis=3))
-                D_real_loss, D_real_logit = self.patch_discriminator(
-                    tf.concat([real_images, y_fill], axis=3), reuse=True)
-                # D_fake_loss, D_fake_logit = self.patch_discriminator(
-                #     tf.concat([fake_images, images], axis=3))
-                # D_real_loss, D_real_logit = self.patch_discriminator(
-                #     tf.concat([real_images, images], axis=3), reuse=True)
+                if cgan_gen:
+                    y = tf.reshape(self.evil_labels, [self.batch_size, 1, 1, -1])
+                    y_fill = y * tf.ones([
+                        self.batch_size,
+                        self.img_dim,
+                        self.img_dim,
+                        self.opts.evil_label_num])
+                    D_fake_loss, D_fake_logit = self.patch_discriminator(
+                        tf.concat([fake_images, y_fill], axis=3))
+                    D_real_loss, D_real_logit = self.patch_discriminator(
+                        tf.concat([real_images, y_fill], axis=3), reuse=True)
+                else:  # cgan_gen is False.
+                    D_fake_loss, D_fake_logit = self.patch_discriminator(
+                        tf.concat([fake_images, images], axis=3))
+                    D_real_loss, D_real_logit = self.patch_discriminator(
+                        tf.concat([real_images, images], axis=3), reuse=True)
             else:
             # This is by default False.
                 D_fake_loss, D_fake_logit = \
@@ -318,7 +321,7 @@ class advGAN():
                 # self.added_noise = tf.random_normal(
                 #     [self.batch_size, self.img_dim, self.img_dim, self.output_c_dim], stddev=0.2)
                 self.added_noise = tf.random_normal(
-                    [self.batch_size, 1, 1, self.opts.evil_label_num], stddev=0.01)
+                    [self.batch_size, 1, 1, self.opts.evil_label_num * 10], stddev=0.01)
                 self.label_clue = tf.reshape(
                     self.evil_labels,
                     [self.batch_size, 1, 1, self.opts.evil_label_num])
