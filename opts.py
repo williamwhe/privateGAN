@@ -92,6 +92,8 @@ def parse_opt():
                         help="pretrain iteration")
     parser.add_argument('--max_iteration', type=int, default=2000,
                         help="Maximum training iteration (default: 2000).")
+    parser.add_argument('--max_epoch', type=int, default=30,
+                        help='The maximum number of epochs for training.')
 
     parser.add_argument('--confidence', type=float, default=0.0,
                         help="confidence")
