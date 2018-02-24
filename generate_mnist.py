@@ -177,6 +177,7 @@ def train():
                     writer.add_summary(summary_str, global_step)
 
                 global_step += 1
+                batch_no += 1
 
             # Validation after each trainig epoch.
             print '\tD: %.4f, G: %.4f\n\thinge(%.1f): %.4f, L1(%.1f): %.4f, L2(%.1f): %.4f' % (
