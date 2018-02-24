@@ -101,7 +101,9 @@ def train():
         loader = Dataset2(train_data, train_label)
         print 'Training data loaded.'
 
-        best_sum_accuracy = -1.0
+        best_evil_accuracy = -1.0
+        best_res_epoch = -1
+        best_res = None
         for epoch_num in range(opt.max_epoch):
             print 'Epoch %d' % epoch_num
 
@@ -259,23 +261,17 @@ def train():
                     np.concatenate([fakes, noise, original], axis=1))
 
             # Only for the purpose of finding best D and G training times.
-            if (good_accuracy + evil_accuracy) > best_sum_accuracy:
-                best_sum_accuracy = good_accuracy + evil_accuracy
-                duplicate_num = 0
-                best_image_path = 'best_dn_%d_gn_%d' % \
-                    (opt.d_train_num, opt.g_train_num)
-                while os.path.isfile(best_image_path + '_' + str(duplicate_num) + '.png'):
-                    duplicate_num += 1
-                best_image_path += '_' + str(duplicate_num) + '.png'
+            if evil_accuracy > best_evil_accuracy:
+                best_evil_accuracy = evil_accuracy
+                best_res_epoch = epoch_num
                 if opt.cgan_gen:
-                    scipy.misc.imsave(
-                        best_image_path,
-                        np.concatenate([fakes, separator, original], axis=1))
+                    best_res = np.concatenate([fakes, separator, original], axis=1)
                 else:
-                    scipy.misc.imsave(
-                        best_image_path,
-                        np.concatenate([fakes, noise, original], axis=1))
+                    best_res = np.concatenate([fakes, noise, original], axis=1)
 
+        best_image_path = 'best_dn_%d_gn_%d_%d_epoch_%d.png' % \
+            (opt.d_train_num, opt.g_train_num, duplicate_num, best_res_epoch)
+        scipy.misc.imsave(best_image_path, best_res)
 
         # print 'Maximum iterations: %d' % opt.max_iteration
         # while iteration < opt.max_iteration:
